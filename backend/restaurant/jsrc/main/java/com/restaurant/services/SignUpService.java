@@ -2,7 +2,10 @@ package com.restaurant.services;
 
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.Index;
 import com.amazonaws.services.dynamodbv2.document.spec.PutItemSpec;
+import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,7 +13,7 @@ import com.restaurant.dto.SignUpDTO;
 import com.restaurant.validators.*;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
-import com.amazonaws.services.dynamodbv2.document.Table;
+
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +28,7 @@ public class SignUpService {
     private final ObjectMapper objectMapper;
     private final DynamoDB dynamoDB;
     private final Table usersTable;
-
+    private final Table waitersTable;
     private final String clientId;
 
     private static final Logger logger = Logger.getLogger(SignUpService.class.getName());
@@ -41,15 +44,13 @@ public class SignUpService {
         this.objectMapper = objectMapper;
         this.dynamoDB = dynamoDB;
         this.usersTable = dynamoDB.getTable(System.getenv("USERS_TABLE"));
-
+        this.waitersTable = dynamoDB.getTable(System.getenv("WAITERS_TABLE"));
         this.clientId = clientId;
     }
 
     public APIGatewayProxyResponseEvent handleSignUp(APIGatewayProxyRequestEvent request) {
         try {
             SignUpDTO signUpDto = SignUpDTO.fromJson(request.getBody());
-
-
 
             // Validate email and password using custom validators
             if (!EmailValidator.validateEmail(signUpDto.getEmail())) {
@@ -69,9 +70,17 @@ public class SignUpService {
                             AttributeType.builder().name("email").value(signUpDto.getEmail()).build()
                     )
                     .build();
-            SignUpResponse signUpResponse = cognitoClient.signUp(signUpRequest);
 
+            SignUpResponse signUpResponse = cognitoClient.signUp(signUpRequest);
             String userId = signUpResponse.userSub();
+
+            // Check if user already exists in the Users table
+            if (isUserAlreadyRegistered(signUpDto.getEmail())) {
+                return createResponse(400, "A user with this userId already exists.", null);
+            }
+
+            // Check if the email exists in the Waiters table
+            String role = isEmailInWaitersTable(signUpDto.getEmail()) ? "Waiter" : "Customer";
 
             // Store in DynamoDB
             usersTable.putItem(new PutItemSpec().withItem(new Item()
@@ -79,14 +88,29 @@ public class SignUpService {
                     .withString("email", signUpDto.getEmail())
                     .withString("firstName", signUpDto.getFirstName())
                     .withString("lastName", signUpDto.getLastName())
+                    .withString("role", role)
             ));
 
-            return createResponse(200, "User signed up successfully", Map.of("userId", userId));
+            return createResponse(200, "User registered successfully", Map.of("userId", userId, "role", role));
 
         } catch (Exception e) {
             logger.severe("Error in signup: " + e.getMessage());
             return createResponse(500, "Signup failed: " + e.getMessage(), null);
         }
+    }
+
+    // Helper method to check if user already exists in the Users table
+    private boolean isUserAlreadyRegistered(String email) {
+        Index emailIndex = usersTable.getIndex("email-index");
+        boolean item = emailIndex.query("email", email).iterator().hasNext(); // Query the GSI
+        return item;
+    }
+
+    // Helper method to check if the email exists in the Waiters table
+    private boolean isEmailInWaitersTable(String email) {
+        Index emailIndex = waitersTable.getIndex("email-index");
+        boolean item = emailIndex.query("email", email).iterator().hasNext(); // Query the GSI
+        return item;
     }
 
     private APIGatewayProxyResponseEvent createResponse(int statusCode, String message, Map<String, String> data) {
@@ -96,7 +120,8 @@ public class SignUpService {
 
         try {
             return new APIGatewayProxyResponseEvent()
-                    .withStatusCode(statusCode);
+                    .withStatusCode(statusCode)
+                    .withBody(objectMapper.writeValueAsString(response));
 
         } catch (Exception e) {
             return new APIGatewayProxyResponseEvent().withStatusCode(500).withBody("{\"message\":\"Response Error\"}");

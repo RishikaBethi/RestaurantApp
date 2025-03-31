@@ -38,8 +38,6 @@ public class ServiceModule {
         return new DynamoDB(amazonDynamoDB);
     }
 
-
-
     @Provides
     @Singleton
     public SignUpService provideSignUpService(
@@ -56,7 +54,6 @@ public class ServiceModule {
     public ObjectMapper provideObjectMapper() {
         return new ObjectMapper();
     }
-
 
 
     @Provides

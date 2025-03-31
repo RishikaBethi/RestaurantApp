@@ -9,8 +9,13 @@ import javax.inject.Singleton;
 @Singleton
 @Component(modules = {ServiceModule.class})
 public interface AppComponent {
-    // Inject dependencies into RestaurantHandler
     void inject(RestaurantHandler handler);
-    // For constructor injection, we need to expose the SignUpService
+
     SignUpService signUpService();
+
+    @Component.Builder
+    interface Builder {
+        Builder serviceModule(ServiceModule module); // Allow passing ServiceModule
+        AppComponent build();
+    }
 }

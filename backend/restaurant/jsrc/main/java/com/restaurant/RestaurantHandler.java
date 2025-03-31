@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 )
 @EnvironmentVariables(value = {
 		@EnvironmentVariable(key = "USERS_TABLE", value = "${user_table}"),
+		@EnvironmentVariable(key = "WAITERS_TABLE", value = "${waiters_table}"),
 		@EnvironmentVariable(key = "COGNITO_USER_POOL_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_USER_POOL_ID),
 		@EnvironmentVariable(key = "REGION", value = "${region}"),
 		@EnvironmentVariable(key = "COGNITO_CLIENT_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_CLIENT_ID)
@@ -40,10 +41,10 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 
 	@Inject
 	SignUpService signUpService;
-
 	public RestaurantHandler() {
-		AppComponent appComponent = DaggerAppComponent.create();
-
+		AppComponent appComponent = DaggerAppComponent.builder()
+				.serviceModule(new ServiceModule())
+				.build();
 		appComponent.inject(this);
 	}
 
@@ -56,10 +57,10 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 			logger.info("Handling signup request");
 			return signUpService.handleSignUp(request);
 		}
-		logger.info("not Handling signup requestzzzz");
+		logger.info("Request does not match signup route");
 		return new APIGatewayProxyResponseEvent()
 				.withStatusCode(405)
-				.withBody("{\"message\":\"Method Not Allowedz\", \"path\":\"" + path + "\", \"method\":\"" + httpMethod + "\"}")
+				.withBody("{\"message\":\"Method Not Allowed\", \"path\":\"" + path + "\", \"method\":\"" + httpMethod + "\"}")
 				.withHeaders(Map.of("Content-Type", "application/json"));
 	}
 }
