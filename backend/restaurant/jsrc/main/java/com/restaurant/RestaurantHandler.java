@@ -53,14 +53,13 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 		String path = request.getPath();
 		String httpMethod = request.getHttpMethod();
 
-		if ("/auth/signup".equals(path) && "POST".equals(httpMethod)) {
+		if ("/auth/sign-up".equals(path) && "POST".equals(httpMethod)) {
 			logger.info("Handling signup request");
 			return signUpService.handleSignUp(request);
 		}
 		logger.info("Request does not match signup route");
 		return new APIGatewayProxyResponseEvent()
-				.withStatusCode(405)
-				.withBody("{\"message\":\"Method Not Allowed\", \"path\":\"" + path + "\", \"method\":\"" + httpMethod + "\"}")
+				.withBody("{\"message\":\"Method Not Allowed\"")
 				.withHeaders(Map.of("Content-Type", "application/json"));
 	}
 }

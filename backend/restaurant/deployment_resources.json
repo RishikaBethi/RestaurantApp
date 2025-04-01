@@ -80,7 +80,7 @@
     "deploy_stage": "dev",
     "dependencies": [],
     "resources": {
-      "/auth/signup": {
+      "/auth/sign-up": {
         "enable_cors": true,
         "POST": {
           "authorization_type": "NONE",

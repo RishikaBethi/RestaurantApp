@@ -54,11 +54,11 @@ public class SignUpService {
 
             // Validate email and password using custom validators
             if (!EmailValidator.validateEmail(signUpDto.getEmail())) {
-                return createResponse(400, "Invalid email format", null);
+                return createResponse(400, "Invalid email format");
             }
 
             if (!PasswordValidator.validatePassword(signUpDto.getPassword())) {
-                return createResponse(400, "Password must be 8-16 characters long, include an uppercase letter, a number, and a special character", null);
+                return createResponse(400, "Password must be 8-16 characters long, include an uppercase letter, a number, and a special character");
             }
 
             // Cognito sign-up
@@ -76,7 +76,7 @@ public class SignUpService {
 
             // Check if user already exists in the Users table
             if (isUserAlreadyRegistered(signUpDto.getEmail())) {
-                return createResponse(400, "A user with this userId already exists.", null);
+                return createResponse(409, "A user with this email address already exists.");
             }
 
             // Check if the email exists in the Waiters table
@@ -91,11 +91,11 @@ public class SignUpService {
                     .withString("role", role)
             ));
 
-            return createResponse(200, "User registered successfully", Map.of("userId", userId, "role", role));
+            return createResponse(201, "User registered successfully");
 
         } catch (Exception e) {
             logger.severe("Error in signup: " + e.getMessage());
-            return createResponse(500, "Signup failed: " + e.getMessage(), null);
+            return createResponse(500, "Signup failed: " + e.getMessage());
         }
     }
 
@@ -113,18 +113,18 @@ public class SignUpService {
         return item;
     }
 
-    private APIGatewayProxyResponseEvent createResponse(int statusCode, String message, Map<String, String> data) {
+    private APIGatewayProxyResponseEvent createResponse(int statusCode, String message) {
         Map<String, Object> response = new HashMap<>();
         response.put("message", message);
-        if (data != null) response.put("data", data);
-
         try {
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(statusCode)
                     .withBody(objectMapper.writeValueAsString(response));
 
         } catch (Exception e) {
-            return new APIGatewayProxyResponseEvent().withStatusCode(500).withBody("{\"message\":\"Response Error\"}");
+            return new APIGatewayProxyResponseEvent()
+                    .withStatusCode(500)
+                    .withBody("{\"message\":\"Response Error\"}");
         }
     }
 }
