@@ -4,4 +4,6 @@ logs_expiration: 30
 region: ap-southeast-2
 user_table: "tm7-Users"
 waiters_table: "tm7-Waiters"
+reservations_table: "tm7-Reservations"
+locations_table: "tm7-Locations"
 user_pool: "restaurant-user-pool"
