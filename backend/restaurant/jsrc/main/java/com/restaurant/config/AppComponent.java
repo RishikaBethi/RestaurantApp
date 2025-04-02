@@ -1,6 +1,7 @@
 package com.restaurant.config;
 
 import com.restaurant.RestaurantHandler;
+
 import com.restaurant.services.SignUpService;
 import dagger.Component;
 
@@ -13,4 +14,5 @@ public interface AppComponent {
     void inject(RestaurantHandler handler);
     // For constructor injection, we need to expose the SignUpService
     SignUpService signUpService();
+
 }

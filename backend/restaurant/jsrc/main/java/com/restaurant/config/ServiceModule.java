@@ -3,6 +3,7 @@ package com.restaurant.config;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+
 import com.restaurant.services.SignUpService;
 import dagger.Module;
 import dagger.Provides;
@@ -59,12 +60,14 @@ public class ServiceModule {
 
 
 
+
     @Provides
     @Singleton
     public String provideClientId() {
         // Get Cognito client ID from environment variable or configuration
         return System.getenv("COGNITO_CLIENT_ID");
     }
+
 
 
 }

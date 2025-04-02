@@ -71,7 +71,8 @@
         "ALLOW_USER_SRP_AUTH",
         "ALLOW_REFRESH_TOKEN_AUTH",
         "ALLOW_ADMIN_USER_PASSWORD_AUTH",
-        "ALLOW_CUSTOM_AUTH"
+        "ALLOW_CUSTOM_AUTH",
+        "ALLOW_USER_PASSWORD_AUTH"
       ]},
     "tags": {}
   },
@@ -80,7 +81,7 @@
     "deploy_stage": "dev",
     "dependencies": [],
     "resources": {
-      "/auth/signup": {
+      "/auth/sign-up": {
         "enable_cors": true,
         "POST": {
           "authorization_type": "NONE",
@@ -95,7 +96,28 @@
           "default_error_pattern": true,
           "enable_proxy": true
         }
+      },
+      "/auth/sign-in": {
+
+        "enable_cors": true,
+
+        "POST": {
+
+          "authorization_type": "NONE",
+          "integration_type": "lambda",
+          "lambda_name": "restaurant_handler",
+          "api_key_required": false,
+          "method_request_parameters": {},
+          "integration_request_body_template": {},
+          "responses": [],
+          "integration_responses": [],
+          "default_error_pattern": true,
+          "enable_proxy": true
+
+        }
+
       }
+
     },
     "tags": {},
     "authorizers": {

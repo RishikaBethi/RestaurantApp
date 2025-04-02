@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+
 import com.syndicate.deployment.annotations.resources.DependsOn;
 
 import com.restaurant.config.*;
@@ -41,6 +42,8 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 	@Inject
 	SignUpService signUpService;
 
+
+
 	public RestaurantHandler() {
 		AppComponent appComponent = DaggerAppComponent.create();
 
@@ -52,10 +55,11 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 		String path = request.getPath();
 		String httpMethod = request.getHttpMethod();
 
-		if ("/auth/signup".equals(path) && "POST".equals(httpMethod)) {
+		if ("/auth/sign-up".equals(path) && "POST".equals(httpMethod)) {
 			logger.info("Handling signup request");
 			return signUpService.handleSignUp(request);
 		}
+
 		logger.info("not Handling signup requestzzzz");
 		return new APIGatewayProxyResponseEvent()
 				.withStatusCode(405)

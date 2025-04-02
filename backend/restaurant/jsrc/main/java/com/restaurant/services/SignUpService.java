@@ -10,6 +10,7 @@ import com.restaurant.dto.SignUpDTO;
 import com.restaurant.validators.*;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import javax.inject.Inject;
 import java.util.HashMap;
@@ -28,6 +29,8 @@ public class SignUpService {
 
     private final String clientId;
 
+
+
     private static final Logger logger = Logger.getLogger(SignUpService.class.getName());
 
     // Constructor injection with @Inject annotation
@@ -41,7 +44,6 @@ public class SignUpService {
         this.objectMapper = objectMapper;
         this.dynamoDB = dynamoDB;
         this.usersTable = dynamoDB.getTable(System.getenv("USERS_TABLE"));
-
         this.clientId = clientId;
     }
 
@@ -50,15 +52,15 @@ public class SignUpService {
             SignUpDTO signUpDto = SignUpDTO.fromJson(request.getBody());
 
 
-
             // Validate email and password using custom validators
             if (!EmailValidator.validateEmail(signUpDto.getEmail())) {
-                return createResponse(400, "Invalid email format", null);
+                return createResponse(400, "Invalid email format");
             }
 
             if (!PasswordValidator.validatePassword(signUpDto.getPassword())) {
-                return createResponse(400, "Password must be 8-16 characters long, include an uppercase letter, a number, and a special character", null);
+                return createResponse(400, "Password must be 8-16 characters long, include an uppercase letter, a number, and a special character");
             }
+
 
             // Cognito sign-up
             SignUpRequest signUpRequest = SignUpRequest.builder()
@@ -69,34 +71,61 @@ public class SignUpService {
                             AttributeType.builder().name("email").value(signUpDto.getEmail()).build()
                     )
                     .build();
-            SignUpResponse signUpResponse = cognitoClient.signUp(signUpRequest);
 
-            String userId = signUpResponse.userSub();
 
-            // Store in DynamoDB
-            usersTable.putItem(new PutItemSpec().withItem(new Item()
-                    .withPrimaryKey("userId", userId)
-                    .withString("email", signUpDto.getEmail())
-                    .withString("firstName", signUpDto.getFirstName())
-                    .withString("lastName", signUpDto.getLastName())
-            ));
 
-            return createResponse(200, "User signed up successfully", Map.of("userId", userId));
+            try {
+
+                SignUpResponse signUpResponse = cognitoClient.signUp(signUpRequest);
+                String userId = signUpResponse.userSub();
+
+                AdminConfirmSignUpRequest confirmRequest = AdminConfirmSignUpRequest.builder()
+                        .userPoolId(System.getenv("COGNITO_USER_POOL_ID"))
+                        .username(signUpDto.getEmail())
+                        .build();
+                logger.info("Confirm Signup called successfully");
+                cognitoClient.adminConfirmSignUp(confirmRequest);
+
+
+                try{
+                    // Store in DynamoDB
+                    usersTable.putItem(new PutItemSpec().withItem(new Item()
+                            .withPrimaryKey("userId", userId)
+                            .withString("email", signUpDto.getEmail())
+                            .withString("firstName", signUpDto.getFirstName())
+                            .withString("lastName", signUpDto.getLastName())
+                    ));
+                } catch (Exception e) {
+                    logger.severe("Error storing user data in DynamoDB: " + e.getMessage());
+                    return createResponse(500, "Error saving user data.");
+                }
+
+            }
+
+            catch (UsernameExistsException e) {
+                return new APIGatewayProxyResponseEvent()
+                        .withStatusCode(400)
+                        .withBody("{\"message\":\"A user with this email address already exists.\"}");
+            } catch (Exception e) {
+                return new APIGatewayProxyResponseEvent()
+                        .withStatusCode(500)
+                        .withBody("{\"message\":\"An error occurred.\"}"+e.getMessage());
+            }
+
+            return createResponse(200, "User registered successfully");
 
         } catch (Exception e) {
             logger.severe("Error in signup: " + e.getMessage());
-            return createResponse(500, "Signup failed: " + e.getMessage(), null);
+            return createResponse(500, "Signup failed: " + e.getMessage());
         }
     }
 
-    private APIGatewayProxyResponseEvent createResponse(int statusCode, String message, Map<String, String> data) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", message);
-        if (data != null) response.put("data", data);
+    private APIGatewayProxyResponseEvent createResponse(int statusCode, String message) {
+
 
         try {
             return new APIGatewayProxyResponseEvent()
-                    .withStatusCode(statusCode);
+                    .withStatusCode(statusCode).withBody(message);
 
         } catch (Exception e) {
             return new APIGatewayProxyResponseEvent().withStatusCode(500).withBody("{\"message\":\"Response Error\"}");
