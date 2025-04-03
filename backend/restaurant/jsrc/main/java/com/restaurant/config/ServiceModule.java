@@ -4,6 +4,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.restaurant.services.SignUpService;
+import com.restaurant.services.SignInService;
 import com.restaurant.services.ReservationService;
 import com.restaurant.services.WaiterService;
 import com.restaurant.services.NotificationService;
@@ -55,6 +56,16 @@ public class ServiceModule {
             DynamoDB dynamoDB,
             String clientId) {
         return new SignUpService(cognitoClient, objectMapper, dynamoDB, clientId);
+    }
+
+    @Provides
+    @Singleton
+    public SignInService provideSignInService(
+            CognitoIdentityProviderClient cognitoClient,
+            ObjectMapper objectMapper,
+            String clientId,
+            DynamoDB dynamoDB) {
+        return new SignInService(cognitoClient, objectMapper, clientId, dynamoDB);
     }
 
     // Provide ReservationService Dependency

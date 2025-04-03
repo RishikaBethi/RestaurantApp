@@ -17,6 +17,7 @@ import com.syndicate.deployment.model.DeploymentRuntime;
 import com.syndicate.deployment.model.RetentionSetting;
 import com.syndicate.deployment.model.environment.ValueTransformer;
 import com.restaurant.services.SignUpService;
+import com.restaurant.services.SignInService;
 import com.restaurant.services.ReservationService;
 import com.restaurant.services.WaiterService;
 import com.restaurant.services.NotificationService;
@@ -49,6 +50,7 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 	private static final ObjectMapper objectMapper = new ObjectMapper(); // Added objectMapper
 
 	@Inject SignUpService signUpService;
+	@Inject SignInService signInService;
 	@Inject ReservationService reservationService;
 	@Inject WaiterService waiterService;
 	@Inject NotificationService notificationService;
@@ -73,6 +75,11 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 			if ("/auth/sign-up".equals(path) && "POST".equals(httpMethod)) {
 				logger.info("Handling signup request");
 				return signUpService.handleSignUp(request);
+			}
+
+			if ("/auth/sign-in".equals(path) && "POST".equals(httpMethod)) {
+				logger.info("Handling sign-in request");
+				return signInService.handleSignIn(request);
 			}
 
 			if ("/bookings/client".equals(path) && "POST".equalsIgnoreCase(httpMethod)) {
@@ -181,7 +188,9 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 				return Helper.createErrorResponse(400, "Invalid reservation cancellation request.");
 			}
 			String reservationId = pathParts[pathParts.length - 1]; 			Map<String, String> requestBody = parseJson(request.getBody());
-			String userId = requestBody.get("userId");
+			// Extract user ID from JWT claims
+			Map<String, Object> claims = Helper.extractClaims(request);
+			String userId = (String) claims.get("sub");
 
 			if (userId == null || userId.isEmpty()) {
 				return Helper.createErrorResponse(400, "Missing userId.");
@@ -189,15 +198,15 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 
 			List<Map<String, Object>> reservations = reservationService.getReservations();
 			boolean exists = reservations.stream()
-					.anyMatch(res -> res.get("reservationId").equals(reservationId) && res.get("userId").equals(userId));
+					.anyMatch(res -> res.get("reservationId").equals(reservationId));
 
 			if (!exists) {
 				return Helper.createErrorResponse(404, "Reservation not found.");
 			}
-
-			reservationService.modifyReservation(reservationId, userId, "CANCELED");
+			reservationService.modifyReservation(reservationId, "Cancelled");
 			return Helper.createApiResponse(200, Map.of("message", "Reservation Canceled"));
 		} catch (Exception e) {
+			logger.severe("Error canceling reservation: " + e.getMessage());
 			return Helper.createErrorResponse(500, "Error canceling reservation: " + e.getMessage());
 		}
 	}

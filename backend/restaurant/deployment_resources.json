@@ -71,7 +71,8 @@
         "ALLOW_USER_SRP_AUTH",
         "ALLOW_REFRESH_TOKEN_AUTH",
         "ALLOW_ADMIN_USER_PASSWORD_AUTH",
-        "ALLOW_CUSTOM_AUTH"
+        "ALLOW_CUSTOM_AUTH",
+        "ALLOW_USER_PASSWORD_AUTH"
       ]
     },
     "tags": {}
@@ -79,7 +80,16 @@
   "restaurant-api": {
     "resource_type": "api_gateway",
     "deploy_stage": "dev",
-    "dependencies": [],
+    "authorizers": {
+      "authorizer": {
+        "type": "COGNITO_USER_POOLS",
+        "identity_source": "method.request.header.Authorization",
+        "user_pools": [
+          "${pool_name}"
+        ],
+        "ttl": 300
+      }
+    },
     "resources": {
       "/auth/sign-up": {
         "enable_cors": true,
@@ -141,6 +151,21 @@
           "integration_responses": [],
           "default_error_pattern": true
         }
+      },
+      "/auth/sign-in": {
+        "enable_cors": true,
+        "POST": {
+          "authorization_type": "NONE",
+          "integration_type": "lambda",
+          "lambda_name": "restaurant_handler",
+          "api_key_required": false,
+          "method_request_parameters": {},
+          "integration_request_body_template": {},
+          "responses": [],
+          "integration_responses": [],
+          "default_error_pattern": true,
+          "enable_proxy": true
+        }
       }
     },
     "tags": {},
@@ -152,6 +177,24 @@
         "user_pools": [
           "restaurant-user-pool"
         ]
+      }
+    },
+    "Users": {
+      "resource_type": "dynamodb_table",
+      "hash_key_name": "userId",
+      "hash_key_type": "S",
+      "read_capacity": 10,
+      "write_capacity": 10,
+      "global_indexes": [],
+      "autoscaling": [],
+      "tags": {},
+      "attributes": {
+        "userId": "String",
+        "email": "String",
+        "firstName": "String",
+        "lastName": "String",
+        "role": "String",
+        "userAvatarUrl": "String"
       }
     }
   }

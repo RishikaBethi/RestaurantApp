@@ -77,7 +77,7 @@ public class SignInService {
             // Extract username; fallback to email if not found
             String username = (userItem != null) ? userItem.getString("firstName") + " " + userItem.getString("lastName")
                     : signInDto.getEmail(); // Default to email if missing
-            String role = (userItem != null) ? userItem.getString("role") : "CLIENT"; // Default to CLIENT if user not found
+            String role = (userItem != null) ? userItem.getString("role") : "CUSTOMER"; // Default to CLIENT if user not found
 
             Map<String, String> responseData = new HashMap<>();
             responseData.put("accessToken", accessToken);

@@ -15,6 +15,7 @@ import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityPr
 import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
 
 import javax.inject.Inject;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -52,15 +53,6 @@ public class SignUpService {
         try {
             SignUpDTO signUpDto = SignUpDTO.fromJson(request.getBody());
 
-            // Validate email and password using custom validators
-            if (!EmailValidator.validateEmail(signUpDto.getEmail())) {
-                return createResponse(400, "Invalid email format");
-            }
-
-            if (!PasswordValidator.validatePassword(signUpDto.getPassword())) {
-                return createResponse(400, "Password must be 8-16 characters long, include an uppercase letter, a number, and a special character");
-            }
-
             // Cognito sign-up
             SignUpRequest signUpRequest = SignUpRequest.builder()
                     .clientId(clientId)
@@ -71,39 +63,44 @@ public class SignUpService {
                     )
                     .build();
 
-            SignUpResponse signUpResponse = cognitoClient.signUp(signUpRequest);
-            String userId = signUpResponse.userSub();
+            try {
+                SignUpResponse signUpResponse = cognitoClient.signUp(signUpRequest);
+                String userId = signUpResponse.userSub();
 
-            // Check if user already exists in the Users table
-            if (isUserAlreadyRegistered(signUpDto.getEmail())) {
-                return createResponse(409, "A user with this email address already exists.");
+                AdminConfirmSignUpRequest confirmRequest = AdminConfirmSignUpRequest.builder()
+                        .userPoolId(System.getenv("COGNITO_USER_POOL_ID"))
+                        .username(signUpDto.getEmail())
+                        .build();
+                logger.info("Confirm Signup called successfully");
+                cognitoClient.adminConfirmSignUp(confirmRequest);
+                String role = isEmailInWaitersTable(signUpDto.getEmail()) ? "Waiter" : "Customer";
+
+                try {
+                    // Store in DynamoDB
+                    usersTable.putItem(new PutItemSpec().withItem(new Item()
+                            .withPrimaryKey("userId", userId)
+                            .withString("email", signUpDto.getEmail())
+                            .withString("firstName", signUpDto.getFirstName())
+                            .withString("lastName", signUpDto.getLastName())
+                            .withString("role", role)
+                    ));
+                } catch (java.lang.Exception e) {
+                    logger.severe("Error storing user data in DynamoDB: " + e.getMessage());
+                    return createResponse(500, "Error saving user data.");
+                }
             }
+            catch (UsernameExistsException e) {
+                return createResponse(400,"A user with this email address already exists.");
 
-            // Check if the email exists in the Waiters table
-            String role = isEmailInWaitersTable(signUpDto.getEmail()) ? "Waiter" : "Customer";
-
-            // Store in DynamoDB
-            usersTable.putItem(new PutItemSpec().withItem(new Item()
-                    .withPrimaryKey("userId", userId)
-                    .withString("email", signUpDto.getEmail())
-                    .withString("firstName", signUpDto.getFirstName())
-                    .withString("lastName", signUpDto.getLastName())
-                    .withString("role", role)
-            ));
-
+            } catch (Exception e) {
+                return createResponse(500,"An error occurred."+e.getMessage());
+            }
             return createResponse(201, "User registered successfully");
 
         } catch (Exception e) {
             logger.severe("Error in signup: " + e.getMessage());
             return createResponse(500, "Signup failed: " + e.getMessage());
         }
-    }
-
-    // Helper method to check if user already exists in the Users table
-    private boolean isUserAlreadyRegistered(String email) {
-        Index emailIndex = usersTable.getIndex("email-index");
-        boolean item = emailIndex.query("email", email).iterator().hasNext(); // Query the GSI
-        return item;
     }
 
     // Helper method to check if the email exists in the Waiters table
@@ -113,18 +110,20 @@ public class SignUpService {
         return item;
     }
 
-    private APIGatewayProxyResponseEvent createResponse(int statusCode, String message) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", message);
-        try {
-            return new APIGatewayProxyResponseEvent()
-                    .withStatusCode(statusCode)
-                    .withBody(objectMapper.writeValueAsString(response));
+    private static Map<String, String> createCorsHeaders() {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+        headers.put("Access-Control-Allow-Origin", "*");
+        headers.put("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        headers.put("Access-Control-Allow-Headers", "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token");
+        return Collections.unmodifiableMap(headers);
+    }
 
-        } catch (Exception e) {
-            return new APIGatewayProxyResponseEvent()
-                    .withStatusCode(500)
-                    .withBody("{\"message\":\"Response Error\"}");
-        }
+    private APIGatewayProxyResponseEvent createResponse(int statusCode, String message) {
+        APIGatewayProxyResponseEvent apiGatewayProxyResponseEvent = new APIGatewayProxyResponseEvent();
+        apiGatewayProxyResponseEvent.setHeaders(createCorsHeaders());
+        return apiGatewayProxyResponseEvent
+                .withStatusCode(statusCode)
+                .withBody("{\"message\":"+"\""+message+"\""+"}");
     }
 }
