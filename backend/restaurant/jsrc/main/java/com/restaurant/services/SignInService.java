@@ -6,12 +6,14 @@ import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.restaurant.dto.SignInDTO;
+import com.restaurant.model.SignInEntity;
+import com.restaurant.validators.EmailValidator;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AuthFlowType;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.InitiateAuthRequest;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.InitiateAuthResponse;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.NotAuthorizedException;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.UserNotFoundException;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
@@ -34,32 +36,34 @@ public class SignInService {
         this.cognitoClient = cognitoClient;
         this.objectMapper = objectMapper;
         this.clientId = clientId;
-        this.dynamoDB=dynamoDB;
+        this.dynamoDB = dynamoDB;
         this.usersTable = dynamoDB.getTable(System.getenv("USERS_TABLE"));
     }
 
     public String extractUserIdFromToken(String idToken) {
         DecodedJWT jwt = JWT.decode(idToken);
-        return jwt.getClaim("sub").asString(); // Extract "sub" claim (user ID)
+        return jwt.getClaim("sub").asString();
     }
 
     public APIGatewayProxyResponseEvent handleSignIn(APIGatewayProxyRequestEvent request) {
         try {
-            SignInDTO signInDto = SignInDTO.fromJson(request.getBody());
+            SignInEntity signInEntity = SignInEntity.fromJson(request.getBody());
 
             // Validate input
-            if (signInDto.getEmail() == null || signInDto.getEmail().isEmpty()) {
+            if (!EmailValidator.validateEmail(signInEntity.getEmail())) {
+                return createResponse(400, "Invalid Email");
+            }
+            if (signInEntity.getEmail() == null || signInEntity.getEmail().isEmpty()) {
                 return createResponse(400, "Email is required");
             }
-            if (signInDto.getPassword() == null || signInDto.getPassword().isEmpty()) {
+            if (signInEntity.getPassword() == null || signInEntity.getPassword().isEmpty()) {
                 return createResponse(400, "Password is required");
             }
 
             // Cognito sign-in
             Map<String, String> authParams = new HashMap<>();
-            authParams.put("USERNAME", signInDto.getEmail());
-            authParams.put("PASSWORD", signInDto.getPassword());
-
+            authParams.put("USERNAME", signInEntity.getEmail());
+            authParams.put("PASSWORD", signInEntity.getPassword());
 
             InitiateAuthRequest authRequest = InitiateAuthRequest.builder()
                     .authFlow(AuthFlowType.USER_PASSWORD_AUTH)
@@ -67,17 +71,20 @@ public class SignInService {
                     .authParameters(authParams)
                     .build();
 
-            InitiateAuthResponse authResponse = cognitoClient.initiateAuth(authRequest);
-            String accessToken = authResponse.authenticationResult().idToken(); // Using idToken as accessToken
+            InitiateAuthResponse authResponse;
+            try {
+                authResponse = cognitoClient.initiateAuth(authRequest);
+            } catch (UserNotFoundException | NotAuthorizedException e) {
+                return createResponse(401, "Unauthorized access");
+            }
 
-            // Query DynamoDB for the username using userId
+            String accessToken = authResponse.authenticationResult().idToken();
             String userId = extractUserIdFromToken(accessToken);
-            Item userItem = usersTable.getItem("userId", userId); // Get user details by ID
+            Item userItem = usersTable.getItem("userId", userId);
 
-            // Extract username; fallback to email if not found
             String username = (userItem != null) ? userItem.getString("firstName") + " " + userItem.getString("lastName")
-                    : signInDto.getEmail(); // Default to email if missing
-            String role = (userItem != null) ? userItem.getString("role") : "CLIENT"; // Default to CLIENT if user not found
+                    : signInEntity.getEmail();
+            String role = (userItem != null) ? userItem.getString("role") : "CLIENT";
 
             Map<String, String> responseData = new HashMap<>();
             responseData.put("accessToken", accessToken);
@@ -86,9 +93,6 @@ public class SignInService {
 
             return createSuccessResponse(responseData);
 
-        } catch (NotAuthorizedException e) {
-            logger.severe("Invalid credentials: " + e.getMessage());
-            return createResponse(401, "Invalid email or password");
         } catch (Exception e) {
             logger.severe("Sign-in failed: " + e.getMessage());
             return createResponse(500, "Sign-in failed: " + e.getMessage());
@@ -98,13 +102,11 @@ public class SignInService {
     private APIGatewayProxyResponseEvent createSuccessResponse(Map<String, String> data) {
         try {
             String body = objectMapper.writeValueAsString(data);
-            APIGatewayProxyResponseEvent apiGatewayProxyResponseEvent = new APIGatewayProxyResponseEvent();
-            apiGatewayProxyResponseEvent.setHeaders(createCorsHeaders());
-            return apiGatewayProxyResponseEvent
-                    .withStatusCode(200)
-                    .withBody(body);
+            APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
+            response.setHeaders(createCorsHeaders());
+            return response.withStatusCode(200).withBody(body);
         } catch (Exception e) {
-            return createResponse(500, "{\"message\":\"Response Error\"}");
+            return createResponse(500, "Response Error");
         }
     }
 
@@ -118,13 +120,8 @@ public class SignInService {
     }
 
     private APIGatewayProxyResponseEvent createResponse(int statusCode, String message) {
-        APIGatewayProxyResponseEvent apiGatewayProxyResponseEvent = new APIGatewayProxyResponseEvent();
-        apiGatewayProxyResponseEvent.setHeaders(createCorsHeaders());
-
-        return apiGatewayProxyResponseEvent
-                .withStatusCode(statusCode)
-                .withBody("{\"message\":\"" + message + "\"}");
-
+        APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
+        response.setHeaders(createCorsHeaders());
+        return response.withStatusCode(statusCode).withBody("{\"message\":\"" + message + "\"}");
     }
 }
-

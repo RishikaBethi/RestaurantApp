@@ -26,4 +26,11 @@ public class SignInEntity {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public static SignInEntity fromJson(String jsonString) {
+        JSONObject json = new JSONObject(jsonString);
+        String email = json.optString("email", null);
+        String password = json.optString("password", null);
+        return new SignInEntity(email, password);
+    }
 }
