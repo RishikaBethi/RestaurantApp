@@ -1,40 +1,35 @@
 package com.restaurant.services;
 
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
-import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.Index;
+import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.spec.PutItemSpec;
-import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurant.dto.SignUpDTO;
-import com.restaurant.validators.*;
+import com.restaurant.validators.EmailValidator;
+import com.restaurant.validators.NameValidator;
+import com.restaurant.validators.PasswordValidator;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
+import com.amazonaws.services.dynamodbv2.document.Table;
 
 import javax.inject.Inject;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
-
 public class SignUpService {
-
-    // Declare all dependencies as final fields
     private final CognitoIdentityProviderClient cognitoClient;
     private final ObjectMapper objectMapper;
     private final DynamoDB dynamoDB;
     private final Table usersTable;
     private final Table waitersTable;
     private final String clientId;
-
     private static final Logger logger = Logger.getLogger(SignUpService.class.getName());
 
-    // Constructor injection with @Inject annotation
     @Inject
     public SignUpService(
             CognitoIdentityProviderClient cognitoClient,
@@ -53,6 +48,20 @@ public class SignUpService {
         try {
             SignUpDTO signUpDto = SignUpDTO.fromJson(request.getBody());
 
+            // Validate fields
+            if (!NameValidator.validateName(signUpDto.getFirstName())) {
+                return createResponse(400, "Invalid or missing first name");
+            }
+            if (!NameValidator.validateName(signUpDto.getLastName())) {
+                return createResponse(400, "Invalid or missing last name");
+            }
+            if (!EmailValidator.validateEmail(signUpDto.getEmail())) {
+                return createResponse(400, "Invalid email format");
+            }
+            if (!PasswordValidator.validatePassword(signUpDto.getPassword())) {
+                return createResponse(400, "Password must be 8-16 characters, include uppercase, lowercase, number, and special character");
+            }
+
             // Cognito sign-up
             SignUpRequest signUpRequest = SignUpRequest.builder()
                     .clientId(clientId)
@@ -64,37 +73,36 @@ public class SignUpService {
                     .build();
 
             try {
-                SignUpResponse signUpResponse = cognitoClient.signUp(signUpRequest);
-                String userId = signUpResponse.userSub();
+                cognitoClient.signUp(signUpRequest);
 
                 AdminConfirmSignUpRequest confirmRequest = AdminConfirmSignUpRequest.builder()
                         .userPoolId(System.getenv("COGNITO_USER_POOL_ID"))
                         .username(signUpDto.getEmail())
                         .build();
-                logger.info("Confirm Signup called successfully");
                 cognitoClient.adminConfirmSignUp(confirmRequest);
                 String role = isEmailInWaitersTable(signUpDto.getEmail()) ? "Waiter" : "Customer";
 
                 try {
-                    // Store in DynamoDB
+                    // Using email as partition key and not storing userId
                     usersTable.putItem(new PutItemSpec().withItem(new Item()
-                            .withPrimaryKey("userId", userId)
-                            .withString("email", signUpDto.getEmail())
+                            .withPrimaryKey("email", signUpDto.getEmail())
                             .withString("firstName", signUpDto.getFirstName())
                             .withString("lastName", signUpDto.getLastName())
                             .withString("role", role)
                     ));
-                } catch (java.lang.Exception e) {
+                } catch (Exception e) {
                     logger.severe("Error storing user data in DynamoDB: " + e.getMessage());
-                    return createResponse(500, "Error saving user data.");
+                    return createResponse(500, "Error saving user data");
                 }
-            }
-            catch (UsernameExistsException e) {
-                return createResponse(400,"A user with this email address already exists.");
-
+            } catch (UsernameExistsException e) {
+                return createResponse(400, "A user with this email address already exists");
+            } catch (InvalidPasswordException e) {
+                return createResponse(400, "Password does not meet requirements");
             } catch (Exception e) {
-                return createResponse(500,"An error occurred."+e.getMessage());
+                logger.severe("Cognito error: " + e.getMessage());
+                return createResponse(500, "An error occurred: " + e.getMessage());
             }
+
             return createResponse(201, "User registered successfully");
 
         } catch (Exception e) {
@@ -103,11 +111,9 @@ public class SignUpService {
         }
     }
 
-    // Helper method to check if the email exists in the Waiters table
     private boolean isEmailInWaitersTable(String email) {
         Index emailIndex = waitersTable.getIndex("email-index");
-        boolean item = emailIndex.query("email", email).iterator().hasNext(); // Query the GSI
-        return item;
+        return emailIndex.query("email", email).iterator().hasNext();
     }
 
     private static Map<String, String> createCorsHeaders() {
@@ -120,10 +126,8 @@ public class SignUpService {
     }
 
     private APIGatewayProxyResponseEvent createResponse(int statusCode, String message) {
-        APIGatewayProxyResponseEvent apiGatewayProxyResponseEvent = new APIGatewayProxyResponseEvent();
-        apiGatewayProxyResponseEvent.setHeaders(createCorsHeaders());
-        return apiGatewayProxyResponseEvent
-                .withStatusCode(statusCode)
-                .withBody("{\"message\":"+"\""+message+"\""+"}");
+        APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
+        response.setHeaders(createCorsHeaders());
+        return response.withStatusCode(statusCode).withBody("{\"message\":\"" + message + "\"}");
     }
 }
