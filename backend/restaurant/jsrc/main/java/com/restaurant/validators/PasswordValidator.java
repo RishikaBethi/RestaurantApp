@@ -9,6 +9,7 @@ public class PasswordValidator {
             return false;
         }
         return password.matches(".*[A-Z].*") && // Uppercase
+                password.matches(".*[a-z].*") && // Lowercase (added)
                 password.matches(".*[0-9].*") && // Number
                 password.matches(".*[!@#$%^&*()_+-=\\[\\]{};':\",.<>/?].*"); // Special character
     }

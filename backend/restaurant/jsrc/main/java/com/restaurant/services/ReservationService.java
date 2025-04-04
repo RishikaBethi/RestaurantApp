@@ -4,6 +4,7 @@ import com.amazonaws.services.dynamodbv2.document.*;
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 import com.amazonaws.services.dynamodbv2.document.spec.PutItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
+import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.amazonaws.services.lambda.runtime.Context;
@@ -24,7 +25,7 @@ public class ReservationService {
     private static final String LOCATIONS_TABLE = System.getenv("LOCATIONS_TABLE");
     private static final String ORDERS_TABLE = System.getenv("ORDERS_TABLE");
 
-    private static final String USER_INDEX_NAME = "userId-index"; // Ensure this exists in DynamoDB
+    private static final String EMAIL_NAME = "email-index"; // Ensure this exists in DynamoDB
     private final Table reservationTable;
     private final Table locationTable;
     private final Table ordersTable;
@@ -87,7 +88,7 @@ public class ReservationService {
             // Save reservation
             reservationTable.putItem(new PutItemSpec().withItem(new Item()
                     .withPrimaryKey("reservationId", reservationId)
-                    .withString("userId", userId)
+                    .withString("email", email)
                     .withString("waiterId", waiterId)
                     .withString("locationId", requestBody.get("locationId"))
                     .withNumber("tableNumber", Integer.parseInt(requestBody.get("tableNumber")))
@@ -101,7 +102,7 @@ public class ReservationService {
 
             // Save order
             ordersTable.putItem(new PutItemSpec().withItem(new Item()
-                    .withPrimaryKey("orderId", orderId, "SK", email)
+                    .withPrimaryKey("orderId", orderId, "email", email)
                     .withString("reservationId", reservationId)
                     .withString("locationId", requestBody.get("locationId"))
                     .withString("date", requestBody.get("date"))
@@ -111,8 +112,7 @@ public class ReservationService {
 
             // Fetch reservation and location details
             Item reservationItem = reservationTable.getItem("reservationId", reservationId);
-            Table locationsTable = dynamoDB.getTable(System.getenv("LOCATIONS_TABLE"));
-            Item locationItem = locationsTable.getItem("locationId", reservationItem.getString("locationId"));
+            Item locationItem = locationTable.getItem("locationId", reservationItem.getString("locationId"));
 
             // Prepare response
             Map<String, Object> responseData = new HashMap<>();
@@ -123,7 +123,7 @@ public class ReservationService {
             responseData.put("timeSlot", timeSlot);
             responseData.put("preOrder", "0");
             responseData.put("guestsNumber", String.valueOf(reservationItem.getInt("guestsNumber")));
-            responseData.put("feedbackId", reservationItem.isPresent("feedbackId") ? reservationItem.getString("feedbackId") : null);
+            responseData.put("feedbackId", reservationItem.hasAttribute("feedbackId") ? reservationItem.getString("feedbackId") : null);
 
             return Helper.createApiResponse(200, responseData);
 
@@ -136,51 +136,56 @@ public class ReservationService {
     public APIGatewayProxyResponseEvent handleGetReservations(APIGatewayProxyRequestEvent request) {
         try {
             Map<String, Object> claims = Helper.extractClaims(request);
-            String userId = (String) claims.get("sub");
             String email = (String) claims.get("email");
 
-            if (userId == null || userId.isEmpty()) {
-                return Helper.createErrorResponse(401, "Unauthorized: Missing or invalid token.");
+            logger.info("Extracted email: " + email);
+            if (email == null || email.isEmpty()) {
+                return Helper.createErrorResponse(401, "Unauthorized: Email not found in token.");
             }
 
             List<Map<String, Object>> userReservations = new ArrayList<>();
-            Index userIndex = reservationTable.getIndex(USER_INDEX_NAME);
 
-            ItemCollection<QueryOutcome> items = userIndex.query(
-                    new QuerySpec().withKeyConditionExpression("userId = :uid")
-                            .withValueMap(new ValueMap().withString(":uid", userId))
+            Index emailIndex = reservationTable.getIndex("email-index");
+            if (emailIndex == null) {
+                logger.severe("DynamoDB index 'email-index' does not exist.");
+                return Helper.createErrorResponse(500, "Server error: Email index not found.");
+            }
+
+            ItemCollection<QueryOutcome> items = emailIndex.query(
+                    new QuerySpec().withKeyConditionExpression("email = :email")
+                            .withValueMap(new ValueMap().withString(":email", email))
             );
 
             for (Item item : items) {
                 Map<String, Object> reservation = item.asMap();
-                String reservationId = (String) reservation.get("reservationId");
-                String locationId = (String) reservation.get("locationId");
-                String orderId = (String) reservation.get("orderId");
 
+                String reservationId = reservation.getOrDefault("reservationId", "null").toString();
+                String locationId = reservation.getOrDefault("locationId", "null").toString();
+                String orderId = reservation.getOrDefault("orderId", "null").toString();
                 String timeSlot = reservation.get("timeFrom") + " - " + reservation.get("timeTo");
 
                 // Get location address
-                Item loc = locationTable.getItem("locationId", locationId);
-                String address = loc != null ? loc.getString("address") : "Unknown";
+                Item loc = (locationId.equals("null")) ? null : locationTable.getItem(new GetItemSpec().withPrimaryKey("locationId", locationId));
+                String address = (loc != null && loc.isPresent("address")) ? loc.getString("address") : "Unknown";
 
                 // Get dish count
-                Item orderItem = ordersTable.getItem("orderId", orderId, "SK", email);
+                Item orderItem = (orderId.equals("N/A")) ? null : ordersTable.getItem(new GetItemSpec().withPrimaryKey("orderId", orderId, "email", email));
                 int dishCount = 0;
                 if (orderItem != null && orderItem.isPresent("dishItems")) {
                     List<String> dishes = orderItem.getList("dishItems");
                     dishCount = dishes != null ? dishes.size() : 0;
                 }
 
-                userReservations.add(Map.of(
-                        "id", reservationId,
-                        "status", reservation.get("status"),
-                        "locationAddress", address,
-                        "date", reservation.get("date"),
-                        "timeSlot", timeSlot,
-                        "preOrder", String.valueOf(dishCount),
-                        "guestsNumber", reservation.get("guestsNumber").toString(),
-                        "feedbackId", null
-                ));
+                Map<String, Object> responseData = new HashMap<>();
+                responseData.put("id", reservationId);
+                responseData.put("status", reservation.get("status"));
+                responseData.put("locationAddress", address);
+                responseData.put("date", reservation.get("date"));
+                responseData.put("timeSlot", timeSlot);
+                responseData.put("preOrder", String.valueOf(dishCount));
+                responseData.put("guestsNumber", String.valueOf(reservation.get("guestsNumber")));
+                responseData.put("feedbackId", reservation.getOrDefault("feedbackId",null));
+                userReservations.add(responseData);
             }
 
             return Helper.createApiResponse(200, userReservations);
@@ -233,12 +238,11 @@ public class ReservationService {
             }
             String reservationId = pathParts[pathParts.length - 1];
             Map<String, String> requestBody = parseJson(request.getBody());
-            // Extract user ID from JWT claims
+            // Extract user email from JWT claims
             Map<String, Object> claims = Helper.extractClaims(request);
-            String userId = (String) claims.get("sub");
-
-            if (userId == null || userId.isEmpty()) {
-                return Helper.createErrorResponse(400, "Missing userId.");
+            String email = (String) claims.get("email");
+            if (email == null || email.isEmpty()) {
+                return Helper.createErrorResponse(400, "Missing email.");
             }
 
             List<Map<String, Object>> reservations = getReservations();

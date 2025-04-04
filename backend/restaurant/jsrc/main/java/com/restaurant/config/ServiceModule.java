@@ -91,6 +91,4 @@ public class ServiceModule {
         // Get Cognito client ID from environment variable or configuration
         return System.getenv("COGNITO_CLIENT_ID");
     }
-
-
 }
