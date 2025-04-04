@@ -3,6 +3,8 @@ package com.restaurant.services;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
+import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,10 +16,9 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.InitiateAut
 import software.amazon.awssdk.services.cognitoidentityprovider.model.InitiateAuthResponse;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.NotAuthorizedException;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.UserNotFoundException;
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.interfaces.DecodedJWT;
 
 import javax.inject.Inject;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +31,8 @@ public class SignInService {
     private static final Logger logger = Logger.getLogger(SignInService.class.getName());
     private final DynamoDB dynamoDB;
     private final Table usersTable;
+    private static final int MAX_FAILED_ATTEMPTS = 3;
+    private static final long LOCKOUT_DURATION_SECONDS = 30 * 60;
 
     @Inject
     public SignInService(CognitoIdentityProviderClient cognitoClient, ObjectMapper objectMapper, String clientId, DynamoDB dynamoDB) {
@@ -38,11 +41,6 @@ public class SignInService {
         this.clientId = clientId;
         this.dynamoDB = dynamoDB;
         this.usersTable = dynamoDB.getTable(System.getenv("USERS_TABLE"));
-    }
-
-    public String extractUserIdFromToken(String idToken) {
-        DecodedJWT jwt = JWT.decode(idToken);
-        return jwt.getClaim("sub").asString();
     }
 
     public APIGatewayProxyResponseEvent handleSignIn(APIGatewayProxyRequestEvent request) {
@@ -60,6 +58,14 @@ public class SignInService {
                 return createResponse(400, "Password is required");
             }
 
+            // Check if the user is locked out
+            Item userItem = usersTable.getItem("email", signInEntity.getEmail());
+            if (userItem != null) {
+                if (isAccountLocked(userItem)) {
+                    return createResponse(403, "Your account is temporarily locked due to multiple failed login attempts. Please try again later.");
+                }
+            }
+
             // Cognito sign-in
             Map<String, String> authParams = new HashMap<>();
             authParams.put("USERNAME", signInEntity.getEmail());
@@ -74,13 +80,22 @@ public class SignInService {
             InitiateAuthResponse authResponse;
             try {
                 authResponse = cognitoClient.initiateAuth(authRequest);
+
+                // Successful login - reset failed attempts
+                if (userItem != null) {
+                    resetFailedAttempts(signInEntity.getEmail());
+                }
+
             } catch (UserNotFoundException | NotAuthorizedException e) {
-                return createResponse(401, "Unauthorized access");
+                // Increment failed login attempts
+                incrementFailedAttempts(signInEntity.getEmail(), userItem);
+                return createResponse(401, "Incorrect email or password. Try again or create an account.");
             }
 
             String accessToken = authResponse.authenticationResult().idToken();
-            String userId = extractUserIdFromToken(accessToken);
-            Item userItem = usersTable.getItem("userId", userId);
+
+            // Fetch user data
+            userItem = usersTable.getItem("email", signInEntity.getEmail());
 
             String username = (userItem != null) ? userItem.getString("firstName") + " " + userItem.getString("lastName")
                     : signInEntity.getEmail();
@@ -97,6 +112,49 @@ public class SignInService {
             logger.severe("Sign-in failed: " + e.getMessage());
             return createResponse(500, "Sign-in failed: " + e.getMessage());
         }
+    }
+
+    private boolean isAccountLocked(Item userItem) {
+        if (userItem.hasAttribute("lockoutUntil")) {
+            long lockoutUntil = userItem.getLong("lockoutUntil");
+            long currentTime = Instant.now().getEpochSecond();
+            return currentTime < lockoutUntil;
+        }
+        return false;
+    }
+
+    private void incrementFailedAttempts(String email, Item userItem) {
+        if (userItem == null) {
+            // If user doesn't exist in DynamoDB, we can't track failed attempts
+            return;
+        }
+
+        int failedAttempts = userItem.hasAttribute("failedAttempts") ? userItem.getInt("failedAttempts") : 0;
+        failedAttempts++;
+
+        if (failedAttempts >= MAX_FAILED_ATTEMPTS) {
+            // Lock the account for 30 minutes
+            long lockoutUntil = Instant.now().getEpochSecond() + LOCKOUT_DURATION_SECONDS;
+            usersTable.updateItem(new UpdateItemSpec()
+                    .withPrimaryKey("email", email)
+                    .withUpdateExpression("SET failedAttempts = :attempts, lockoutUntil = :lockout")
+                    .withValueMap(new ValueMap()
+                            .withInt(":attempts", failedAttempts)
+                            .withLong(":lockout", lockoutUntil)));
+        } else {
+            // Increment failed attempts
+            usersTable.updateItem(new UpdateItemSpec()
+                    .withPrimaryKey("email", email)
+                    .withUpdateExpression("SET failedAttempts = :attempts")
+                    .withValueMap(new ValueMap()
+                            .withInt(":attempts", failedAttempts)));
+        }
+    }
+
+    private void resetFailedAttempts(String email) {
+        usersTable.updateItem(new UpdateItemSpec()
+                .withPrimaryKey("email", email)
+                .withUpdateExpression("REMOVE failedAttempts, lockoutUntil"));
     }
 
     private APIGatewayProxyResponseEvent createSuccessResponse(Map<String, String> data) {

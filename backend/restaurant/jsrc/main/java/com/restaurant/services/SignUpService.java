@@ -11,9 +11,9 @@ import com.restaurant.dto.SignUpDTO;
 import com.restaurant.validators.EmailValidator;
 import com.restaurant.validators.NameValidator;
 import com.restaurant.validators.PasswordValidator;
+import com.amazonaws.services.dynamodbv2.document.Table;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
-import com.amazonaws.services.dynamodbv2.document.Table;
 
 import javax.inject.Inject;
 import java.util.Collections;
@@ -73,8 +73,7 @@ public class SignUpService {
                     .build();
 
             try {
-                SignUpResponse signUpResponse = cognitoClient.signUp(signUpRequest);
-                String userId = signUpResponse.userSub();
+                cognitoClient.signUp(signUpRequest);
 
                 AdminConfirmSignUpRequest confirmRequest = AdminConfirmSignUpRequest.builder()
                         .userPoolId(System.getenv("COGNITO_USER_POOL_ID"))
@@ -84,9 +83,9 @@ public class SignUpService {
                 String role = isEmailInWaitersTable(signUpDto.getEmail()) ? "Waiter" : "Customer";
 
                 try {
+                    // Using email as partition key and not storing userId
                     usersTable.putItem(new PutItemSpec().withItem(new Item()
-                            .withPrimaryKey("userId", userId)
-                            .withString("email", signUpDto.getEmail())
+                            .withPrimaryKey("email", signUpDto.getEmail())
                             .withString("firstName", signUpDto.getFirstName())
                             .withString("lastName", signUpDto.getLastName())
                             .withString("role", role)

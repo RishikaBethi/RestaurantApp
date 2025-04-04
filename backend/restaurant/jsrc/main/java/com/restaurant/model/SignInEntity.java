@@ -1,5 +1,7 @@
 package com.restaurant.model;
 
+import org.json.JSONObject;
+
 public class SignInEntity {
     private String email;
     private String password;

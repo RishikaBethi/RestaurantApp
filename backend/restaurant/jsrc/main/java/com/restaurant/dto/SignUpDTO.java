@@ -2,10 +2,8 @@ package com.restaurant.dto;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
-//import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
 
-import java.util.Objects;
 
 public class SignUpDTO {
     @NotBlank(message = "First name is mandatory")
