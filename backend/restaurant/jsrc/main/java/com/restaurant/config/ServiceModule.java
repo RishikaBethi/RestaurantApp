@@ -7,14 +7,11 @@ import com.restaurant.services.SignUpService;
 import com.restaurant.services.SignInService;
 import com.restaurant.services.ReservationService;
 import com.restaurant.services.WaiterService;
-import com.restaurant.services.NotificationService;
 import dagger.Module;
 import dagger.Provides;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 import software.amazon.awssdk.regions.Region;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.amazonaws.services.sns.AmazonSNS;
-import com.amazonaws.services.sns.AmazonSNSClientBuilder;
 
 
 import javax.inject.Singleton;
@@ -22,9 +19,6 @@ import javax.inject.Singleton;
 
 @Module
 public class ServiceModule {
-
-    private static final String SNS_TOPIC_ARN = System.getenv("SNS_TOPIC_ARN");  // Read from environment variable
-
 
     @Provides
     @Singleton
@@ -72,23 +66,11 @@ public class ServiceModule {
     @Provides
     @Singleton
     public ReservationService provideReservationService(DynamoDB dynamoDB) {
+
         return new ReservationService(dynamoDB);
     }
 
-    @Provides
-    @Singleton
-    public AmazonSNS provideAmazonSNS() {
-        return AmazonSNSClientBuilder.standard()
-                .withRegion(System.getenv("REGION"))
-                .build();
-    }
 
-    // Provide NotificationService Dependency
-    @Provides
-    @Singleton
-    public NotificationService provideNotificationService(AmazonSNS amazonSNS) {
-        return new NotificationService(amazonSNS, SNS_TOPIC_ARN);
-    }
 
     // Provide WaiterService Dependency
     @Provides
@@ -101,6 +83,7 @@ public class ServiceModule {
     @Provides
     @Singleton
     public ObjectMapper provideObjectMapper() {
+
         return new ObjectMapper();
     }
 

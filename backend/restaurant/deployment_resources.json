@@ -80,15 +80,13 @@
   "restaurant-api": {
     "resource_type": "api_gateway",
     "deploy_stage": "dev",
-    "authorizers": {
-      "authorizer": {
-        "type": "COGNITO_USER_POOLS",
-        "identity_source": "method.request.header.Authorization",
-        "user_pools": [
-          "${pool_name}"
-        ],
-        "ttl": 300
-      }
+    "authorizer": {
+      "type": "COGNITO_USER_POOLS",
+      "identity_source": "method.request.header.Authorization",
+      "user_pools": [
+        "${pool_name}"
+      ],
+      "ttl": 300
     },
     "resources": {
       "/auth/sign-up": {

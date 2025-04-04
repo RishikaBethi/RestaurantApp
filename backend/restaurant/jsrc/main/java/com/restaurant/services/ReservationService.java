@@ -4,86 +4,138 @@ import com.amazonaws.services.dynamodbv2.document.*;
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 import com.amazonaws.services.dynamodbv2.document.spec.PutItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
-import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 
 import java.util.*;
 
 public class ReservationService {
     private static final String TABLE_NAME = System.getenv("RESERVATIONS_TABLE");
-    private static final String USER_INDEX_NAME = "userId-index"; // Ensure this exists in DynamoDB
-    private final Table reservationTable;
+    private static final String TABLE_NAME_LOC = System.getenv("LOCATIONS_TABLE");
+    private static final String TABLE_NAME_ORDERS = System.getenv("ORDERS_TABLE");
 
     private final DynamoDB dynamoDB;
+    private final Table reservationTable;
+    private final Table locationTable;
+    private final Table ordersTable;
 
     public ReservationService(DynamoDB dynamoDB) {
         this.dynamoDB = dynamoDB;
         this.reservationTable = dynamoDB.getTable(TABLE_NAME);
+        this.locationTable = dynamoDB.getTable(TABLE_NAME_LOC);
+        this.ordersTable = dynamoDB.getTable(TABLE_NAME_ORDERS);
     }
 
-    // Create a reservation
-    public String createReservation(Map<String, String> requestBody, String userId, String waiterId) {
+    public String createReservation(Map<String, String> requestBody, String email, String waiterId) {
         UUID reservationId = UUID.randomUUID();
+        UUID orderId = UUID.randomUUID();
         try {
             reservationTable.putItem(new PutItemSpec().withItem(new Item()
                     .withPrimaryKey("reservationId", reservationId.toString())
-                    .withString("userId", userId)
+                    .withString("email", email)
                     .withString("waiterId", waiterId)
                     .withString("locationId", requestBody.get("locationId"))
-                    .withNumber("tableNumber", Integer.parseInt(requestBody.get("tableNumber")))  // Store as Number
-                    .withString("date", requestBody.get("date")) // Ensure ISO-8601 format (YYYY-MM-DD)
-                    .withNumber("guestsNumber", Integer.parseInt(requestBody.get("guestsNumber"))) // Store as Number
-                    .withString("timeFrom", requestBody.get("timeFrom")) // Store as String
+                    .withString("tableNumber", requestBody.get("tableNumber"))
+                    .withString("date", requestBody.get("date"))
+                    .withNumber("guestsNumber", parseInteger(requestBody.get("guestsNumber")))
+                    .withString("timeFrom", requestBody.get("timeFrom"))
                     .withString("timeTo", requestBody.get("timeTo"))
-                    .withString("status", "Pending") // Default status
-            ));
-            return reservationId.toString();
+                    .withString("status", "Reserved")
+                    .withString("orderId", orderId.toString())));
         } catch (Exception e) {
-            System.err.println("Error creating reservation: " + e.getMessage());
-            return null;
+            throw new RuntimeException("Error creating reservation: " + e.getMessage(), e);
         }
+
+        return reservationId.toString();
     }
 
-    // Modify reservation status
     public String modifyReservation(String reservationId, String status) {
         try {
             UpdateItemSpec updateItemSpec = new UpdateItemSpec()
                     .withPrimaryKey("reservationId", reservationId)
-                    .withUpdateExpression("set #s = :status")
+                    .withUpdateExpression("SET #s = :status")
                     .withNameMap(Collections.singletonMap("#s", "status"))
-                    .withValueMap(new ValueMap().withString(":status", status));
+                    .withValueMap(Collections.singletonMap(":status", status));
 
             reservationTable.updateItem(updateItemSpec);
-            return "Reservation updated to: " + status;
+            return "Reservation updated successfully: " + status;
+
         } catch (Exception e) {
-            System.err.println("Error updating reservation: " + e.getMessage());
-            return "Failed to update reservation.";
+            throw new RuntimeException("Error updating reservation: " + e.getMessage(), e);
         }
     }
 
-    // Get all reservations for a user
-    public List<Map<String, Object>> getReservationsByUser(String userId) {
-        Index userIndex = reservationTable.getIndex(USER_INDEX_NAME); // Ensure this exists
-
+    public List<Map<String, Object>> getReservationsByUser(String email) {
         QuerySpec querySpec = new QuerySpec()
-                .withKeyConditionExpression("userId = :uid")
-                .withValueMap(new ValueMap().withString(":uid", userId));
+                .withKeyConditionExpression("email = :e")
+                .withValueMap(Collections.singletonMap(":e", email));
 
-        ItemCollection<QueryOutcome> items = userIndex.query(querySpec);
+        ItemCollection<QueryOutcome> items = reservationTable.query(querySpec);
         List<Map<String, Object>> reservations = new ArrayList<>();
+
         for (Item item : items) {
             reservations.add(item.asMap());
         }
         return reservations;
     }
 
-    // Get all reservations (admin functionality)
     public List<Map<String, Object>> getReservations() {
         ItemCollection<ScanOutcome> items = reservationTable.scan();
-
         List<Map<String, Object>> reservations = new ArrayList<>();
+
         for (Item item : items) {
             reservations.add(item.asMap());
         }
         return reservations;
+    }
+
+    public Optional<Map<String, Object>> getReservationById(String reservationId) {
+        Item item = reservationTable.getItem("reservationId", reservationId);
+
+        if (item == null) {
+            return Optional.empty();
+        }
+
+        // Construct a map from the DynamoDB item attributes
+        Map<String, Object> reservationDetails = new HashMap<>();
+        reservationDetails.put("id", item.getString("reservationId"));
+        reservationDetails.put("status", item.getString("status"));
+        reservationDetails.put("date", item.getString("date"));
+        reservationDetails.put("timeSlot", item.getString("timeFrom") + " - " + item.getString("timeTo"));
+        reservationDetails.put("guestsNumber", item.getNumber("guestsNumber"));
+
+        // Fetch orderId and dish count
+        String orderId = item.getString("orderId");
+        int preOrderCount = 0;
+
+        if (orderId != null) {
+            Item orderItem = ordersTable.getItem("orderId", orderId);
+            if (orderItem != null && orderItem.isPresent("dishItems")) {
+                preOrderCount = orderItem.getList("dishItems").size();
+            }
+        }
+
+        reservationDetails.put("preOrder", preOrderCount);
+
+        String locationId = item.getString("locationId");
+        Item locationItem = locationTable.getItem("locationId", locationId);
+
+        if (locationItem != null) {
+            reservationDetails.put("locationAddress", locationItem.getString("address"));
+        } else {
+            reservationDetails.put("locationAddress", "Unknown");
+        }
+
+
+
+        reservationDetails.put("feedbackId", "None");
+        return Optional.of(reservationDetails);
+    }
+
+
+    private int parseInteger(String value) {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid number format: " + value, e);
+        }
     }
 }

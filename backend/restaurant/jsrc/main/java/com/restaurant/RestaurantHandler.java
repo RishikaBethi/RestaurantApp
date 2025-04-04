@@ -20,11 +20,11 @@ import com.restaurant.services.SignUpService;
 import com.restaurant.services.SignInService;
 import com.restaurant.services.ReservationService;
 import com.restaurant.services.WaiterService;
-import com.restaurant.services.NotificationService;
 
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 @DependsOn(resourceType = ResourceType.COGNITO_USER_POOL, name = "${user_pool}")
@@ -40,6 +40,7 @@ import java.util.logging.Logger;
 		@EnvironmentVariable(key = "WAITERS_TABLE", value = "${waiters_table}"),
 		@EnvironmentVariable(key = "RESERVATIONS_TABLE", value = "${reservations_table}"),
 		@EnvironmentVariable(key = "LOCATIONS_TABLE", value = "${locations_table}"),
+		@EnvironmentVariable(key = "ORDERS_TABLE", value = "${orders_table}"),
 		@EnvironmentVariable(key = "COGNITO_USER_POOL_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_USER_POOL_ID),
 		@EnvironmentVariable(key = "REGION", value = "${region}"),
 		@EnvironmentVariable(key = "COGNITO_CLIENT_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_CLIENT_ID)
@@ -53,7 +54,6 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 	@Inject SignInService signInService;
 	@Inject ReservationService reservationService;
 	@Inject WaiterService waiterService;
-	@Inject NotificationService notificationService;
 
 	public RestaurantHandler() {
 		initDependencies();
@@ -116,7 +116,8 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 			logger.info("Extracted claims: " + claims); // Debugging purpose
 
 			String userId = (String) claims.get("sub");
-			if (userId == null || userId.isEmpty()) {
+			String email = (String) claims.get("email");
+			if (userId == null || userId.isEmpty() || email == null || email.isEmpty()) {
 				return Helper.createErrorResponse(401, "Unauthorized: Missing or invalid token.");
 			}
 
@@ -143,19 +144,30 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 			String waiterId = waiterService.assignWaiter(requestBody.get("locationId"));
 
 			// Create reservation
-			String reservationId = reservationService.createReservation(requestBody, userId, waiterId);
+			String reservationId = reservationService.createReservation(requestBody, email, waiterId);
 
-			// Send confirmation notification
-			notificationService.sendNotification(
-					"Reservation Confirmed! ID: " + reservationId,
-					"Reservation Confirmation"
+			Optional<Map<String, Object>> reservationDetailsOpt = reservationService.getReservationById(reservationId);
+
+			if (reservationDetailsOpt.isEmpty()) {
+				return Helper.createErrorResponse(404, "Reservation not found.");
+			}
+
+			Map<String, Object> reservationDetails = reservationDetailsOpt.get();
+
+			// Construct response
+			Map<String, Object> response = Map.of(
+					"id", reservationDetails.get("id"),
+					"status", reservationDetails.get("status"),
+					"locationAddress", reservationDetails.get("locationAddress"),
+					"date", reservationDetails.get("date"),
+					"timeSlot", reservationDetails.get("timeSlot"),
+					"preOrder", reservationDetails.get("preOrder"),
+					"guestsNumber", reservationDetails.get("guestsNumber"),
+					"feedbackId", reservationDetails.get("feedbackId")
 			);
 
-			// Return success response
-			return Helper.createApiResponse(200, Map.of(
-					"message", "Reservation Created",
-					"reservationId", reservationId
-			));
+			return Helper.createApiResponse(200, response);
+
 
 		} catch (Exception e) {
 			logger.severe("Error creating reservation: " + e.getMessage());
@@ -187,7 +199,8 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 			if (pathParts.length < 3) {
 				return Helper.createErrorResponse(400, "Invalid reservation cancellation request.");
 			}
-			String reservationId = pathParts[pathParts.length - 1]; 			Map<String, String> requestBody = parseJson(request.getBody());
+			String reservationId = pathParts[pathParts.length - 1];
+			Map<String, String> requestBody = parseJson(request.getBody());
 			// Extract user ID from JWT claims
 			Map<String, Object> claims = Helper.extractClaims(request);
 			String userId = (String) claims.get("sub");

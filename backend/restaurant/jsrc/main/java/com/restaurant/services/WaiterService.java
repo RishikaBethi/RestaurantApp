@@ -43,7 +43,7 @@ public class WaiterService {
 
             //  Step 2: Count reservations for this waiter
             QuerySpec querySpec = new QuerySpec()
-                    .withKeyConditionExpression("userId = :v_user")
+                    .withKeyConditionExpression("waiterId = :v_user")
                     .withValueMap(new ValueMap().withString(":v_user", waiterId));
 
             int reservationCount = userIndex.query(querySpec).getAccumulatedItemCount();

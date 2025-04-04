@@ -5,7 +5,6 @@ import com.restaurant.services.SignUpService;
 import com.restaurant.services.SignInService;
 import com.restaurant.services.ReservationService;
 import com.restaurant.services.WaiterService;
-import com.restaurant.services.NotificationService;
 
 import dagger.Component;
 
@@ -19,7 +18,6 @@ public interface AppComponent {
     SignUpService signUpService();
     SignInService signInService();
     ReservationService reservationService();
-    NotificationService notificationService();
     WaiterService waiterService();
 
     @Component.Builder
