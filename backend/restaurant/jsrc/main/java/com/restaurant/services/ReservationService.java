@@ -24,9 +24,10 @@ public class ReservationService {
         this.ordersTable = dynamoDB.getTable(TABLE_NAME_ORDERS);
     }
 
-    public String createReservation(Map<String, String> requestBody, String email, String waiterId) {
+    public Map<String, Object> createReservation(Map<String, String> requestBody, String email, String waiterId) {
         UUID reservationId = UUID.randomUUID();
         UUID orderId = UUID.randomUUID();
+
         try {
             reservationTable.putItem(new PutItemSpec().withItem(new Item()
                     .withPrimaryKey("reservationId", reservationId.toString())
@@ -40,12 +41,61 @@ public class ReservationService {
                     .withString("timeTo", requestBody.get("timeTo"))
                     .withString("status", "Reserved")
                     .withString("orderId", orderId.toString())));
+
+            // Insert empty order into the Orders Table
+            ordersTable.putItem(new PutItemSpec().withItem(new Item()
+                    .withPrimaryKey("orderId", orderId.toString())
+                    .withString("email", email) // Using email instead of userId
+                    .withString("date", requestBody.get("date"))
+                    .withList("dishItems", new ArrayList<>()) // Empty dishItems list
+                    .withString("locationId", requestBody.get("locationId"))
+                    .withString("reservationId", reservationId.toString())
+                    .withString("state", "Submitted") // Initial state
+                    .withString("timeSlot", requestBody.get("timeFrom") + " - " + requestBody.get("timeTo"))));
+
+            return getReservationResponse(reservationId.toString());
+
         } catch (Exception e) {
             throw new RuntimeException("Error creating reservation: " + e.getMessage(), e);
         }
-
-        return reservationId.toString();
     }
+
+    private Map<String, Object> getReservationResponse(String reservationId) {
+        Item item = reservationTable.getItem("reservationId", reservationId);
+
+        if (item == null) {
+            throw new RuntimeException("Reservation not found after creation.");
+        }
+
+        Map<String, Object> reservationDetails = new HashMap<>();
+        reservationDetails.put("id", item.getString("reservationId"));
+        reservationDetails.put("status", item.getString("status"));
+        reservationDetails.put("date", item.getString("date"));
+        reservationDetails.put("timeSlot", item.getString("timeFrom") + " - " + item.getString("timeTo"));
+        reservationDetails.put("guestsNumber", item.getNumber("guestsNumber").toString());
+
+        // Fetch location address
+        String locationId = item.getString("locationId");
+        Item locationItem = locationTable.getItem("locationId", locationId);
+        reservationDetails.put("locationAddress", locationItem != null ? locationItem.getString("address") : "Unknown");
+
+        // Fetch orderId and preOrder count
+        String orderId = item.getString("orderId");
+        int preOrderCount = 0;
+
+        if (orderId != null) {
+            Item orderItem = ordersTable.getItem("orderId", orderId);
+            if (orderItem != null && orderItem.isPresent("dishItems")) {
+                preOrderCount = orderItem.getList("dishItems").size();
+            }
+        }
+
+        reservationDetails.put("preOrder", String.valueOf(preOrderCount));
+        reservationDetails.put("feedbackId", "None");
+
+        return reservationDetails;
+    }
+
 
     public String modifyReservation(String reservationId, String status) {
         try {

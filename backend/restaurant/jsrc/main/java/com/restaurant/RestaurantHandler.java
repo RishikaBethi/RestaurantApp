@@ -144,36 +144,43 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 			String waiterId = waiterService.assignWaiter(requestBody.get("locationId"));
 
 			// Create reservation
-			String reservationId = reservationService.createReservation(requestBody, email, waiterId);
+			Map<String, Object> reservationData = reservationService.createReservation(requestBody, email, waiterId);
+
+			if (reservationData == null || !reservationData.containsKey("reservationId")) {
+				return Helper.createErrorResponse(500, "Error creating reservation: Missing reservation ID.");
+			}
+
+			String reservationId = reservationData.get("reservationId").toString();
+
 
 			Optional<Map<String, Object>> reservationDetailsOpt = reservationService.getReservationById(reservationId);
 
-			if (reservationDetailsOpt.isEmpty()) {
-				return Helper.createErrorResponse(404, "Reservation not found.");
-			}
+			if (reservationDetailsOpt.isEmpty()) return Helper.createErrorResponse(404, "Reservation not found.");
 
 			Map<String, Object> reservationDetails = reservationDetailsOpt.get();
+			logger.info("Reservation Details: " + reservationDetails);
 
-			// Construct response
-			Map<String, Object> response = Map.of(
-					"id", reservationDetails.get("id"),
-					"status", reservationDetails.get("status"),
-					"locationAddress", reservationDetails.get("locationAddress"),
-					"date", reservationDetails.get("date"),
-					"timeSlot", reservationDetails.get("timeSlot"),
-					"preOrder", reservationDetails.get("preOrder"),
-					"guestsNumber", reservationDetails.get("guestsNumber"),
-					"feedbackId", reservationDetails.get("feedbackId")
+			Map<String, String> formattedResponse = Map.of(
+					"id", String.valueOf(reservationDetails.getOrDefault("reservationId", "")),
+					"status", String.valueOf(reservationDetails.getOrDefault("status", "")),
+					"locationAddress", String.valueOf(reservationDetails.getOrDefault("locationAddress", "")),
+					"date", String.valueOf(reservationDetails.getOrDefault("date", "")),
+					"timeSlot", String.valueOf(reservationDetails.getOrDefault("timeFrom", "")) + " - " + String.valueOf(reservationDetails.getOrDefault("timeTo", "")),
+					"preOrder", String.valueOf(reservationDetails.getOrDefault("preOrder", 0)),  // Ensure proper casting
+					"guestsNumber", String.valueOf(reservationDetails.getOrDefault("guestsNumber", 0)),  // Ensure proper casting
+					"feedbackId", String.valueOf(reservationDetails.getOrDefault("feedbackId", ""))
 			);
 
-			return Helper.createApiResponse(200, response);
 
-
+			return Helper.createApiResponse(200, formattedResponse);
 		} catch (Exception e) {
 			logger.severe("Error creating reservation: " + e.getMessage());
 			return Helper.createErrorResponse(500, "Error creating reservation: " + e.getMessage());
 		}
 	}
+
+
+
 
 
 	private APIGatewayProxyResponseEvent handleGetReservations(APIGatewayProxyRequestEvent request) {
