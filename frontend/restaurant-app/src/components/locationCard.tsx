@@ -8,12 +8,7 @@ interface LocationCardProps {
   averageOccupancy: number;
 }
  
-export default function LocationCard({
-  image,
-  address,
-  totalCapacity,
-  averageOccupancy,
-}: LocationCardProps) {
+export default function LocationCard({image,address,totalCapacity,averageOccupancy}: LocationCardProps) {
   return (
     <Card className="w-full shadow-lg rounded-lg overflow-hidden">
       <img src={image} alt={address} className="w-full h-40 object-cover" />

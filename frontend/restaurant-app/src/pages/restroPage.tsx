@@ -1,39 +1,19 @@
 import { useParams } from "react-router-dom";
+import { useLocationDetails } from "@/hooks/useLocationDetails";
 import { Button } from "@/components/ui/button";
 import { Star, MapPin } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import SpecialtyDishCard from "@/components/specialtyDishCard";
+import axios from "axios";
+import ShimmerDishes from "@/components/shimmer/shimmerDishes";
 
-import strawberrySalad from "@/assets/dishImage.png";
-import avocadoBowl from "@/assets/dishImage.png";
-import lentilSalad from "@/assets/dishImage.png";
-import springSalad from "@/assets/dishImage.png";
-
-import location1 from "@/assets/locationImage.png";
-import location2 from "@/assets/locationImage.png";
-import location3 from "@/assets/locationImage.png";
-import DishCard from "@/components/dishCard";
-
-interface Location {
+interface SpecialtyDish {
   id: number;
-  image: string;
-  address: string;
-  totalCapacity: number;
-  averageOccupancy: number;
+  name: string;
+  price: string;
+  weight: string;
+  imageUrl: string;
 }
-
-// Sample locations
-const locations: Location[] = [
-  { id: 1, image: location1, address: "48 Rustaveli Avenue", totalCapacity: 10, averageOccupancy: 90 },
-  { id: 2, image: location2, address: "14 Baratashvili Street", totalCapacity: 18, averageOccupancy: 78 },
-  { id: 3, image: location3, address: "9 Abashidze Street", totalCapacity: 20, averageOccupancy: 99 },
-];
-
-const specialtyDishes = [
-  { id: 1, name: "Fresh Strawberry Mint Salad", price: "$7", weight: "430g", image: strawberrySalad },
-  { id: 2, name: "Avocado Pine Nut Bowl", price: "$8", weight: "430g", image: avocadoBowl },
-  { id: 3, name: "Roasted Sweet Potato & Lentil Salad", price: "$7.5", weight: "430g", image: lentilSalad },
-  { id: 4, name: "Spring Salad", price: "$7", weight: "430g", image: springSalad }
-];
 
 const reviews = [
   {
@@ -68,11 +48,38 @@ const reviews = [
 
 export default function RestroPage() {
   const { locationId } = useParams<{ locationId: string }>();
-  const location = locations.find((loc) => loc.id === parseInt(locationId || ""));
+  const { location, loading: locationLoading } = useLocationDetails(locationId);
   const [sortOption, setSortOption] = useState("Top rated first");
+  const [specialtyDishes, setSpecialtyDishes] = useState<SpecialtyDish[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    if (!locationId) return;
+    
+    setLoading(true);
+    setError("");
 
+    axios.get(`https://ig8csmv3m6.execute-api.ap-southeast-2.amazonaws.com/devss/locations/${locationId}/speciality-dishes`)
+      .then((response) => {
+        setSpecialtyDishes(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error loading dishes:", error);
+        setError("Failed to load specialty dishes.");
+        setLoading(false);
+      });
+  }, [locationId]);
+  
   return (
     <div className="container mx-auto p-6">
+       {locationLoading ? (
+        <p className="text-center font-semibold text-2xl">Loading...</p>
+      ) : error || !location ? (
+        <p className="text-red-500">{error || "Location not found."}</p>
+      ) : (
+        <>
       <div className="flex flex-col md:flex-row items-center gap-6">
         <div className="flex-1">
           <h1 className="text-3xl font-bold text-green-700">Green & Tasty</h1>
@@ -89,15 +96,17 @@ export default function RestroPage() {
           <p className="text-gray-700 font-semibold">Average Occupancy: {location?.averageOccupancy}%</p>
           <Button className="mt-4 bg-green-600 hover:bg-green-700">Book a Table</Button>
         </div>
-        <img src={location?.image} alt="Restaurant" className="rounded-lg w-full md:w-1/2" />
+        <img src={location?.imageUrl} alt="Restaurant" className="rounded-lg h-64 w-auto object-cover md:w-1/2" />
       </div>
 
       <h2 className="text-2xl font-semibold mt-10">Specialty Dishes</h2>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-        {specialtyDishes.map((dish) => (
-          <DishCard  {...dish} key={dish.id}  />
-        ))}
-      </div>
+      {loading ? <ShimmerDishes /> : error ? <p className="text-red-500">{error}</p> : (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+          {specialtyDishes.map((dish) => (
+            <SpecialtyDishCard key={dish.id} {...dish} />
+          ))}
+        </div>
+      )}
 
       <h2 className="text-2xl font-semibold mt-10">Customer Reviews</h2>
       <div className="flex justify-between items-center mt-4">
@@ -139,6 +148,8 @@ export default function RestroPage() {
           </div>
         ))}
       </div>
+      </>
+    )}
     </div>
   );
 }

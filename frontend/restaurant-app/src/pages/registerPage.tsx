@@ -6,8 +6,8 @@ import { Label } from "@/components/ui/label";
 import logo from "@/assets/logo.png";
 import { useNavigate } from "react-router";
 import { Eye, EyeOff } from "lucide-react";
-import axios from "axios";
 import {toast} from "sonner";
+import { registerUser } from "@/services/registerService";
 
 interface FormData {
   firstName: string;
@@ -127,14 +127,14 @@ const RegisterPage: React.FC = () => {
     console.log("Form submitted:", formData);
     setLoading(true);
     try {
-      const response = await axios.post("https://zyq0q0wjii.execute-api.ap-southeast-2.amazonaws.com/dev/auth/sign-up", {
+      const response = await registerUser({
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
-        confirmPassword: formData.confirmPassword
+        confirmPassword: formData.confirmPassword,
       });
-      console.log("Registration successful:", response.data);
+      console.log("Registration successful:", response);
       navigate("/login");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {

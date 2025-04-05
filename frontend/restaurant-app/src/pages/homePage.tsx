@@ -1,33 +1,59 @@
-import DishCard from "@/components/dishCard";
+import PopularDishCard from "@/components/popularDishCard";
 import LocationCard from "@/components/locationCard";
 import saladImage from "@/assets/homepage.png";
- 
-// Import images for dishes
-import strawberrySalad from "@/assets/dishImage.png";
-import avocadoBowl from "@/assets/dishImage.png";
-import lentilSalad from "@/assets/dishImage.png";
-import springSalad from "@/assets/dishImage.png";
- 
-// Import images for locations
-import location1 from "@/assets/locationImage.png";
-import location2 from "@/assets/locationImage.png";
-import location3 from "@/assets/locationImage.png";
+import ShimmerDishes from "@/components/shimmer/shimmerDishes";
 import { Link } from "react-router-dom";
- 
-const dishes = [
-  { image: strawberrySalad, name: "Fresh Strawberry Mint Salad", price: "17$", weight: "430g" },
-  { image: avocadoBowl, name: "Avocado Pine Nut Bowl", price: "17$", weight: "430g" },
-  { image: lentilSalad, name: "Roasted Potato & Lentil Salad", price: "17$", weight: "430g" },
-  { image: springSalad, name: "Spring Salad", price: "17$", weight: "430g" }
-];
- 
-const locations = [
-  { image: location1, address: "48 Rustaveli Avenue", totalCapacity: 10, averageOccupancy: 90,id:1 },
-  { image: location2, address: "14 Baratashvili Street", totalCapacity: 18, averageOccupancy: 78,id:2 },
-  { image: location3, address: "9 Abashidze Street", totalCapacity: 20, averageOccupancy: 99,id:3 }
-];
+import { useEffect, useState } from "react";
+import axios from "axios";
+import ShimmerLocations from "@/components/shimmer/shimmerLocations";
+
+interface Location {
+  id: string;
+  address: string;
+  description: string;
+  totalCapacity: string;
+  averageOccupancy: string;
+  imageUrl: string;
+  rating: string;
+}
+interface PopularDish {
+  id: string;
+  name: string;
+  price: string;
+  weight: string;
+  imageUrl: string;
+}
  
 export default function Home() {
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [popularDishes, setPopularDishes] = useState<PopularDish[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    setError("");
+    axios.get("https://ig8csmv3m6.execute-api.ap-southeast-2.amazonaws.com/devss/locations")
+      .then(response => {
+        setLocations(response.data);
+      })
+      .catch(error => {
+        console.error("Error fetching locations:", error);
+        setError("Failed to load locations!");
+      });
+ 
+   axios.get("https://ig8csmv3m6.execute-api.ap-southeast-2.amazonaws.com/devss/dishes/popular")
+      .then((response) => {
+        setPopularDishes(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching dishes:", error);
+      })
+      .finally(() => {
+        setLoading(false); 
+      });
+    }, []);
+
   return (
     <div className="bg-gray-100 min-h-screen">
       <header
@@ -49,23 +75,28 @@ export default function Home() {
       {/* Most Popular Dishes Section */}
       <section className="p-6">
         <h3 className="text-xl font-semibold">Most Popular Dishes</h3>
-        <div className="grid grid-cols-4 gap-4 mt-4">
-          {dishes.map((dish, index) => (
-            <DishCard key={index} {...dish} />
-          ))}
-        </div>
+        {loading ? <ShimmerDishes /> : error ? <p className="text-red-500">{error}</p> : (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+            {popularDishes.map((dish,index) => (
+              <PopularDishCard key={index} {...dish} />))}
+          </div>
+        )}
       </section>
  
       {/* Locations Section */}
       <section className="p-6">
         <h3 className="text-xl font-semibold">Locations</h3>
+        {loading ? (
+          <ShimmerLocations />
+        ) : (
         <div className="grid grid-cols-3 gap-4 mt-4">
           {locations.map((location) => (
              <Link key={location.id} to={`/restaurant/${location.id}`} className="block transform transition duration-300 hover:scale-105 hover:shadow-lg">
-            <LocationCard {...location} />
+            <LocationCard image={location.imageUrl} address={location.address} totalCapacity={parseInt(location.totalCapacity)} averageOccupancy={parseInt(location.averageOccupancy)} />
             </Link>
           ))}
         </div>
+        )}
       </section>
     </div>
   );

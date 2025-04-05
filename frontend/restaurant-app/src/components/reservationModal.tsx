@@ -5,15 +5,18 @@ import { FaUser, FaClock } from "react-icons/fa";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import ConfirmationModal from "./confirmationModal";
 
+interface Table {
+  locationId: string;
+  locationAddress: string | null;
+  availableSlots: string[];
+  tableNumber: string;
+  capacity: string;
+}
+
 interface ReservationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  table: {
-    id: number;
-    address: string;
-    capacity: number;
-    slots: string[];
-  } | null;
+  table: Table | null;
 }
 
 const extractStartTime = (slot: string) => slot.split(" - ")[0];
@@ -26,7 +29,7 @@ export default function ReservationModal({ isOpen, onClose, table }: Reservation
   const [error, setError] = useState<string | null>(null);
 
   if (!table) return null;
-  const availableTimes = Array.from(new Set(table.slots.map(extractStartTime)));
+  const availableTimes = Array.from(new Set(table.availableSlots.map(extractStartTime)));
 
   // Handle reservation confirmation
   const handleReservation = () => {
@@ -51,7 +54,7 @@ export default function ReservationModal({ isOpen, onClose, table }: Reservation
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Make a Reservation</DialogTitle>
           <p className="text-gray-600 mt-1 text-sm">
-            You are making a reservation at <strong>{table.address}</strong>, Table {table.id}, <br />
+            You are making a reservation at <strong>{table.locationAddress}</strong>, Table {table.tableNumber}, <br />
             for <strong>October 14, 2024</strong>.
           </p>
         </DialogHeader>
@@ -76,7 +79,7 @@ export default function ReservationModal({ isOpen, onClose, table }: Reservation
               <span className="font-semibold text-green-600">{guests}</span>
               <button
                 className="px-1 border border-green-600 rounded text-lg text-green-600"
-                onClick={() => setGuests((prev) => Math.min(table.capacity, prev + 1))}
+                onClick={() => setGuests((prev) => Math.min(parseInt(table.capacity), prev + 1))}
               >
                 +
               </button>
@@ -143,8 +146,8 @@ export default function ReservationModal({ isOpen, onClose, table }: Reservation
         onClose={() => setShowConfirmation(false)}
         reservationDetails={{
           guests,
-          table: table.id,
-          address: table.address,
+          table: parseInt(table.tableNumber),
+          address: table.locationAddress || "Unknown",
           fromTime: fromTime,
           toTime: toTime
         }}

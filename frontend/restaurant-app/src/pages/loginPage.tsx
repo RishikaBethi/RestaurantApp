@@ -1,5 +1,4 @@
 import { useState } from "react";
-import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,6 +6,7 @@ import logo from "@/assets/logo.png";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import { loginUser } from "@/services/loginService";
 
 export default function Login({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => void }) {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -52,10 +52,10 @@ export default function Login({ setIsLoggedIn }: { setIsLoggedIn: (value: boolea
 
     try {
       setLoading(true);
-      const response = await axios.post("https://zyq0q0wjii.execute-api.ap-southeast-2.amazonaws.com/dev/auth/sign-in", formData);
+      const response = await loginUser(formData);
 
       // Assuming the API returns a token & user data
-      const { accessToken, username, role } = response.data;
+      const { accessToken, username, role } = response;
 
       // Store token & user in localStorage
       localStorage.setItem("token", accessToken);
