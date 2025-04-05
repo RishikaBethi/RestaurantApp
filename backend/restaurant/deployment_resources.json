@@ -10,6 +10,7 @@
             "dynamodb:GetItem",
             "dynamodb:Query",
             "dynamodb:PutItem",
+            "dynamodb:Scan",
             "dynamodb:Batch*",
             "dynamodb:DeleteItem",
             "ssm:PutParameter",
@@ -32,6 +33,44 @@
       "lambda-basic-execution"
     ],
     "resource_type": "iam_role",
+    "tags": {}
+  },
+  "restaurant_api": {
+    "resource_type": "api_gateway",
+    "deploy_stage": "api",
+    "dependencies": [],
+    "resources": {
+      "/bookings/tables": {
+        "enable_cors": true,
+        "GET": {
+          "authorization_type": "NONE",
+          "integration_type": "lambda",
+          "lambda_name": "restaurant_handler",
+          "api_key_required": false,
+          "method_request_parameters": {},
+          "integration_request_body_template": {},
+          "responses": [],
+          "integration_responses": [],
+          "default_error_pattern": true,
+          "enable_proxy": true
+        }
+      },
+      "/locations/select-options": {
+        "enable_cors": true,
+        "GET": {
+          "authorization_type": "NONE",
+          "integration_type": "lambda",
+          "lambda_name": "restaurant_handler",
+          "api_key_required": false,
+          "method_request_parameters": {},
+          "integration_request_body_template": {},
+          "responses": [],
+          "integration_responses": [],
+          "default_error_pattern": true,
+          "enable_proxy": true
+        }
+      }
+    },
     "tags": {}
   }
 }
