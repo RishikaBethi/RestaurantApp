@@ -1,10 +1,13 @@
 package com.restaurant.config;
 
 import com.restaurant.RestaurantHandler;
-import com.restaurant.services.SignUpService;
-import com.restaurant.services.SignInService;
-import com.restaurant.services.ReservationService;
-import com.restaurant.services.WaiterService;
+import com.restaurant.services.auth.SignUpService;
+import com.restaurant.services.auth.SignInService;
+import com.restaurant.services.reservations.GetReservationService;
+import com.restaurant.services.reservations.CancelReservationService;
+import com.restaurant.services.reservations.UpdateReservationService;
+import com.restaurant.services.bookings.BookingService;
+import com.restaurant.services.waiters.WaiterService;
 
 import dagger.Component;
 
@@ -17,8 +20,11 @@ public interface AppComponent {
 
     SignUpService signUpService();
     SignInService signInService();
-    ReservationService reservationService();
+    GetReservationService getReservationService();
+    CancelReservationService cancelReservationService();
+    UpdateReservationService updateReservationService();
     WaiterService waiterService();
+    BookingService bookingService();
 
     @Component.Builder
     interface Builder {

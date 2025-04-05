@@ -16,10 +16,13 @@ import com.syndicate.deployment.annotations.lambda.LambdaHandler;
 import com.syndicate.deployment.model.DeploymentRuntime;
 import com.syndicate.deployment.model.RetentionSetting;
 import com.syndicate.deployment.model.environment.ValueTransformer;
-import com.restaurant.services.SignUpService;
-import com.restaurant.services.SignInService;
-import com.restaurant.services.ReservationService;
-import com.restaurant.services.WaiterService;
+import com.restaurant.services.auth.SignUpService;
+import com.restaurant.services.auth.SignInService;
+import com.restaurant.services.reservations.GetReservationService;
+import com.restaurant.services.reservations.CancelReservationService;
+import com.restaurant.services.reservations.UpdateReservationService;
+import com.restaurant.services.bookings.BookingService;
+import com.restaurant.services.waiters.WaiterService;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -40,6 +43,7 @@ import java.util.logging.Logger;
 		@EnvironmentVariable(key = "RESERVATIONS_TABLE", value = "${reservations_table}"),
 		@EnvironmentVariable(key = "LOCATIONS_TABLE", value = "${locations_table}"),
 		@EnvironmentVariable(key = "ORDERS_TABLE", value = "${orders_table}"),
+		@EnvironmentVariable(key = "TABLES_TABLE", value = "${tables_table}"),
 		@EnvironmentVariable(key = "COGNITO_USER_POOL_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_USER_POOL_ID),
 		@EnvironmentVariable(key = "REGION", value = "${region}"),
 		@EnvironmentVariable(key = "COGNITO_CLIENT_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_CLIENT_ID)
@@ -51,8 +55,10 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 
 	@Inject SignUpService signUpService;
 	@Inject SignInService signInService;
-	@Inject ReservationService reservationService;
-	@Inject WaiterService waiterService;
+	@Inject GetReservationService getReservationService;
+	@Inject CancelReservationService cancelReservationService;
+	@Inject UpdateReservationService updateReservationService;
+	@Inject BookingService bookingService;
 
 	public RestaurantHandler() {
 		initDependencies();
@@ -82,26 +88,19 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 			}
 
 			if ("/bookings/client".equals(path) && "POST".equalsIgnoreCase(httpMethod)) {
-				return reservationService.handleCreateReservation(request);
+				return bookingService.handleCreateReservation(request);
 			}
 
 			if ("/bookings/client/".equals(path) && "PUT".equalsIgnoreCase(httpMethod)) {
-				// Extract reservationId from the path
-				String[] pathParts = path.split("/");
-				if (pathParts.length == 4) {
-					String reservationId = pathParts[3];
-					return reservationService.handleUpdateReservation(request, reservationId);
-				} else {
-					return Helper.createErrorResponse(400, "Invalid reservationId in path");
-				}
+				return updateReservationService.handleUpdateReservation(request, path);
 			}
 
 			if ("/reservations".equals(path) && "GET".equalsIgnoreCase(httpMethod)) {
-				return reservationService.handleGetReservations(request);
+				return getReservationService.handleGetReservations(request);
 			}
 
 			if (path.startsWith("/reservations/") && "DELETE".equalsIgnoreCase(httpMethod)) {
-				return reservationService.handleCancelReservation(request, path);
+				return cancelReservationService.handleCancelReservation(request, path);
 			}
 
 			return Helper.createErrorResponse(400, "Invalid Request");

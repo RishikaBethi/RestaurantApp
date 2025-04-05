@@ -1,9 +1,9 @@
 package com.restaurant.utils;
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Map;
-import java.util.Base64;
+import java.util.*;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
 
@@ -20,10 +20,7 @@ public class Helper {
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(statusCode)
                     .withBody(objectMapper.writeValueAsString(body))
-                    .withHeaders(Map.of(
-                            "Content-Type", "application/json",
-                            "Access-Control-Allow-Origin", "*"
-                    ));
+                    .withHeaders(createCorsHeaders());
         } catch (Exception e) {
             logger.severe("Error serializing API response: " + e.getMessage());
             return createErrorResponse(500, "Error serializing response");
@@ -40,7 +37,7 @@ public class Helper {
     /**
      * Extracts user claims from the JWT token in the request headers.
      */
-    public static Map<String, Object> extractClaims(com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent request) {
+    public static Map<String, Object> extractClaims(APIGatewayProxyRequestEvent request) {
         try {
             String authorizationHeader = request.getHeaders().get("Authorization");
 
@@ -84,5 +81,14 @@ public class Helper {
             logger.severe("Error decoding Base64 JWT payload: " + e.getMessage());
             return null;
         }
+    }
+
+    private static Map<String, String> createCorsHeaders() {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+        headers.put("Access-Control-Allow-Origin", "*");
+        headers.put("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        headers.put("Access-Control-Allow-Headers", "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token");
+        return Collections.unmodifiableMap(headers);
     }
 }

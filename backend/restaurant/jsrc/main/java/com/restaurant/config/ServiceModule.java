@@ -3,10 +3,13 @@ package com.restaurant.config;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
-import com.restaurant.services.SignUpService;
-import com.restaurant.services.SignInService;
-import com.restaurant.services.ReservationService;
-import com.restaurant.services.WaiterService;
+import com.restaurant.services.auth.SignUpService;
+import com.restaurant.services.auth.SignInService;
+import com.restaurant.services.reservations.GetReservationService;
+import com.restaurant.services.reservations.CancelReservationService;
+import com.restaurant.services.reservations.UpdateReservationService;
+import com.restaurant.services.bookings.BookingService;
+import com.restaurant.services.waiters.WaiterService;
 import dagger.Module;
 import dagger.Provides;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
@@ -67,8 +70,26 @@ public class ServiceModule {
     // Provide ReservationService Dependency
     @Provides
     @Singleton
-    public ReservationService provideReservationService(DynamoDB dynamoDB, WaiterService waiterService) {
-        return new ReservationService(dynamoDB, waiterService);
+    public GetReservationService provideGetReservationService(DynamoDB dynamoDB) {
+        return new GetReservationService(dynamoDB);
+    }
+
+    @Provides
+    @Singleton
+    public CancelReservationService provideCancelReservationService(DynamoDB dynamoDB) {
+        return new CancelReservationService(dynamoDB);
+    }
+
+    @Provides
+    @Singleton
+    public UpdateReservationService provideUpdateReservationService(DynamoDB dynamoDB) {
+        return new UpdateReservationService(dynamoDB);
+    }
+
+    @Provides
+    @Singleton
+    public BookingService provideBookingService(DynamoDB dynamoDB, WaiterService waiterService) {
+        return new BookingService(dynamoDB, waiterService);
     }
 
     // Provide WaiterService Dependency
