@@ -1,13 +1,13 @@
 package com.restaurant.config;
 
 import com.restaurant.RestaurantHandler;
-import com.restaurant.services.auth.SignUpService;
-import com.restaurant.services.auth.SignInService;
-import com.restaurant.services.reservations.GetReservationService;
-import com.restaurant.services.reservations.CancelReservationService;
-import com.restaurant.services.reservations.UpdateReservationService;
-import com.restaurant.services.bookings.BookingService;
-import com.restaurant.services.waiters.WaiterService;
+import com.restaurant.services.SignUpService;
+import com.restaurant.services.SignInService;
+import com.restaurant.services.GetReservationService;
+import com.restaurant.services.CancelReservationService;
+import com.restaurant.services.UpdateReservationService;
+import com.restaurant.services.BookingService;
+import com.restaurant.services.WaiterService;
 
 import dagger.Component;
 
