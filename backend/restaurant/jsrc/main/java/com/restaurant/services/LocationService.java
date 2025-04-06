@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import static org.openjdk.tools.sjavac.Util.getStackTrace;
+//import static org.openjdk.tools.sjavac.Util.getStackTrace;
 
 public class LocationService {
     private static final Logger logger = Logger.getLogger(LocationService.class.getName());
@@ -52,7 +52,7 @@ public class LocationService {
 
             return createResponse(200, objectMapper.writeValueAsString(locations));
         } catch (Exception e) {
-            logger.severe("Error in getLocations: " + e.getMessage() + ", Stacktrace: " + getStackTrace(e));
+            //logger.severe("Error in getLocations: " + e.getMessage() + ", Stacktrace: " + getStackTrace(e));
             return createResponse(500, "{\"message\":\"Internal Server Error: " + e.getMessage() + "\"}");
         }
     }

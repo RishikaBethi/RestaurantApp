@@ -36,11 +36,6 @@ public class ServiceModule {
                 .build();
     }
 
-    @Provides
-    @Singleton
-    public DynamoDB provideDynamoDB(AmazonDynamoDB amazonDynamoDB) {
-        return new DynamoDB(amazonDynamoDB);
-    }
 
     @Provides
     @Singleton
@@ -103,5 +98,7 @@ public class ServiceModule {
     public  FeedbackService provideFeedbackService(DynamoDB dynamoDB, ObjectMapper objectMapper){
         return new FeedbackService(dynamoDB,objectMapper);
     }
+
+
 
 }
