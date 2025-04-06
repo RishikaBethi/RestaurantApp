@@ -10,12 +10,19 @@ import com.restaurant.services.DishService;
 
 import com.restaurant.services.LocationsService;
 import com.restaurant.services.TablesService;
+import com.restaurant.services.SignUpService;
+import com.restaurant.services.SignInService;
+import com.restaurant.services.ReservationService;
+import com.restaurant.services.WaiterService;
 import dagger.Module;
 import dagger.Provides;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 import software.amazon.awssdk.regions.Region;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 import javax.inject.Singleton;
+
 
 @Module
 public class ServiceModule {
@@ -36,6 +43,11 @@ public class ServiceModule {
                 .build();
     }
 
+    @Provides
+    @Singleton
+    public DynamoDB provideDynamoDB(AmazonDynamoDB amazonDynamoDB) {
+        return new DynamoDB(amazonDynamoDB);
+    }
 
     @Provides
     @Singleton
@@ -99,6 +111,20 @@ public class ServiceModule {
         return new FeedbackService(dynamoDB,objectMapper);
     }
 
+    @Provides
+    @Singleton
+    public ReservationService provideReservationService(DynamoDB dynamoDB, WaiterService waiterService) {
 
+        return new ReservationService(dynamoDB, waiterService);
+    }
+
+
+
+    // Provide WaiterService Dependency
+    @Provides
+    @Singleton
+    public WaiterService provideWaiterService(DynamoDB dynamoDB) {
+        return new WaiterService(dynamoDB);
+    }
 
 }

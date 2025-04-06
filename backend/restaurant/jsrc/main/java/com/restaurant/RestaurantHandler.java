@@ -5,9 +5,15 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.restaurant.config.AppComponent;
-import com.restaurant.config.ServiceModule;
 import com.restaurant.config.DaggerAppComponent;
+import com.restaurant.config.ServiceModule;
 import com.restaurant.services.*;
+import com.syndicate.deployment.annotations.resources.DependsOn;
+
+import com.restaurant.config.*;
+import com.restaurant.utils.Helper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.syndicate.deployment.model.ResourceType;
 import com.syndicate.deployment.annotations.environment.EnvironmentVariable;
 import com.syndicate.deployment.annotations.environment.EnvironmentVariables;
 import com.syndicate.deployment.annotations.lambda.LambdaHandler;
@@ -15,49 +21,58 @@ import com.syndicate.deployment.annotations.resources.DependsOn;
 import com.syndicate.deployment.model.ResourceType;
 import com.syndicate.deployment.model.RetentionSetting;
 import com.syndicate.deployment.model.environment.ValueTransformer;
+import com.restaurant.services.SignUpService;
+import com.restaurant.services.SignInService;
+import com.restaurant.services.ReservationService;
+import com.restaurant.services.WaiterService;
 
 import javax.inject.Inject;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 @DependsOn(resourceType = ResourceType.COGNITO_USER_POOL, name = "${user_pool}")
 @LambdaHandler(
-    lambdaName = "restaurant_handler",
-	roleName = "restaurant_handler-role",
-	isPublishVersion = true,
-	aliasName = "${lambdas_alias_name}",
-	logsExpiration = RetentionSetting.SYNDICATE_ALIASES_SPECIFIED
+		lambdaName = "restaurant_handler",
+		roleName = "restaurant_handler-role",
+		isPublishVersion = true,
+		aliasName = "${lambdas_alias_name}",
+		logsExpiration = RetentionSetting.SYNDICATE_ALIASES_SPECIFIED
 )
 @EnvironmentVariables(value = {
 		@EnvironmentVariable(key = "USERS_TABLE", value = "${user_table}"),
 		@EnvironmentVariable(key = "WAITERS_TABLE", value = "${waiter_table}"),
-		@EnvironmentVariable(key = "LOCATIONS_TABLE", value = "tm7-Locations"),
-		@EnvironmentVariable(key = "DISHES_TABLE", value = "tm7-Dishes"),
-		@EnvironmentVariable(key = "FEEDBACKS_TABLE", value = "tm7-Feedback"),
+		@EnvironmentVariable(key = "COGNITO_USER_POOL_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_USER_POOL_ID),
+		@EnvironmentVariable(key = "REGION", value = "${region}"),
+		@EnvironmentVariable(key = "COGNITO_CLIENT_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_CLIENT_ID),
+        @EnvironmentVariable(key = "LOCATIONS_TABLE", value = "tm7-Locations"),
+        @EnvironmentVariable(key = "DISHES_TABLE", value = "tm7-Dishes"),
+        @EnvironmentVariable(key = "FEEDBACKS_TABLE", value = "tm7-Feedback"),
         @EnvironmentVariable(key = "RESERVATIONS_TABLE", value = "${reservations_table}"),
         @EnvironmentVariable(key = "TABLES_TABLE", value = "${tables_table}"),
-        @EnvironmentVariable(key = "COGNITO_USER_POOL_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_USER_POOL_ID),
-		@EnvironmentVariable(key = "COGNITO_CLIENT_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_CLIENT_ID),
-		@EnvironmentVariable(key = "REGION", value = "${region}")
+        @EnvironmentVariable(key = "ORDERS_TABLE", value = "${orders_table}")
+
 })
 public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
 	private static final Logger logger = Logger.getLogger(RestaurantHandler.class.getName());
+	private static final ObjectMapper objectMapper = new ObjectMapper(); // Added objectMapper
 
 	@Inject
-    SignUpService signUpService;
+	SignUpService signUpService;
 
 	@Inject
-    SignInService signInService;
+	SignInService signInService;
 
-	@Inject
+    @Inject
     LocationService locationService;
 
-	@Inject
+    @Inject
     DishService dishService;
 
-	@Inject
+    @Inject
     FeedbackService feedbackService;
 
     @Inject
@@ -66,11 +81,17 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
     @Inject
     LocationsService locationsService;
 
-	public RestaurantHandler() {
-		initDependencies();
-	}
+    @Inject
+    ReservationService reservationService;
 
-	private void initDependencies() {
+    @Inject
+    WaiterService waiterService;
+
+    public RestaurantHandler() {
+        initDependencies();
+    }
+
+    private void initDependencies() {
         AppComponent appComponent = DaggerAppComponent.builder()
                 .serviceModule(new ServiceModule())
                 .build();
@@ -149,7 +170,20 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
                         request, context);
             }
 
-			return createErrorResponse(405, "Method Not Allowed: " + path + " with method " + httpMethod);
+            if ("/bookings/client".equals(path) && "POST".equalsIgnoreCase(httpMethod)) {
+                return reservationService.handleCreateReservation(request);
+            }
+
+            if ("/reservations".equals(path) && "GET".equalsIgnoreCase(httpMethod)) {
+                return reservationService.handleGetReservations(request);
+            }
+
+            if (path.startsWith("/reservations/") && "DELETE".equalsIgnoreCase(httpMethod)) {
+                return reservationService.handleCancelReservation(request, path);
+            }
+
+
+            return createErrorResponse(405, "Method Not Allowed: " + path + " with method " + httpMethod);
         }
         catch (Exception e) {
             logger.severe("Error handling request: " + e.getMessage());
@@ -163,13 +197,6 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
                 .withHeaders(Map.of("Content-Type", "application/json"));
     }
 
-//    private APIGatewayProxyResponseEvent createErrorResponseM(String message) {
-//        String safeMessage = message != null ? message : "Unknown error occurred";
-//        return new APIGatewayProxyResponseEvent()
-//                .withStatusCode(400)
-//                .withBody("{\"error\": \"" + safeMessage + "\"}")
-//                .withHeaders(Map.of("Content-Type", "application/json"));
-//    }
 
     private APIGatewayProxyResponseEvent methodNotAllowed() {
         return new APIGatewayProxyResponseEvent()
