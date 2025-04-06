@@ -4,8 +4,10 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.restaurant.services.SignInService;
-import com.restaurant.services.SignUpService;
+import com.restaurant.services.*;
+import com.restaurant.services.LocationService;
+import com.restaurant.services.DishService;
+
 import dagger.Module;
 import dagger.Provides;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
@@ -15,6 +17,7 @@ import javax.inject.Singleton;
 
 @Module
 public class ServiceModule {
+
     @Provides
     @Singleton
     public CognitoIdentityProviderClient provideCognitoClient() {
@@ -51,20 +54,17 @@ public class ServiceModule {
 
     @Provides
     @Singleton
-    public SignUpService provideSignUpService(CognitoIdentityProviderClient cognitoClient,
-                                              ObjectMapper objectMapper,
-                                              DynamoDB dynamoDB,
-                                              String clientId) {
-        return new SignUpService(cognitoClient, objectMapper, dynamoDB, clientId);
+    public LocationService provideLocationService(DynamoDB dynamoDB, ObjectMapper objectMapper) {
+        return new LocationService(dynamoDB, objectMapper);
     }
-
     @Provides
     @Singleton
-    public SignInService provideSignInService(
-            CognitoIdentityProviderClient cognitoClient,
-            ObjectMapper objectMapper,
-            String clientId,
-            DynamoDB dynamoDB) {
-        return new SignInService(cognitoClient, objectMapper, clientId, dynamoDB);
+    public  DishService provideDishService(DynamoDB dynamoDB, ObjectMapper objectMapper){
+        return new DishService(dynamoDB,objectMapper);
+    }
+    @Provides
+    @Singleton
+    public  FeedbackService provideFeedbackService(DynamoDB dynamoDB, ObjectMapper objectMapper){
+        return new FeedbackService(dynamoDB,objectMapper);
     }
 }

@@ -12,6 +12,8 @@
             "dynamodb:PutItem",
             "dynamodb:Batch*",
             "dynamodb:DeleteItem",
+            "dynamodb:UpdateItem",
+            "dynamodb:Scan",
             "ssm:PutParameter",
             "ssm:GetParameter",
             "kms:Decrypt",
@@ -108,8 +110,77 @@
           "default_error_pattern": true,
           "enable_proxy": true
         }
+      },
+
+      "/dishes/popular": {
+        "enable_cors": false,
+        "GET": {
+          "authorization_type": "NONE",
+          "integration_type": "lambda",
+          "enable_proxy": true,
+          "lambda_name": "restaurant_handler",
+          "api_key_required": false,
+          "method_request_parameters": {},
+          "integration_request_body_template": {},
+          "responses": [],
+          "integration_responses": [],
+          "default_error_pattern": true
+        }
+      },
+      "/locations": {
+        "enable_cors": false,
+        "GET": {
+          "authorization_type": "NONE",
+          "integration_type": "lambda",
+          "enable_proxy": true,
+          "lambda_name": "restaurant_handler",
+          "api_key_required": false,
+          "method_request_parameters": {},
+          "integration_request_body_template": {},
+          "responses": [],
+          "integration_responses": [],
+          "default_error_pattern": true
+        }
+      },
+      "/locations/{id}/feedbacks": {
+        "enable_cors": false,
+        "GET": {
+          "authorization_type": "NONE",
+          "integration_type": "lambda",
+          "enable_proxy": true,
+          "lambda_name": "restaurant_handler",
+          "api_key_required": false,
+          "method_request_parameters": {
+            "method.request.path.id": true,
+            "method.request.querystring.type": false,
+            "method.request.querystring.page": false,
+            "method.request.querystring.size": false,
+            "method.request.querystring.sort": false
+          },
+          "integration_request_body_template": {},
+          "responses": [],
+          "integration_responses": [],
+          "default_error_pattern": true
+        }
+      },
+      "/locations/{id}/speciality-dishes": {
+        "enable_cors": false,
+        "GET": {
+          "authorization_type": "NONE",
+          "integration_type": "lambda",
+          "enable_proxy": true,
+          "lambda_name": "restaurant_handler",
+          "api_key_required": false,
+          "method_request_parameters": {
+            "method.request.path.id": true
+          },
+          "integration_request_body_template": {},
+          "responses": [],
+          "integration_responses": [],
+          "default_error_pattern": true
+        }
       }
-    },
+  },
     "tags": {},
     "authorizers": {
       "cognito-authorizer": {
