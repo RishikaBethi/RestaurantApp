@@ -15,4 +15,6 @@ public interface AppComponent {
     LocationService locationService();
     DishService dishService();
     FeedbackService feedbackService();
+    TablesService getTablesService();
+    LocationsService getLocationsService();
 }

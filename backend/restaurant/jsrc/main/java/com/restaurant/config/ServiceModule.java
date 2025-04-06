@@ -8,6 +8,8 @@ import com.restaurant.services.*;
 import com.restaurant.services.LocationService;
 import com.restaurant.services.DishService;
 
+import com.restaurant.services.LocationsService;
+import com.restaurant.services.TablesService;
 import dagger.Module;
 import dagger.Provides;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
@@ -42,8 +44,27 @@ public class ServiceModule {
 
     @Provides
     @Singleton
+    public DynamoDB provideDynamoDB() {
+        AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
+        return new DynamoDB(client);
+    }
+
+    @Provides
+    @Singleton
     public ObjectMapper provideObjectMapper() {
         return new ObjectMapper();
+    }
+
+    @Provides
+    @Singleton
+    public TablesService provideRestaurantService(DynamoDB dynamoDB, ObjectMapper objectMapper) {
+        return new TablesService(dynamoDB, objectMapper);
+    }
+
+    @Provides
+    @Singleton
+    public LocationsService provideLocationService(DynamoDB dynamoDB, ObjectMapper objectMapper) {
+        return new LocationsService(dynamoDB, objectMapper);
     }
 
     @Provides
@@ -69,12 +90,6 @@ public class ServiceModule {
             String clientId,
             DynamoDB dynamoDB) {
         return new SignInService(cognitoClient, objectMapper, clientId, dynamoDB);
-    }
-
-    @Provides
-    @Singleton
-    public LocationService provideLocationService(DynamoDB dynamoDB, ObjectMapper objectMapper) {
-        return new LocationService(dynamoDB, objectMapper);
     }
 
     @Provides
