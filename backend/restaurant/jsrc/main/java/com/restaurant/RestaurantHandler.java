@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 		@EnvironmentVariable(key = "RESERVATIONS_TABLE", value = "${reservations_table}"),
 		@EnvironmentVariable(key = "LOCATIONS_TABLE", value = "${locations_table}"),
 		@EnvironmentVariable(key = "ORDERS_TABLE", value = "${orders_table}"),
+		@EnvironmentVariable(key = "TABLES_TABLE", value = "${tables_table}"),
 		@EnvironmentVariable(key = "COGNITO_USER_POOL_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_USER_POOL_ID),
 		@EnvironmentVariable(key = "REGION", value = "${region}"),
 		@EnvironmentVariable(key = "COGNITO_CLIENT_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_CLIENT_ID)
@@ -50,10 +51,14 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 	private static final Logger logger = Logger.getLogger(RestaurantHandler.class.getName());
 	private static final ObjectMapper objectMapper = new ObjectMapper(); // Added objectMapper
 
-	@Inject SignUpService signUpService;
-	@Inject SignInService signInService;
-	@Inject ReservationService reservationService;
-	@Inject WaiterService waiterService;
+	@Inject
+	SignUpService signUpService;
+	@Inject
+	SignInService signInService;
+	@Inject
+	ReservationService reservationService;
+	@Inject
+	WaiterService waiterService;
 
 	public RestaurantHandler() {
 		initDependencies();
@@ -83,15 +88,15 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 			}
 
 			if ("/bookings/client".equals(path) && "POST".equalsIgnoreCase(httpMethod)) {
-				return handleCreateReservation(request);
+				return reservationService.handleCreateReservation(request);
 			}
 
 			if ("/reservations".equals(path) && "GET".equalsIgnoreCase(httpMethod)) {
-				return handleGetReservations(request);
+				return reservationService.handleGetReservations(request);
 			}
 
 			if (path.startsWith("/reservations/") && "DELETE".equalsIgnoreCase(httpMethod)) {
-				return handleCancelReservation(request, path);
+				return reservationService.handleCancelReservation(request, path);
 			}
 
 			return Helper.createErrorResponse(400, "Invalid Request");
@@ -101,143 +106,4 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 		}
 	}
 
-	private APIGatewayProxyResponseEvent handleCreateReservation(APIGatewayProxyRequestEvent request) {
-		try {
-			logger.info("Handling reservation booking request");
-
-			// Parse request body
-			Map<String, String> requestBody = parseJson(request.getBody());
-			if (requestBody == null || requestBody.isEmpty()) {
-				return Helper.createErrorResponse(400, "Invalid request data: Empty request body.");
-			}
-
-			// Extract user ID from JWT claims
-			Map<String, Object> claims = Helper.extractClaims(request);
-			logger.info("Extracted claims: " + claims); // Debugging purpose
-
-			String userId = (String) claims.get("sub");
-			String email = (String) claims.get("email");
-			if (userId == null || userId.isEmpty() || email == null || email.isEmpty()) {
-				return Helper.createErrorResponse(401, "Unauthorized: Missing or invalid token.");
-			}
-
-			// Validate required fields in request body
-			List<String> requiredFields = List.of("locationId", "tableNumber", "date", "guestsNumber", "timeFrom", "timeTo");
-			for (String field : requiredFields) {
-				if (!requestBody.containsKey(field) || requestBody.get(field).trim().isEmpty()) {
-					return Helper.createErrorResponse(400, "Missing required field: " + field);
-				}
-			}
-
-			// Convert guestsNumber to Integer
-			int guestsNumber;
-			try {
-				guestsNumber = Integer.parseInt(requestBody.get("guestsNumber"));
-				if (guestsNumber <= 0) {
-					return Helper.createErrorResponse(400, "Invalid guestsNumber: Must be a positive integer.");
-				}
-			} catch (NumberFormatException e) {
-				return Helper.createErrorResponse(400, "Invalid guestsNumber: Must be an integer.");
-			}
-
-			// Assign a waiter
-			String waiterId = waiterService.assignWaiter(requestBody.get("locationId"));
-
-			// Create reservation
-			Map<String, Object> reservationData = reservationService.createReservation(requestBody, email, waiterId);
-
-			if (reservationData == null || !reservationData.containsKey("reservationId")) {
-				return Helper.createErrorResponse(500, "Error creating reservation: Missing reservation ID.");
-			}
-
-			String reservationId = reservationData.get("reservationId").toString();
-
-
-			Optional<Map<String, Object>> reservationDetailsOpt = reservationService.getReservationById(reservationId);
-
-			if (reservationDetailsOpt.isEmpty()) return Helper.createErrorResponse(404, "Reservation not found.");
-
-			Map<String, Object> reservationDetails = reservationDetailsOpt.get();
-			logger.info("Reservation Details: " + reservationDetails);
-
-			Map<String, String> formattedResponse = Map.of(
-					"id", String.valueOf(reservationDetails.getOrDefault("reservationId", "")),
-					"status", String.valueOf(reservationDetails.getOrDefault("status", "")),
-					"locationAddress", String.valueOf(reservationDetails.getOrDefault("locationAddress", "")),
-					"date", String.valueOf(reservationDetails.getOrDefault("date", "")),
-					"timeSlot", String.valueOf(reservationDetails.getOrDefault("timeFrom", "")) + " - " + String.valueOf(reservationDetails.getOrDefault("timeTo", "")),
-					"preOrder", String.valueOf(reservationDetails.getOrDefault("preOrder", 0)),  // Ensure proper casting
-					"guestsNumber", String.valueOf(reservationDetails.getOrDefault("guestsNumber", 0)),  // Ensure proper casting
-					"feedbackId", String.valueOf(reservationDetails.getOrDefault("feedbackId", ""))
-			);
-
-
-			return Helper.createApiResponse(200, formattedResponse);
-		} catch (Exception e) {
-			logger.severe("Error creating reservation: " + e.getMessage());
-			return Helper.createErrorResponse(500, "Error creating reservation: " + e.getMessage());
-		}
-	}
-
-
-
-
-
-	private APIGatewayProxyResponseEvent handleGetReservations(APIGatewayProxyRequestEvent request) {
-		try {
-			Map<String, Object> claims = Helper.extractClaims(request);
-			String userId = (String) claims.get("sub");
-
-			if (userId == null || userId.isEmpty()) {
-				return Helper.createErrorResponse(401, "Unauthorized: Missing or invalid token.");
-			}
-
-			List<Map<String, Object>> reservations = reservationService.getReservationsByUser(userId);
-			return Helper.createApiResponse(200, reservations);
-		} catch (Exception e) {
-			return Helper.createErrorResponse(500, "Error fetching reservations: " + e.getMessage());
-		}
-	}
-
-
-	private APIGatewayProxyResponseEvent handleCancelReservation(APIGatewayProxyRequestEvent request, String path) {
-		try {
-			String[] pathParts = path.split("/");
-			if (pathParts.length < 3) {
-				return Helper.createErrorResponse(400, "Invalid reservation cancellation request.");
-			}
-			String reservationId = pathParts[pathParts.length - 1];
-			Map<String, String> requestBody = parseJson(request.getBody());
-			// Extract user ID from JWT claims
-			Map<String, Object> claims = Helper.extractClaims(request);
-			String userId = (String) claims.get("sub");
-
-			if (userId == null || userId.isEmpty()) {
-				return Helper.createErrorResponse(400, "Missing userId.");
-			}
-
-			List<Map<String, Object>> reservations = reservationService.getReservations();
-			boolean exists = reservations.stream()
-					.anyMatch(res -> res.get("reservationId").equals(reservationId));
-
-			if (!exists) {
-				return Helper.createErrorResponse(404, "Reservation not found.");
-			}
-			reservationService.modifyReservation(reservationId, "Cancelled");
-			return Helper.createApiResponse(200, Map.of("message", "Reservation Canceled"));
-		} catch (Exception e) {
-			logger.severe("Error canceling reservation: " + e.getMessage());
-			return Helper.createErrorResponse(500, "Error canceling reservation: " + e.getMessage());
-		}
-	}
-
-	private Map<String, String> parseJson(String json) {
-		try {
-			logger.info("Parsing JSON: " + json);  // Log incoming JSON
-			return objectMapper.readValue(json, Map.class);
-		} catch (Exception e) {
-			logger.severe("Error parsing JSON: " + e.getMessage());
-			return Map.of();
-		}
-	}
 }

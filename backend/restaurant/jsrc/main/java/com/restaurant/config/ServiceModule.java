@@ -65,9 +65,9 @@ public class ServiceModule {
     // Provide ReservationService Dependency
     @Provides
     @Singleton
-    public ReservationService provideReservationService(DynamoDB dynamoDB) {
+    public ReservationService provideReservationService(DynamoDB dynamoDB, WaiterService waiterService) {
 
-        return new ReservationService(dynamoDB);
+        return new ReservationService(dynamoDB, waiterService);
     }
 
 
