@@ -11,6 +11,8 @@ import java.util.*;
 import java.util.logging.Logger;
 import com.restaurant.services.WaiterService;
 import com.restaurant.dtos.ReservationResponseDTO;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 
 public class BookingService {
     private static final Logger logger = Logger.getLogger(BookingService.class.getName());
@@ -75,10 +77,24 @@ public class BookingService {
             String timeFrom = requestBody.get("timeFrom");
             String timeTo = requestBody.get("timeTo");
 
+            try {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+                LocalDateTime reservationStart = LocalDateTime.parse(date + " " + timeFrom, formatter);
+                ZonedDateTime reservationStartIST = reservationStart.atZone(ZoneId.of("Asia/Kolkata"));
+                ZonedDateTime nowIST = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"));
+
+                if (reservationStartIST.isBefore(nowIST)) {
+                    return Helper.createErrorResponse(400, "You cannot book a reservation in the past.");
+                }
+            } catch (Exception e) {
+                logger.severe("Error parsing reservation time: " + e.getMessage());
+                return Helper.createErrorResponse(400, "Invalid date or time format.");
+            }
+
             // Check if table exists in Tables table
             Item tableItem = tablesTable.getItem("locationId", locationId, "tableNumber", tableNumber);
             if (tableItem == null) {
-                return Helper.createErrorResponse(404, "The specified table number does not exist for the given location.");
+                return Helper.createErrorResponse(400, "The specified table number does not exist for the given location.");
             }
 
             // Check for existing overlapping reservations for same table/date
@@ -148,7 +164,7 @@ public class BookingService {
                     null // feedbackId
             );
 
-            return Helper.createApiResponse(200, dto.toJson());
+            return Helper.createApiResponse(201, dto.toJson());
 
         } catch (Exception e) {
             logger.severe("Error creating reservation: " + e.getMessage());
