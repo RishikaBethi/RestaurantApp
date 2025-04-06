@@ -2,3 +2,6 @@ account-id: '864899830479'
 lambdas_alias_name: devm
 logs_expiration: 30
 region: ap-southeast-2
+locations_table: "tm7-Locations"
+reservations_table: "tm7-Reservations"
+tables_table: "tm7-Tables"

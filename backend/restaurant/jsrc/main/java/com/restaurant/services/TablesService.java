@@ -17,9 +17,9 @@ import java.util.*;
 
 public class TablesService {
     private final DynamoDB dynamoDB;
-    private final String tableName = "tm7-Tables";
-    private final String reservationsTableName = "tm7-Reservations";
-    private final String locationsTable = "tm7-Locations";
+    private final String tableName = System.getenv("TABLES_TABLE");
+    private final String reservationsTableName = System.getenv("RESERVATIONS_TABLE");
+    private final String locationsTable = System.getenv("LOCATIONS_TABLE");
     private final ObjectMapper objectMapper;
     private Map<String, String> queryParams = new HashMap<>();
     private final List<String> timeSlots = List.of("10:30-11:00","12:15-1:45","14:00-3:30","15:45-17:15","17:30-19:00","19:15-20:45","21:00-22:30");
@@ -37,7 +37,6 @@ public class TablesService {
             if (queryParams == null) {
                 return createResponse(200, Collections.emptyList());
             }
-
 
             String locationId = queryParams.get("locationId");
             String date = queryParams.get("date");
@@ -84,6 +83,8 @@ public class TablesService {
         }
     }
 
+    //filter tables initially by capacity and locations sent
+    //return list of tables that satisfy the 2 criteria from the tables table
     public List<Item> getAvailableTablesByLocationAndCapacity(String locationId, int guests) {
         Table table = dynamoDB.getTable(tableName);
         List<Item> tablesList = new ArrayList<>();
@@ -130,12 +131,14 @@ public class TablesService {
         }
     }
 
+    //return a list of available slots for every table the list fetched from the previous function
     private List<AvailableSlotsDTO> getAvailableTimeSlots(List<Item> tablesList, String date, String time, Context context) {
         List<AvailableSlotsDTO> responseList = new ArrayList<>();
 
         LocalDate selectedDate = date != null ? LocalDate.parse(date) : LocalDate.now();
         LocalTime userTime = time != null ? LocalTime.parse(time, DateTimeFormatter.ofPattern("HH:mm")) : null;
 
+        //check if the date and time entered by user are before the current date and time
         if ((selectedDate.isBefore(LocalDate.now())) ||
                 (selectedDate.isEqual(LocalDate.now()) && userTime != null && userTime.isBefore(LocalTime.now()))) {
             return Collections.emptyList();
@@ -143,7 +146,10 @@ public class TablesService {
 
         for (Item table : tablesList) {
             String locationId = table.getString("locationId");
+
+            // the function returns a list of slots that are not available for that table and removes it from the available slots
             List<String> notAvailable = returnNotAvailableSlots(locationId, table.getString("tableNumber"), date, time, context);
+
             ArrayList<String> availableSlots = new ArrayList<>(timeSlots);
             availableSlots.removeAll(notAvailable);
 
@@ -166,6 +172,7 @@ public class TablesService {
         return responseList;
     }
 
+    // to return a list of time slots that are not available for that particular table
     private List<String> returnNotAvailableSlots(String locationId, String tableNumber, String date, String time, Context context) {
         Table reservationsTable = dynamoDB.getTable(reservationsTableName);
         ScanSpec scanSpec = new ScanSpec()
@@ -189,10 +196,6 @@ public class TablesService {
         return notAvailableSlots;
     }
 
-    private int convertTimeToMinutes(String time) {
-        String[] parts = time.split(":");
-        return Integer.parseInt(parts[0]) * 60 + Integer.parseInt(parts[1]);
-    }
 
     private Map<String, String> createCorsHeaders() {
         Map<String, String> headers = new HashMap<>();

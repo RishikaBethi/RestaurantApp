@@ -12,7 +12,7 @@ import java.util.*;
 
 public class LocationsService {
     private final DynamoDB dynamoDB;
-    private final String tableName = "tm7-Locations";
+    private final String tableName = System.getenv("LOCATIONS_TABLE");
     private final ObjectMapper objectMapper;
 
     @Inject
