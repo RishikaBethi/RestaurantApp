@@ -43,5 +43,5 @@ Lambda feature overview.
 ## Deployment from scratch
 1. action 1 to deploy the software
 2. action 2
-...
+   ...
 
