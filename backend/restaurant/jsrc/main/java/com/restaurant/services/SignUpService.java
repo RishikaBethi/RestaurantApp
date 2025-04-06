@@ -83,7 +83,7 @@ public class SignUpService {
                 String role = isEmailInWaitersTable(signUpDto.getEmail()) ? "Waiter" : "Customer";
 
                 try {
-                    // Using email as partition key and not storing userId
+
                     usersTable.putItem(new PutItemSpec().withItem(new Item()
                             .withPrimaryKey("email", signUpDto.getEmail())
                             .withString("firstName", signUpDto.getFirstName())
@@ -98,7 +98,9 @@ public class SignUpService {
                 return createResponse(400, "A user with this email address already exists");
             } catch (InvalidPasswordException e) {
                 return createResponse(400, "Password does not meet requirements");
-            } catch (Exception e) {
+            }catch (InvalidParameterException e) {
+                return createResponse(400, "Invalid email format");}
+            catch (Exception e) {
                 logger.severe("Cognito error: " + e.getMessage());
                 return createResponse(500, "An error occurred: " + e.getMessage());
             }

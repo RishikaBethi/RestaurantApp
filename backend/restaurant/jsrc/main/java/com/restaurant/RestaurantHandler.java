@@ -6,14 +6,12 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.restaurant.services.SignInService;
 import com.syndicate.deployment.annotations.resources.DependsOn;
-
 import com.restaurant.config.*;
 import com.syndicate.deployment.model.ResourceType;
 import com.restaurant.services.SignUpService;
 import com.syndicate.deployment.annotations.environment.EnvironmentVariable;
 import com.syndicate.deployment.annotations.environment.EnvironmentVariables;
 import com.syndicate.deployment.annotations.lambda.LambdaHandler;
-import com.syndicate.deployment.model.DeploymentRuntime;
 import com.syndicate.deployment.model.RetentionSetting;
 import com.syndicate.deployment.model.environment.ValueTransformer;
 
@@ -46,9 +44,19 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 	@Inject
 	SignInService signInService;
 
+//	public RestaurantHandler() {
+//		AppComponent appComponent = DaggerAppComponent.create();
+//
+//		appComponent.inject(this);
+//	}
 	public RestaurantHandler() {
-		AppComponent appComponent = DaggerAppComponent.create();
+		initDependencies();
+	}
 
+	private void initDependencies() {
+		AppComponent appComponent = DaggerAppComponent.builder()
+				.serviceModule(new ServiceModule())
+				.build();
 		appComponent.inject(this);
 	}
 

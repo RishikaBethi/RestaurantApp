@@ -120,24 +120,6 @@
           "restaurant-user-pool"
         ]
       }
-    },
-    "Users": {
-      "resource_type": "dynamodb_table",
-      "hash_key_name": "userId",
-      "hash_key_type": "S",
-      "read_capacity": 10,
-      "write_capacity": 10,
-      "global_indexes": [],
-      "autoscaling": [],
-      "tags": {},
-      "attributes": {
-        "userId": "String",
-        "email": "String",
-        "firstName": "String",
-        "lastName": "String",
-        "role": "String",
-        "userAvatarUrl": "String"
-      }
     }
   }
 }
