@@ -8,6 +8,8 @@ import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.restaurant.utils.Helper;
 import java.util.logging.Logger;
 import java.util.*;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 
 public class CancelReservationService {
     private static final Logger logger = Logger.getLogger(CancelReservationService.class.getName());
@@ -55,6 +57,23 @@ public class CancelReservationService {
             // Check if the reservation is already cancelled or completed
             if (!"Reserved".equalsIgnoreCase(status)) {
                 return Helper.createErrorResponse(204, "No active reservation to cancel.");
+            }
+
+            // Check if current IST time is at least 30 minutes before the reservation time
+            String dateStr = reservationItem.getString("date"); // e.g., "2025-04-02"
+            String startTimeStr = reservationItem.getString("timeFrom"); // Get "12:15"
+
+            // Combine date and time into LocalDateTime
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            LocalDateTime reservationDateTime = LocalDateTime.parse(dateStr + " " + startTimeStr, formatter);
+
+            // Convert to IST ZonedDateTime
+            ZonedDateTime reservationIST = reservationDateTime.atZone(ZoneId.of("Asia/Kolkata"));
+            ZonedDateTime nowIST = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"));
+
+            Duration duration = Duration.between(nowIST, reservationIST);
+            if (!duration.isNegative() && duration.toMinutes() <= 30) {
+                return Helper.createErrorResponse(409, "Reservation cannot be canceled within 30 minutes of the reservation time.");
             }
 
             // Cancel the reservation

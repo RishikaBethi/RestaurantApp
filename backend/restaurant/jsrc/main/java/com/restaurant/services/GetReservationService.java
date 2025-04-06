@@ -90,7 +90,7 @@ public class GetReservationService {
                 jsonArray.put(dto.toJson());
             }
 
-            return Helper.createApiResponse(200, jsonArray.toString());
+            return Helper.createApiResponse(200, jsonArray);
         } catch (Exception e) {
             return Helper.createErrorResponse(500, "Error fetching reservations: " + e.getMessage());
         }

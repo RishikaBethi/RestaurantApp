@@ -143,7 +143,7 @@ public class BookingService {
                     locationAddress,
                     date,
                     timeSlot,
-                    "false",
+                    "0",
                     String.valueOf(guestsNumber),
                     null // feedbackId
             );

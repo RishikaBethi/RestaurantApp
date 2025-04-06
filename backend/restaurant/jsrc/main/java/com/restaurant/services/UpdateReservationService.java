@@ -74,7 +74,7 @@ public class UpdateReservationService {
                     null, // locationAddress will be fetched by GetReservationService
                     updatedItem.getString("date"),
                     timeSlot,
-                    "false", // Assuming updated order doesn't imply a preOrder
+                    "0", // Assuming updated order doesn't imply a preOrder
                     String.valueOf(updatedItem.get("guestsNumber")),
                     updatedItem.getString("feedbackId")
             );

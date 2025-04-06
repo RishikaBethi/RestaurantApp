@@ -17,10 +17,22 @@ public class Helper {
      */
     public static APIGatewayProxyResponseEvent createApiResponse(int statusCode, Object body) {
         try {
+            String responseBody;
+
+            // Avoid serializing again if body is already a string or org.json.JSONArray
+            if (body instanceof String) {
+                responseBody = (String) body;
+            } else if (body instanceof org.json.JSONArray || body instanceof org.json.JSONObject) {
+                responseBody = body.toString();
+            } else {
+                responseBody = objectMapper.writeValueAsString(body);
+            }
+
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(statusCode)
-                    .withBody(objectMapper.writeValueAsString(body))
+                    .withBody(responseBody)
                     .withHeaders(createCorsHeaders());
+
         } catch (Exception e) {
             logger.severe("Error serializing API response: " + e.getMessage());
             return createErrorResponse(500, "Error serializing response");

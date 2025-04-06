@@ -4,6 +4,7 @@ import com.amazonaws.services.dynamodbv2.document.*;
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
+import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -23,36 +24,38 @@ public class WaiterService {
     }
 
     public String assignWaiter(String locationId) {
-        Index userIndex = reservationsTable.getIndex("userId-index");
-        if (userIndex == null) {
-            logger.severe("Index userId-index does not exist in " + RESERVATIONS_TABLE);
-            throw new IllegalStateException("userId-index does not exist in " + RESERVATIONS_TABLE);
-        }
-
         Map<String, Integer> waiterLoad = new HashMap<>();
 
-        // Step 1: Scan all waiters for the given location
+        // Step 1: Scan all waiters at this location
         ScanSpec scanSpec = new ScanSpec()
                 .withFilterExpression("locationId = :v_location")
                 .withValueMap(new ValueMap().withString(":v_location", locationId));
-
         ItemCollection<ScanOutcome> scanResult = waitersTable.scan(scanSpec);
 
-        for (Item item : scanResult) {
-            String waiterId = item.getString("waiterId");
+        for (Item waiterItem : scanResult) {
+            String waiterId = waiterItem.getString("waiterId");
+            if (waiterId == null) continue;
 
-            //  Step 2: Count reservations for this waiter
-            QuerySpec querySpec = new QuerySpec()
-                    .withKeyConditionExpression("userId = :v_user")
-                    .withValueMap(new ValueMap().withString(":v_user", waiterId));
+            // Step 2: Count how many reservations this waiter has
+            ScanSpec reservationScan = new ScanSpec()
+                    .withFilterExpression("waiterId = :v_waiterId AND locationId = :v_location AND #st <> :v_cancelled")
+                    .withNameMap(new NameMap().with("#st", "status"))
+                    .withValueMap(new ValueMap()
+                            .withString(":v_waiterId", waiterId)
+                            .withString(":v_location", locationId)
+                            .withString(":v_cancelled", "Cancelled")
+                    );
 
-            int reservationCount = userIndex.query(querySpec).getAccumulatedItemCount();
+            int reservationCount = 0;
+            for (Item ignored : reservationsTable.scan(reservationScan)) {
+                reservationCount++;
+            }
+
             waiterLoad.put(waiterId, reservationCount);
         }
 
-        // Step 3: Assign the least busy waiter
-        return waiterLoad.entrySet()
-                .stream()
+        // Step 3: Pick the least busy waiter
+        return waiterLoad.entrySet().stream()
                 .min(Comparator.comparingInt(Map.Entry::getValue))
                 .map(Map.Entry::getKey)
                 .orElseThrow(() -> {
