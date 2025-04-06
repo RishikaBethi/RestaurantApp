@@ -10,7 +10,9 @@ import javax.inject.Singleton;
 @Component(modules = {ServiceModule.class})
 public interface AppComponent {
     void inject(RestaurantHandler handler);
-     LocationService locationService();
-     DishService dishService();
-     FeedbackService feedbackService();
+    SignUpService signUpService();
+    SignInService signInService();
+    LocationService locationService();
+    DishService dishService();
+    FeedbackService feedbackService();
 }

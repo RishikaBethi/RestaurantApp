@@ -54,17 +54,39 @@ public class ServiceModule {
 
     @Provides
     @Singleton
+    public SignUpService provideSignUpService(CognitoIdentityProviderClient cognitoClient,
+                                              ObjectMapper objectMapper,
+                                              DynamoDB dynamoDB,
+                                              String clientId) {
+        return new SignUpService(cognitoClient, objectMapper, dynamoDB, clientId);
+    }
+
+    @Provides
+    @Singleton
+    public SignInService provideSignInService(
+            CognitoIdentityProviderClient cognitoClient,
+            ObjectMapper objectMapper,
+            String clientId,
+            DynamoDB dynamoDB) {
+        return new SignInService(cognitoClient, objectMapper, clientId, dynamoDB);
+    }
+
+    @Provides
+    @Singleton
     public LocationService provideLocationService(DynamoDB dynamoDB, ObjectMapper objectMapper) {
         return new LocationService(dynamoDB, objectMapper);
     }
+
     @Provides
     @Singleton
     public  DishService provideDishService(DynamoDB dynamoDB, ObjectMapper objectMapper){
         return new DishService(dynamoDB,objectMapper);
     }
+
     @Provides
     @Singleton
     public  FeedbackService provideFeedbackService(DynamoDB dynamoDB, ObjectMapper objectMapper){
         return new FeedbackService(dynamoDB,objectMapper);
     }
+
 }
