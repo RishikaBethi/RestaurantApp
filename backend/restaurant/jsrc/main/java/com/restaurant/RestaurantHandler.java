@@ -1,4 +1,3 @@
-
 package com.restaurant;
 
 import com.amazonaws.services.lambda.runtime.Context;
@@ -40,7 +39,6 @@ import java.util.logging.Logger;
 		@EnvironmentVariable(key = "DISHES_TABLE", value = "tm7-Dishes"),
 		@EnvironmentVariable(key = "FEEDBACKS_TABLE", value = "tm7-Feedback"),
 		@EnvironmentVariable(key = "COGNITO_CLIENT_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_CLIENT_ID),
-		@EnvironmentVariable(key = "SPECIALITY_DISHES_API_URL", value = "${speciality_dishes_api_url}")
 })
 public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
@@ -76,12 +74,6 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 
 			logger.info("Received request - Path: " + path + ", Method: " + httpMethod +
 					", Query: " + (queryParams != null ? queryParams.toString() : "none"));
-
-			// Handle sign-up
-
-			// Handle sign-in
-
-
 			// Handle locations retrieval
 			 if ("/locations".equals(path) && "GET".equals(httpMethod)) {
 				if (queryParams != null && queryParams.containsKey("locationId") && queryParams.containsKey("speciality-dishes")) {
