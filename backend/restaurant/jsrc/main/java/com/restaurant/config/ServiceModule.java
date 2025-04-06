@@ -1,0 +1,70 @@
+package com.restaurant.config;
+
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.restaurant.services.*;
+import com.restaurant.services.LocationService;
+import com.restaurant.services.DishService;
+
+import dagger.Module;
+import dagger.Provides;
+import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
+import software.amazon.awssdk.regions.Region;
+
+import javax.inject.Singleton;
+
+@Module
+public class ServiceModule {
+
+    @Provides
+    @Singleton
+    public CognitoIdentityProviderClient provideCognitoClient() {
+        return CognitoIdentityProviderClient.builder()
+                .region(Region.of(System.getenv("REGION")))
+                .build();
+    }
+
+    @Provides
+    @Singleton
+    public AmazonDynamoDB provideDynamoDBClient() {
+        return AmazonDynamoDBClientBuilder.standard()
+                .withRegion(System.getenv("REGION"))
+                .build();
+    }
+
+    @Provides
+    @Singleton
+    public DynamoDB provideDynamoDB(AmazonDynamoDB amazonDynamoDB) {
+        return new DynamoDB(amazonDynamoDB);
+    }
+
+    @Provides
+    @Singleton
+    public ObjectMapper provideObjectMapper() {
+        return new ObjectMapper();
+    }
+
+    @Provides
+    @Singleton
+    public String provideClientId() {
+        return System.getenv("COGNITO_CLIENT_ID");
+    }
+
+    @Provides
+    @Singleton
+    public LocationService provideLocationService(DynamoDB dynamoDB, ObjectMapper objectMapper) {
+        return new LocationService(dynamoDB, objectMapper);
+    }
+    @Provides
+    @Singleton
+    public  DishService provideDishService(DynamoDB dynamoDB, ObjectMapper objectMapper){
+        return new DishService(dynamoDB,objectMapper);
+    }
+    @Provides
+    @Singleton
+    public  FeedbackService provideFeedbackService(DynamoDB dynamoDB, ObjectMapper objectMapper){
+        return new FeedbackService(dynamoDB,objectMapper);
+    }
+}
