@@ -88,7 +88,7 @@ public class BookingService {
                 }
             } catch (Exception e) {
                 logger.severe("Error parsing reservation time: " + e.getMessage());
-                return Helper.createErrorResponse(400, "Invalid date or time format.");
+                return Helper.createErrorResponse(400, "Invalid date or time format. Use yyyy-MM-dd for date and HH:mm for time");
             }
 
             // Check if table exists in Tables table
