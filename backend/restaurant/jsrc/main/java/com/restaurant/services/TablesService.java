@@ -8,90 +8,121 @@ import com.amazonaws.services.dynamodbv2.document.*;
 import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.restaurant.dto.AvailableSlotsDTO;
-import static com.restaurant.utils.Helper.createApiResponse;
+import org.json.JSONArray;
+
 import javax.inject.Inject;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
-
+import static com.restaurant.utils.Helper.createApiResponse;
+import static com.restaurant.utils.Helper.createErrorResponse;
 
 public class TablesService {
     private final DynamoDB dynamoDB;
     private final String tableName = System.getenv("TABLES_TABLE");
     private final String reservationsTableName = System.getenv("RESERVATIONS_TABLE");
     private final String locationsTable = System.getenv("LOCATIONS_TABLE");
-    private final ObjectMapper objectMapper;
+    //private final ObjectMapper objectMapper;
     private Map<String, String> queryParams = new HashMap<>();
-    private final List<String> timeSlots = List.of("10:30-11:00","12:15-1:45","14:00-3:30","15:45-17:15","17:30-19:00","19:15-20:45","21:00-22:30");
+    private final List<String> timeSlots = List.of("10:30-12:00","12:15-13:45","14:00-15:30","15:45-17:15","17:30-19:00","19:15-20:45","21:00-22:30");
 
     @Inject
-    public TablesService(DynamoDB dynamoDB, ObjectMapper objectMapper) {
+    public TablesService(DynamoDB dynamoDB) {
         this.dynamoDB = dynamoDB;
-        this.objectMapper = objectMapper;
     }
 
     public APIGatewayProxyResponseEvent returnAvailableTablesFilteredByGivenCriteria(
             APIGatewayProxyRequestEvent event, Context context) {
         try {
             queryParams = event.getQueryStringParameters();
+            if (queryParams == null) {
+                return createApiResponse(200, Collections.emptyList());
+            }
 
             String locationId = queryParams.get("locationId");
             String date = queryParams.get("date");
             String guestsStr = queryParams.get("guests");
             String time = queryParams.get("time");
 
-            if (queryParams == null) {
-                return createApiResponse(200, Collections.emptyList());
-            }
-
-            LocalDate selectedDate = date != null ? LocalDate.parse(date) : LocalDate.now();
-            LocalTime userTime = time != null ? LocalTime.parse(time, DateTimeFormatter.ofPattern("HH:mm")) : null;
-
-            //check if the date and time entered by user are before the current date and time
-            if ((selectedDate.isBefore(LocalDate.now())) ||
-                    (selectedDate.isEqual(LocalDate.now()) && userTime != null && userTime.isBefore(LocalTime.now()))) {
-                return createApiResponse(400, "Date/Time cannot be in the past");
-            }
-
             // Validate guests parameter
             int guests;
             try {
                 guests = guestsStr != null ? Integer.parseInt(guestsStr) : -1;
                 if (guestsStr != null && guests <= 0) {
-                    return errorResponseHandler(400, "Guest capacity must be a positive integer");
+                    return createErrorResponse(400, "Guest capacity must be a positive integer");
                 }
             } catch (NumberFormatException e) {
-                return errorResponseHandler(400, "Invalid guest capacity format. Must be an integer");
+                return createErrorResponse(400, "Invalid guest capacity format. Must be an integer");
+            }
+            LocalDate selectedDate = null;
+            if (date != null) {
+                try {
+                    selectedDate = LocalDate.parse(date);
+                } catch (DateTimeParseException e) {
+                    return createErrorResponse(400, "Invalid date format. Use YYYY-MM-DD");
+                }
             }
 
-            // Validate date parameter
-            LocalDate parsedDate;
-            try {
-                parsedDate = date != null ? LocalDate.parse(date) : LocalDate.now();
-            } catch (DateTimeParseException e) {
-                return errorResponseHandler(400, "Invalid date format. Use YYYY-MM-DD");
-            }
-
-            // Validate time parameter
-            LocalTime parsedTime = null;
+            LocalTime userTime = null;
             if (time != null) {
                 try {
-                    parsedTime = LocalTime.parse(time, DateTimeFormatter.ofPattern("HH:mm"));
+                    userTime = LocalTime.parse(time, DateTimeFormatter.ofPattern("HH:mm"));
                 } catch (DateTimeParseException e) {
-                    return errorResponseHandler(400, "Invalid time format. Use HH:MM");
+                    return createErrorResponse(400, "Invalid time format. Use HH:MM");
                 }
+            }
+
+            LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
+
+            if (date != null && time != null) {
+                LocalDateTime selectedDateTime = LocalDateTime.of(selectedDate, userTime);
+                if (selectedDateTime.isBefore(now)) {
+                    return createErrorResponse(400, "Date/time cannot be selected in the past");
+                }
+            } else if (date != null) {
+                if (selectedDate.isBefore(now.toLocalDate())) {
+                    return createErrorResponse(400, "Date cannot be selected in the past");
+                }
+            } else if (time != null) {
+                LocalDateTime selectedDateTime = LocalDateTime.of(now.toLocalDate(), userTime);
+                if (selectedDateTime.isBefore(now)) {
+                    return createErrorResponse(400, "Time cannot be selected in the past");
+                }
+            }
+            
+
+            Table locationsData = dynamoDB.getTable(locationsTable);
+            boolean locationExists = false;
+            ScanSpec scanSpecLocations = new ScanSpec();
+            ItemCollection<ScanOutcome> loctionsItem = locationsData.scan(scanSpecLocations);
+            for(Item location : loctionsItem) {
+                String address = location.getString("locationId");
+                if(address.equals(locationId)) {
+                    locationExists = true;
+                    break;
+                }
+            }
+
+            if(!locationExists) {
+                return createErrorResponse(404, "Location not found");
             }
 
             List<Item> availableTables = getAvailableTablesByLocationAndCapacity(locationId, guests);
             List<AvailableSlotsDTO> availableTimeSlots = getAvailableTimeSlots(availableTables, date, time, context);
 
-            return createApiResponse(200, availableTimeSlots);
+            JSONArray jsonArray = new JSONArray();
+            for (AvailableSlotsDTO dto : availableTimeSlots) {
+                jsonArray.put(dto.toJson());
+            }
+            return createApiResponse(200, jsonArray);
 
         } catch (Exception e) {
             context.getLogger().log("Error: " + e.getMessage());
-            return errorResponseHandler(500, "Internal server error");
+            return createErrorResponse(500, "Internal server error");
         }
     }
 
@@ -147,6 +178,10 @@ public class TablesService {
     private List<AvailableSlotsDTO> getAvailableTimeSlots(List<Item> tablesList, String date, String time, Context context) {
         List<AvailableSlotsDTO> responseList = new ArrayList<>();
 
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
+        LocalDate currentDate = now.toLocalDate();
+        LocalTime currentTime = now.toLocalTime();
+        LocalDate effectiveDate = (date != null) ? LocalDate.parse(date) : currentDate;
 
         for (Item table : tablesList) {
             String locationId = table.getString("locationId");
@@ -156,6 +191,14 @@ public class TablesService {
 
             ArrayList<String> availableSlots = new ArrayList<>(timeSlots);
             availableSlots.removeAll(notAvailable);
+
+            if (effectiveDate.equals(currentDate)) {
+                availableSlots.removeIf(slot -> {
+                    String[] times = slot.split("-");
+                    LocalTime slotStartTime = LocalTime.parse(times[0], DateTimeFormatter.ofPattern("HH:mm"));
+                    return slotStartTime.isBefore(currentTime);
+                });
+            }
 
             Table locTable = dynamoDB.getTable(locationsTable);
             ScanSpec scanSpec = new ScanSpec()
@@ -198,34 +241,5 @@ public class TablesService {
 
         context.getLogger().log("All reserved slots for " + locationId + " on " + date + ": " + notAvailableSlots);
         return notAvailableSlots;
-    }
-
-
-    private Map<String, String> createCorsHeaders() {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json");
-        headers.put("Access-Control-Allow-Origin", "*");
-        headers.put("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        headers.put("Access-Control-Allow-Headers", "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token");
-        return Collections.unmodifiableMap(headers);
-    }
-
-    private APIGatewayProxyResponseEvent errorResponseHandler(int statusCode, String message) {
-        try {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", message);
-
-            APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
-            response.setHeaders(createCorsHeaders());
-            response.setStatusCode(statusCode);
-            response.setBody(objectMapper.writeValueAsString(errorResponse));
-            return response;
-        } catch (Exception e) {
-            APIGatewayProxyResponseEvent fallbackResponse = new APIGatewayProxyResponseEvent();
-            fallbackResponse.setHeaders(createCorsHeaders());
-            fallbackResponse.setStatusCode(500);
-            fallbackResponse.setBody("{\"error\":\"Internal server error\"}");
-            return fallbackResponse;
-        }
     }
 }
