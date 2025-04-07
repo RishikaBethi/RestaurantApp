@@ -1,5 +1,8 @@
 package com.restaurant.dto;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.List;
 
 public class AvailableSlotsDTO {
@@ -34,4 +37,21 @@ public class AvailableSlotsDTO {
     public void setCapacity(int capacity) { this.capacity = capacity; }
     public List<String> getAvailableSlots() { return availableSlots; }
     public void setAvailableSlots(List<String> availableSlots) { this.availableSlots = availableSlots; }
+
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject();
+        json.put("locationId", this.locationId);
+        json.put("locationAddress", this.locationAddress);
+        json.put("tableNumber", this.tableNumber);
+        json.put("capacity", this.capacity);
+        JSONArray slotsArray = new JSONArray();
+        if (this.availableSlots != null) {
+            for (String slot : this.availableSlots) {
+                slotsArray.put(slot);
+            }
+        }
+        json.put("availableSlots", slotsArray);
+
+        return json;
+    }
 }

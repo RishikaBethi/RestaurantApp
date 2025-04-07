@@ -29,13 +29,13 @@ public class ServiceModule {
 
     @Provides
     @Singleton
-    public TablesService provideRestaurantService(DynamoDB dynamoDB, ObjectMapper objectMapper) {
-        return new TablesService(dynamoDB, objectMapper);
+    public TablesService provideRestaurantService(DynamoDB dynamoDB) {
+        return new TablesService(dynamoDB);
     }
 
     @Provides
     @Singleton
-    public LocationsService provideLocationService(DynamoDB dynamoDB, ObjectMapper objectMapper) {
-        return new LocationsService(dynamoDB, objectMapper);
+    public LocationsService provideLocationService(DynamoDB dynamoDB) {
+        return new LocationsService(dynamoDB);
     }
 }
