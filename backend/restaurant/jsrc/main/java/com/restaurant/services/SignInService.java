@@ -4,6 +4,7 @@ import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
+//import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
@@ -162,7 +163,7 @@ public class SignInService {
             String body = objectMapper.writeValueAsString(data);
             APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
             response.setHeaders(createCorsHeaders());
-            return response.withStatusCode(200).withBody(body);
+            return response.withStatusCode(201).withBody(body);
         } catch (Exception e) {
             return createResponse(500, "Response Error");
         }

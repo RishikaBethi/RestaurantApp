@@ -10,9 +10,12 @@ import com.restaurant.config.DaggerAppComponent;
 import com.restaurant.services.*;
 import com.syndicate.deployment.annotations.environment.EnvironmentVariable;
 import com.syndicate.deployment.annotations.environment.EnvironmentVariables;
-import com.syndicate.deployment.annotations.lambda.LambdaHandler;
 import com.syndicate.deployment.annotations.resources.DependsOn;
+
+import com.restaurant.config.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.syndicate.deployment.model.ResourceType;
+import com.syndicate.deployment.annotations.lambda.LambdaHandler;
 import com.syndicate.deployment.model.RetentionSetting;
 import com.syndicate.deployment.model.environment.ValueTransformer;
 
@@ -39,10 +42,12 @@ import java.util.logging.Logger;
         @EnvironmentVariable(key = "TABLES_TABLE", value = "${tables_table}"),
         @EnvironmentVariable(key = "COGNITO_USER_POOL_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_USER_POOL_ID),
 		@EnvironmentVariable(key = "COGNITO_CLIENT_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_CLIENT_ID),
-		@EnvironmentVariable(key = "REGION", value = "${region}")
+		@EnvironmentVariable(key = "REGION", value = "${region}"),
+        @EnvironmentVariable(key = "ORDERS_TABLE", value = "${orders_table}"),
 })
 public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
+    private static final ObjectMapper objectMapper = new ObjectMapper(); // Added objectMapper
 	private static final Logger logger = Logger.getLogger(RestaurantHandler.class.getName());
 
 	@Inject
@@ -66,7 +71,19 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
     @Inject
     LocationsService locationsService;
 
-	public RestaurantHandler() {
+    @Inject
+    GetReservationService getReservationService;
+
+    @Inject
+    CancelReservationService cancelReservationService;
+
+    @Inject
+    UpdateReservationService updateReservationService;
+
+    @Inject
+    BookingService bookingService;
+
+    public RestaurantHandler() {
 		initDependencies();
 	}
 
@@ -147,6 +164,22 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
                 context.getLogger().log("In locations handler");
                 return locationsService.allAvailableLocations(
                         request, context);
+            }
+
+            if ("/bookings/client".equals(path) && "POST".equalsIgnoreCase(httpMethod)) {
+                return bookingService.handleCreateReservation(request);
+            }
+
+            if ("/bookings/client/".equals(path) && "PUT".equalsIgnoreCase(httpMethod)) {
+                return updateReservationService.handleUpdateReservation(request, path);
+            }
+
+            if ("/reservations".equals(path) && "GET".equalsIgnoreCase(httpMethod)) {
+                return getReservationService.handleGetReservations(request);
+            }
+
+            if (path.startsWith("/reservations/") && "DELETE".equalsIgnoreCase(httpMethod)) {
+                return cancelReservationService.handleCancelReservation(request, path);
             }
 
 			return createErrorResponse(405, "Method Not Allowed: " + path + " with method " + httpMethod);

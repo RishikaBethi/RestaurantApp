@@ -17,4 +17,15 @@ public interface AppComponent {
     FeedbackService feedbackService();
     TablesService getTablesService();
     LocationsService getLocationsService();
+    GetReservationService getReservationService();
+    CancelReservationService cancelReservationService();
+    UpdateReservationService updateReservationService();
+    WaiterService waiterService();
+    BookingService bookingService();
+
+    @Component.Builder
+    interface Builder {
+        Builder serviceModule(ServiceModule module); // Allow passing ServiceModule
+        AppComponent build();
+    }
 }

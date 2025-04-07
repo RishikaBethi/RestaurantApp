@@ -5,11 +5,8 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurant.services.*;
-import com.restaurant.services.LocationService;
-import com.restaurant.services.DishService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import com.restaurant.services.LocationsService;
-import com.restaurant.services.TablesService;
 import dagger.Module;
 import dagger.Provides;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
@@ -19,6 +16,8 @@ import javax.inject.Singleton;
 
 @Module
 public class ServiceModule {
+
+    private static final String SNS_TOPIC_ARN = System.getenv("SNS_TOPIC_ARN");
 
     @Provides
     @Singleton
@@ -89,16 +88,50 @@ public class ServiceModule {
 
     @Provides
     @Singleton
-    public  DishService provideDishService(DynamoDB dynamoDB, ObjectMapper objectMapper){
-        return new DishService(dynamoDB,objectMapper);
+    public DishService provideDishService(DynamoDB dynamoDB, ObjectMapper objectMapper) {
+        return new DishService(dynamoDB, objectMapper);
+    }
+
+//    @Provides
+//    @Singleton
+//    public DynamoDB provideDynamoDB(AmazonDynamoDB amazonDynamoDB) {
+//        return new DynamoDB(amazonDynamoDB);
+//    }
+
+    @Provides
+    @Singleton
+    public FeedbackService provideFeedbackService(DynamoDB dynamoDB, ObjectMapper objectMapper) {
+        return new FeedbackService(dynamoDB, objectMapper);
     }
 
     @Provides
     @Singleton
-    public  FeedbackService provideFeedbackService(DynamoDB dynamoDB, ObjectMapper objectMapper){
-        return new FeedbackService(dynamoDB,objectMapper);
+    public GetReservationService provideGetReservationService(DynamoDB dynamoDB) {
+        return new GetReservationService(dynamoDB);
     }
 
+    @Provides
+    @Singleton
+    public CancelReservationService provideCancelReservationService(DynamoDB dynamoDB) {
+        return new CancelReservationService(dynamoDB);
+    }
 
+    @Provides
+    @Singleton
+    public UpdateReservationService provideUpdateReservationService(DynamoDB dynamoDB) {
+        return new UpdateReservationService(dynamoDB);
+    }
 
+    @Provides
+    @Singleton
+    public BookingService provideBookingService(DynamoDB dynamoDB, WaiterService waiterService) {
+        return new BookingService(dynamoDB, waiterService);
+    }
+
+    // Provide WaiterService Dependency
+    @Provides
+    @Singleton
+    public WaiterService provideWaiterService(DynamoDB dynamoDB) {
+        return new WaiterService(dynamoDB);
+    }
 }

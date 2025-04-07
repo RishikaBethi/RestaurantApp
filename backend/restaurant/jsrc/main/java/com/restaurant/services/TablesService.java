@@ -34,14 +34,24 @@ public class TablesService {
             APIGatewayProxyRequestEvent event, Context context) {
         try {
             queryParams = event.getQueryStringParameters();
-            if (queryParams == null) {
-                return createResponse(200, Collections.emptyList());
-            }
 
             String locationId = queryParams.get("locationId");
             String date = queryParams.get("date");
             String guestsStr = queryParams.get("guests");
             String time = queryParams.get("time");
+
+            if (queryParams == null) {
+                return createResponse(200, Collections.emptyList());
+            }
+
+            LocalDate selectedDate = date != null ? LocalDate.parse(date) : LocalDate.now();
+            LocalTime userTime = time != null ? LocalTime.parse(time, DateTimeFormatter.ofPattern("HH:mm")) : null;
+
+            //check if the date and time entered by user are before the current date and time
+            if ((selectedDate.isBefore(LocalDate.now())) ||
+                    (selectedDate.isEqual(LocalDate.now()) && userTime != null && userTime.isBefore(LocalTime.now()))) {
+                return createResponse(400, "Date/Time cannot be in the past");
+            }
 
             // Validate guests parameter
             int guests;
@@ -135,14 +145,6 @@ public class TablesService {
     private List<AvailableSlotsDTO> getAvailableTimeSlots(List<Item> tablesList, String date, String time, Context context) {
         List<AvailableSlotsDTO> responseList = new ArrayList<>();
 
-        LocalDate selectedDate = date != null ? LocalDate.parse(date) : LocalDate.now();
-        LocalTime userTime = time != null ? LocalTime.parse(time, DateTimeFormatter.ofPattern("HH:mm")) : null;
-
-        //check if the date and time entered by user are before the current date and time
-        if ((selectedDate.isBefore(LocalDate.now())) ||
-                (selectedDate.isEqual(LocalDate.now()) && userTime != null && userTime.isBefore(LocalTime.now()))) {
-            return Collections.emptyList();
-        }
 
         for (Item table : tablesList) {
             String locationId = table.getString("locationId");
@@ -206,7 +208,7 @@ public class TablesService {
         return Collections.unmodifiableMap(headers);
     }
 
-    private APIGatewayProxyResponseEvent createResponse(int statusCode, List<AvailableSlotsDTO> data) {
+    private APIGatewayProxyResponseEvent createResponse(int statusCode, Object data) {
         try {
             APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
             response.setHeaders(createCorsHeaders());
