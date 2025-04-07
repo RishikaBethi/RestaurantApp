@@ -7,6 +7,16 @@ import axios from "axios";
 import { useCancelReservation } from "@/hooks/useCancelReservation";
 import { toast } from "sonner";
 import { BASE_API_URL } from "@/constants/constant";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 interface Reservation {
   id: number;
@@ -30,10 +40,13 @@ export default function ReservationsPage() {
   const isAuthenticated = Boolean(localStorage.getItem("user")); // Mock authentication check
   const user=JSON.parse(localStorage.getItem("user")|| '""');
   const role=localStorage.getItem("role");
-  const { cancelReservation, loading: cancelling } = useCancelReservation();
+  const { cancelReservation } = useCancelReservation();
+  const [cancellingId, setCancellingId] = useState<number | null>(null);
+  const [selectedReservationId, setSelectedReservationId] = useState<number | null>(null);
 
   const handleCancelReservation = async (id: number) => {
     try {
+      setCancellingId(id);
       const res = await cancelReservation(id);
       const message = res?.data?.message || "Reservation cancelled!";
       toast.success(message);
@@ -42,6 +55,8 @@ export default function ReservationsPage() {
     } catch (error:any) {
       const errorMsg = error?.response?.data?.message || "Failed to cancel the reservation.";
       toast.error(errorMsg);
+    } finally{
+      setCancellingId(null);
     }
   };
   
@@ -98,9 +113,30 @@ export default function ReservationsPage() {
               </div>
               {res.status === "Reserved" && (
                 <div className="flex justify-between mt-4">
-                  <Button variant="outline" onClick={() => handleCancelReservation(res.id)} disabled={cancelling}>
-                    {cancelling ? "Cancelling..." : "Cancel"}
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" onClick={() => setSelectedReservationId(res.id)} disabled={cancellingId === res.id}>
+                        {cancellingId === res.id ? "Cancelling..." : "Cancel"}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure you want to cancel your reservation?</AlertDialogTitle>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel className="bg-green-600 text-white">No</AlertDialogCancel>
+                          <AlertDialogAction className="bg-red-600"
+                          onClick={() => {
+                            if (selectedReservationId !== null) {
+                              handleCancelReservation(selectedReservationId);
+                            }
+                          }}
+                          >
+                            Yes, Cancel
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   <Button className="bg-green-600 hover:bg-green-700">Edit</Button>
                 </div>
               )}
