@@ -5,6 +5,7 @@ import locationImage from '../assets/homepage.png';
 import ReservationModal from "@/components/reservationModal";
 import AvailableSlotsModal from "@/components/availableSlotsModal";
 import ShimmerTables from "@/components/shimmer/shimmerTables";
+import { BASE_API_URL } from "@/constants/constant";
 
 type Table = {
   locationId: string;
@@ -44,7 +45,7 @@ export default function BookTable() {
   };  
 
   useEffect(() => {
-    axios.get("https://rklnsystq5.execute-api.ap-southeast-2.amazonaws.com/api/bookings/tables") // replace with actual endpoint
+    axios.get(`${BASE_API_URL}/bookings/tables`) 
       .then(res => {
         setAllTables(res.data);
         setFilteredTables(res.data);
@@ -54,7 +55,7 @@ export default function BookTable() {
   }, []);
 
   useEffect(() => {
-    axios.get("https://rklnsystq5.execute-api.ap-southeast-2.amazonaws.com/api/locations/select-options")
+    axios.get(`${BASE_API_URL}/locations/select-options`)
       .then(response => {
         setLocations(response.data);
       })
@@ -85,9 +86,9 @@ export default function BookTable() {
   const handleFindTable = async () => {
     try {
       setLoadingFilteredTables(true);
-      const response = await axios.get("https://rklnsystq5.execute-api.ap-southeast-2.amazonaws.com/api/bookings/tables", {
+      const response = await axios.get(`${BASE_API_URL}/bookings/tables`, {
         params: {
-          location: selectedLocation,
+          locationId: selectedLocation,
           date: selectedDate || getTodayDate(),
           time: selectedTime || getCurrentTime(),
           guests,
@@ -205,7 +206,7 @@ export default function BookTable() {
       </section>
 
       {/* Reservation Modal */}
-      <ReservationModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} table={selectedTable} />
+      <ReservationModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} table={selectedTable} selectedDate={selectedDate} />
       <AvailableSlotsModal 
       isOpen={isSlotsModalOpen} 
       onClose={() => setIsSlotsModalOpen(false)} 

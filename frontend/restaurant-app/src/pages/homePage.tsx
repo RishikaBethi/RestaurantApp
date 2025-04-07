@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import ShimmerLocations from "@/components/shimmer/shimmerLocations";
+import { BASE_API_URL } from "@/constants/constant";
 
 interface Location {
   id: string;
@@ -33,7 +34,7 @@ export default function Home() {
   useEffect(() => {
     setLoading(true);
     setError("");
-    axios.get("https://ig8csmv3m6.execute-api.ap-southeast-2.amazonaws.com/devss/locations")
+    axios.get(`${BASE_API_URL}/locations`)
       .then(response => {
         setLocations(response.data);
       })
@@ -42,7 +43,7 @@ export default function Home() {
         setError("Failed to load locations!");
       });
  
-   axios.get("https://ig8csmv3m6.execute-api.ap-southeast-2.amazonaws.com/devss/dishes/popular")
+   axios.get(`${BASE_API_URL}/dishes/popular`)
       .then((response) => {
         setPopularDishes(response.data);
       })

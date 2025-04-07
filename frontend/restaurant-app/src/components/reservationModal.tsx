@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { FaUser, FaClock } from "react-icons/fa";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import ConfirmationModal from "./confirmationModal";
+import axios from "axios";
 
 interface Table {
   locationId: string;
@@ -17,22 +17,30 @@ interface ReservationModalProps {
   isOpen: boolean;
   onClose: () => void;
   table: Table | null;
+  selectedDate: string;
 }
 
-const extractStartTime = (slot: string) => slot.split(" - ")[0];
-
-export default function ReservationModal({ isOpen, onClose, table }: ReservationModalProps) {
+export default function ReservationModal({ isOpen, onClose, table, selectedDate }: ReservationModalProps) {
   const [guests, setGuests] = useState(1);
-  const [fromTime, setFromTime] = useState<string | null>(null);
-  const [toTime, setToTime] = useState<string | null>(null);
+  const [fromTime, setFromTime] = useState("");
+  const [toTime, setToTime] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [bookingData, setBookingData] = useState<any | null>(null);
+
+  const getTodayDate = (): string => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = `${today.getMonth() + 1}`.padStart(2, '0');
+    const day = `${today.getDate()}`.padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };  
 
   if (!table) return null;
-  const availableTimes = Array.from(new Set(table.availableSlots.map(extractStartTime)));
 
   // Handle reservation confirmation
-  const handleReservation = () => {
+  const handleReservation = async() => {
      // Validation: Check if all required fields are selected
      if (!fromTime || !toTime) {
       setError("Please select both 'From' and 'To' time.");
@@ -42,10 +50,30 @@ export default function ReservationModal({ isOpen, onClose, table }: Reservation
       setError("Please select the number of guests.");
       return;
     }
+
+    const token = localStorage.getItem("token");
+
     // Clear error if all fields are valid
-    setError(null);
-    onClose(); // Close the Reservation Modal
-    setTimeout(() => setShowConfirmation(true), 100); // Delay to ensure smooth transition
+    try {
+      const response = await axios.post("https://6txdnfn1ga.execute-api.ap-southeast-2.amazonaws.com/dev/bookings/client", {
+        locationId: table.locationId,
+        tableNumber: table.tableNumber,
+        date: selectedDate || getTodayDate(),
+        guestsNumber: guests.toString(),
+        timeFrom: fromTime,
+        timeTo: toTime,
+      },{
+        headers: {
+          Authorization: `Bearer ${token}`, 
+        },});
+
+      setBookingData(response.data);
+      onClose();
+      setTimeout(() => setShowConfirmation(true), 100);
+    } catch (err) {
+      console.error("Error making reservation:", err);
+      setError("Failed to make reservation. Please try again or Login to make a reservation");
+    }
   };
   return (
     <>
@@ -55,7 +83,7 @@ export default function ReservationModal({ isOpen, onClose, table }: Reservation
           <DialogTitle className="text-xl font-bold">Make a Reservation</DialogTitle>
           <p className="text-gray-600 mt-1 text-sm">
             You are making a reservation at <strong>{table.locationAddress}</strong>, Table {table.tableNumber}, <br />
-            for <strong>October 14, 2024</strong>.
+            for <strong>{selectedDate}</strong>.
           </p>
         </DialogHeader>
 
@@ -63,7 +91,7 @@ export default function ReservationModal({ isOpen, onClose, table }: Reservation
         <div className="mt-1">
           <h1 className="font-semibold text-sm">Guests</h1>
           <p className="text-sm text-gray-600">Please specify the number of guests.</p>
-          <p className="text-sm text-gray-600 pb-2">Table seating capacity: 10 people</p>
+          <p className="text-sm text-gray-600 pb-2">Table seating capacity: {table.capacity} people</p>
           <div className="flex items-center justify-between border border-gray-300 p-1 rounded-lg mt-1">
             <div className="flex items-center gap-2">
               <FaUser className="text-green-600" />
@@ -95,38 +123,34 @@ export default function ReservationModal({ isOpen, onClose, table }: Reservation
             {/* From Time */}
             <div className="w-1/2">
               <p className="text-xs text-gray-500 mb-1">From</p>
-              <Select onValueChange={setFromTime}>
-                <SelectTrigger className="w-full border-gray-300">
-                  <FaClock className="text-green-600 ml-2" />
-                  <SelectValue placeholder="Select time" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableTimes.map((time, index) => (
-                    <SelectItem key={index} value={time}>
-                      {time}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex items-center border rounded-lg p-2 gap-2 bg-white">
+                <FaClock className="text-gray-500" />
+                <input
+                  type="time"
+                  className="w-full outline-none"
+                  value={fromTime}
+                  onChange={(e) => {
+                    setFromTime(e.target.value);
+                    setToTime(""); // reset toTime
+                  }}
+                />
+              </div>
+              </div>
             </div>
 
             <div className="w-1/2 pl-2">
               <p className="text-xs text-gray-500 mb-1">To</p>
-              <Select onValueChange={setToTime}>
-                <SelectTrigger className="w-full border-gray-300">
-                  <FaClock className="text-green-600 ml-2" />
-                  <SelectValue placeholder="Select time" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableTimes.map((time, index) => (
-                    <SelectItem key={index} value={time}>
-                      {time}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex items-center border rounded-lg p-2 gap-2 bg-white">
+                <FaClock className="text-gray-500" />
+                <input
+                  type="time"
+                  className="w-full outline-none"
+                  value={toTime}
+                  onChange={(e) => setToTime(e.target.value)}
+                  disabled={!fromTime}
+                />
+              </div>
             </div>
-          </div>
         </div>
 
         {/* Error Message */}
@@ -144,13 +168,7 @@ export default function ReservationModal({ isOpen, onClose, table }: Reservation
     <ConfirmationModal
         isOpen={showConfirmation}
         onClose={() => setShowConfirmation(false)}
-        reservationDetails={{
-          guests,
-          table: parseInt(table.tableNumber),
-          address: table.locationAddress || "Unknown",
-          fromTime: fromTime,
-          toTime: toTime
-        }}
+        bookingData={bookingData}
       />
     </>
   );

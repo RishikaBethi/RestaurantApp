@@ -6,6 +6,10 @@ import { useEffect, useState } from "react";
 import SpecialtyDishCard from "@/components/specialtyDishCard";
 import axios from "axios";
 import ShimmerDishes from "@/components/shimmer/shimmerDishes";
+import FeedbackCard from "@/components/feedbackCard"
+import ShimmerFeedback from "@/components/shimmer/shimmerFeedback";
+import { useFeedbacks, Feedback, FeedbackType, SortOption } from "@/hooks/useFeedbacks";
+import { BASE_API_URL } from "@/constants/constant";
 
 interface SpecialtyDish {
   id: number;
@@ -15,52 +19,43 @@ interface SpecialtyDish {
   imageUrl: string;
 }
 
-const reviews = [
-  {
-    id: 1,
-    name: "David",
-    date: "Aug 5, 2023",
-    rating: 5,
-    text: "Absolutely loved this restaurant! The outdoor terrace was perfect for a relaxing evening.",
-  },
-  {
-    id: 2,
-    name: "User1785",
-    date: "Jul 11, 2023",
-    rating: 5,
-    text: "The best dining experience I’ve had in Tbilisi. The vegan options were fantastic.",
-  },
-  {
-    id: 3,
-    name: "Giorgi",
-    date: "Jul 4, 2023",
-    rating: 5,
-    text: "Great food and an excellent vibe! The place has a lively atmosphere.",
-  },
-  {
-    id: 4,
-    name: "Anna",
-    date: "Jun 18, 2023",
-    rating: 5,
-    text: "I visited with friends and was blown away by the creativity of the menu.",
-  },
-];
-
 export default function RestroPage() {
   const { locationId } = useParams<{ locationId: string }>();
   const { location, loading: locationLoading } = useLocationDetails(locationId);
-  const [sortOption, setSortOption] = useState("Top rated first");
+  const [sortOption, setSortOption] = useState<SortOption>("Top rated first");
   const [specialtyDishes, setSpecialtyDishes] = useState<SpecialtyDish[]>([]);
+  const [selectedFeedbackType, setSelectedFeedbackType] = useState<FeedbackType>("SERVICE");
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   
+  // Pagination state
+  const [page, setPage] = useState(0);
+  const { feedbacks, loading: feedbackLoading, totalPages } = useFeedbacks(
+    locationId,
+    selectedFeedbackType,
+    sortOption,
+    page
+  );
+  const [allFeedbacks, setAllFeedbacks] = useState<Feedback[]>([]);
+
+  useEffect(() => {
+    if (page === 0) {
+      setAllFeedbacks(feedbacks);
+    } else {
+      setAllFeedbacks((prev) => [...prev, ...feedbacks]);
+    }
+  }, [feedbacks, page]);
+
+  // Reset feedback list when filter/sort changes
+  useEffect(() => {
+    setPage(0);
+  }, [selectedFeedbackType, sortOption]);
+
   useEffect(() => {
     if (!locationId) return;
-    
     setLoading(true);
     setError("");
-
-    axios.get(`https://ig8csmv3m6.execute-api.ap-southeast-2.amazonaws.com/devss/locations/${locationId}/speciality-dishes`)
+    axios.get(`${BASE_API_URL}/locations/${locationId}/speciality-dishes`)
       .then((response) => {
         setSpecialtyDishes(response.data);
         setLoading(false);
@@ -68,9 +63,17 @@ export default function RestroPage() {
       .catch((error) => {
         console.error("Error loading dishes:", error);
         setError("Failed to load specialty dishes.");
+      })
+      .finally(() => {
         setLoading(false);
       });
   }, [locationId]);
+
+  const loadMore = () => {
+    if (page + 1 < totalPages) {
+      setPage((prev) => prev + 1);
+    }
+  };
   
   return (
     <div className="container mx-auto p-6">
@@ -111,15 +114,19 @@ export default function RestroPage() {
       <h2 className="text-2xl font-semibold mt-10">Customer Reviews</h2>
       <div className="flex justify-between items-center mt-4">
         <div className="flex gap-4">
-          <Button variant="ghost" className="text-green-600 font-semibold border-b-2 border-green-600">
+          <Button variant="ghost" className={`font-semibold ${selectedFeedbackType === "SERVICE" ? "text-green-600 border-b-2 border-green-600" : "text-gray-500"}`}
+                onClick={() => setSelectedFeedbackType("SERVICE")}>
             Service
           </Button>
-          <Button variant="ghost" className="text-gray-500 font-semibold">Cuisine Experience</Button>
+          <Button variant="ghost" className={`font-semibold ${selectedFeedbackType === "CUISINE_EXPERIENCE" ? "text-green-600 border-b-2 border-green-600" : "text-gray-500"}`}
+                onClick={() => setSelectedFeedbackType("CUISINE_EXPERIENCE")}>
+            Cuisine Experience
+          </Button>
         </div>
         <select
           className="border border-green-600 p-2 rounded"
           value={sortOption}
-          onChange={(e) => setSortOption(e.target.value)}
+          onChange={(e) => setSortOption(e.target.value as SortOption)}
         >
           <option>Top rated first</option>
           <option>Low rated first</option>
@@ -128,26 +135,32 @@ export default function RestroPage() {
         </select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-        {reviews.map((review) => (
-          <div key={review.id} className="bg-white shadow rounded-lg p-4">
-            <div className="flex items-center gap-3">
-              <div className="bg-gray-300 rounded-full w-10 h-10"></div>
-              <div>
-                <h3 className="font-semibold">{review.name}</h3>
-                <p className="text-xs text-gray-500">{review.date}</p>
-              </div>
-              <div className="flex"><Star className="w-3 h-3 text-yellow-500" fill="gold"/>
-              <Star className="w-3 h-3 text-yellow-500" fill="gold" />
-              <Star className="w-3 h-3 text-yellow-500" fill="gold" />
-              <Star className="w-3 h-3 text-yellow-500" fill="gold" />
-              <Star className="w-3 h-3 text-yellow-500" fill="gold"/>
-              </div>
+      {feedbackLoading && page === 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+              {[...Array(4)].map((_, i) => (
+                <ShimmerFeedback key={i} />
+              ))}
             </div>
-            <p className="mt-2 text-gray-700">{review.text}</p>
-          </div>
-        ))}
-      </div>
+          ) : allFeedbacks.length === 0 ? (
+            <p className="mt-4 text-center text-gray-600 font-semibold">No reviews yet.</p>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+                {allFeedbacks.map((review) => (
+                  <FeedbackCard key={review.id} {...review} />
+                ))}
+                {feedbackLoading &&
+                  [...Array(4)].map((_, i) => <ShimmerFeedback key={`shimmer-${i}`} />)}
+              </div>
+              {page + 1 < totalPages && (
+                <div className="text-center mt-6">
+                  <Button onClick={loadMore} disabled={feedbackLoading}>
+                    {feedbackLoading ? "Loading..." : "Load More"}
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
       </>
     )}
     </div>
