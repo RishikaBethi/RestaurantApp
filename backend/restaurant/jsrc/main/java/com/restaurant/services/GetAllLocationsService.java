@@ -3,23 +3,22 @@ package com.restaurant.services;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.amazonaws.services.dynamodbv2.document.*;
 import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
-import com.restaurant.dto.LocationsDTO;
+import com.restaurant.dto.AllLocationsDTO;
 import org.json.JSONArray;
 
 import javax.inject.Inject;
 import java.util.*;
 import static com.restaurant.utils.Helper.*;
 
-public class LocationsService {
+public class GetAllLocationsService {
     private final DynamoDB dynamoDB;
     private final String tableName = System.getenv("LOCATIONS_TABLE");
     //private final ObjectMapper objectMapper;
 
     @Inject
-    public LocationsService(DynamoDB dynamoDB) {
+    public GetAllLocationsService(DynamoDB dynamoDB) {
         this.dynamoDB = dynamoDB;
     }
 
@@ -29,9 +28,9 @@ public class LocationsService {
             ScanSpec scanSpec = new ScanSpec();
             ItemCollection<ScanOutcome> locations = table.scan(scanSpec);
 
-            List<LocationsDTO> locationsData = new ArrayList<>();
+            List<AllLocationsDTO> locationsData = new ArrayList<>();
             for (Item location : locations) {
-                LocationsDTO locationDTO = new LocationsDTO(
+                AllLocationsDTO locationDTO = new AllLocationsDTO(
                         location.getString("locationId"),
                         location.getString("address")
                 );
@@ -39,7 +38,7 @@ public class LocationsService {
             }
 
             JSONArray jsonArray = new JSONArray();
-            for (LocationsDTO dto : locationsData) {
+            for (AllLocationsDTO dto : locationsData) {
                 jsonArray.put(dto.toJson());
             }
 

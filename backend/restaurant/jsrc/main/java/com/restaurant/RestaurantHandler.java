@@ -12,7 +12,6 @@ import com.syndicate.deployment.annotations.environment.EnvironmentVariable;
 import com.syndicate.deployment.annotations.environment.EnvironmentVariables;
 import com.syndicate.deployment.annotations.resources.DependsOn;
 
-import com.restaurant.config.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.syndicate.deployment.model.ResourceType;
 import com.syndicate.deployment.annotations.lambda.LambdaHandler;
@@ -71,7 +70,7 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
     TablesService tablesService;
 
     @Inject
-    LocationsService locationsService;
+    GetAllLocationsService locationsService;
 
     @Inject
     GetReservationService getReservationService;

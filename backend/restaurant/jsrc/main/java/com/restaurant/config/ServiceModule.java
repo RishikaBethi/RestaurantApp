@@ -5,7 +5,6 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurant.services.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dagger.Module;
 import dagger.Provides;
@@ -57,8 +56,8 @@ public class ServiceModule {
 
     @Provides
     @Singleton
-    public LocationsService provideLocationService(DynamoDB dynamoDB) {
-        return new LocationsService(dynamoDB);
+    public GetAllLocationsService provideLocationService(DynamoDB dynamoDB) {
+        return new GetAllLocationsService(dynamoDB);
     }
 
     @Provides

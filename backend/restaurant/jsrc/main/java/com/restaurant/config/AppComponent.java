@@ -16,7 +16,7 @@ public interface AppComponent {
     DishService dishService();
     FeedbackService feedbackService();
     TablesService getTablesService();
-    LocationsService getLocationsService();
+    GetAllLocationsService getLocationsService();
     GetReservationService getReservationService();
     CancelReservationService cancelReservationService();
     UpdateReservationService updateReservationService();

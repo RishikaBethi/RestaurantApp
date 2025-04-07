@@ -2,13 +2,13 @@ package com.restaurant.dto;
 
 import org.json.JSONObject;
 
-public class LocationsDTO {
+public class AllLocationsDTO {
     private String id;
     private String address;
 
-    public LocationsDTO() {}
+    public AllLocationsDTO() {}
 
-    public LocationsDTO(String id, String address) {
+    public AllLocationsDTO(String id, String address) {
         this.id = id;
         this.address = address;
     }
