@@ -5,7 +5,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
-import com.restaurant.utils.Helper;
+import static com.restaurant.utils.Helper.*;
 import java.util.logging.Logger;
 import java.util.*;
 import java.time.*;
@@ -25,25 +25,25 @@ public class CancelReservationService {
         try {
             String[] pathParts = path.split("/");
             if (pathParts.length < 3) {
-                return Helper.createErrorResponse(400, "Invalid reservation cancellation request.");
+                return createErrorResponse(400, "Invalid reservation cancellation request.");
             }
             String reservationId = pathParts[pathParts.length - 1];
 
             // Extract user email from JWT claims
-            Map<String, Object> claims = Helper.extractClaims(request);
+            Map<String, Object> claims = extractClaims(request);
             if (claims == null || !claims.containsKey("email")) {
-                return Helper.createErrorResponse(404, "Unauthorized access: User not logged in.");
+                return createErrorResponse(404, "Unauthorized access: User not logged in.");
             }
 
             String email = (String) claims.get("email");
             if (email == null || email.isEmpty()) {
-                return Helper.createErrorResponse(404, "Unauthorized access: Email missing.");
+                return createErrorResponse(404, "Unauthorized access: Email missing.");
             }
 
             // Fetch the specific reservation
             Item reservationItem = reservationTable.getItem("reservationId", reservationId);
             if (reservationItem == null) {
-                return Helper.createErrorResponse(404, "Reservation not found.");
+                return createErrorResponse(404, "Reservation not found.");
             }
 
             String reservationEmail = reservationItem.getString("email");
@@ -51,12 +51,12 @@ public class CancelReservationService {
 
             // Check if the reservation belongs to the user
             if (!email.equals(reservationEmail)) {
-                return Helper.createErrorResponse(403, "Forbidden: This reservation does not belong to you.");
+                return createErrorResponse(403, "Forbidden: This reservation does not belong to you.");
             }
 
             // Check if the reservation is already cancelled or completed
             if (!"Reserved".equalsIgnoreCase(status)) {
-                return Helper.createErrorResponse(204, "No active reservation to cancel.");
+                return createErrorResponse(204, "No active reservation to cancel.");
             }
 
             // Check if current IST time is at least 30 minutes before the reservation time
@@ -73,15 +73,15 @@ public class CancelReservationService {
 
             Duration duration = Duration.between(nowIST, reservationIST);
             if (!duration.isNegative() && duration.toMinutes() <= 30) {
-                return Helper.createErrorResponse(409, "Reservation cannot be canceled within 30 minutes of the reservation time.");
+                return createErrorResponse(409, "Reservation cannot be canceled within 30 minutes of the reservation time.");
             }
 
             // Cancel the reservation
             cancelReservationStatus(reservationId, "Cancelled");
-            return Helper.createApiResponse(200, Map.of("message", "Reservation Canceled"));
+            return createApiResponse(200, Map.of("message", "Reservation Canceled"));
         } catch (Exception e) {
             logger.severe("Error canceling reservation: " + e.getMessage());
-            return Helper.createErrorResponse(500, "Error canceling reservation: " + e.getMessage());
+            return createErrorResponse(500, "Error canceling reservation: " + e.getMessage());
         }
     }
 

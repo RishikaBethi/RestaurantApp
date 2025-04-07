@@ -14,6 +14,8 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static com.restaurant.utils.Helper.*;
+
 public class FeedbackService {
 
     private static final Logger logger = Logger.getLogger(FeedbackService.class.getName());
@@ -49,13 +51,13 @@ public class FeedbackService {
             String path = request.getPath();
             String[] pathParts = path.split("/");
             if (pathParts.length < 3) {
-                return createResponse(400, Map.of("message", "Invalid path format"));
+                return createErrorResponse(400, "Invalid path format");
             }
             String locationId = pathParts[2]; // Extract {id} from /locations/{id}/feedbacks
 
             // Validate location ID
             if (!isValidLocationId(locationId)) {
-                return createResponse(400, Map.of("message", "Invalid location ID"));
+                return createErrorResponse(400, "Invalid location ID");
             }
 
             // Extract query parameters
@@ -66,13 +68,13 @@ public class FeedbackService {
             // Validate the 'type' parameter (required)
             String type = queryParams.get("type");
             if (type == null || type.isEmpty()) {
-                return createResponse(400, Map.of("message", "Query parameter 'type' is required"));
+                return createErrorResponse(400, "Query parameter 'type' is required");
             }
 
             // Normalize type to uppercase and validate allowed values
             type = type.toUpperCase();
             if (!type.equals("SERVICE") && !type.equals("CUISINE_EXPERIENCE")) {
-                return createResponse(400, Map.of("message", "Query parameter 'type' must be either 'SERVICE' or 'CUISINE_EXPERIENCE'"));
+                return createErrorResponse(400, "Query parameter 'type' must be either 'SERVICE' or 'CUISINE_EXPERIENCE'");
             }
 
             // Pagination parameters
@@ -82,17 +84,17 @@ public class FeedbackService {
                 page = Integer.parseInt(queryParams.getOrDefault("page", "0"));
                 size = Integer.parseInt(queryParams.getOrDefault("size", "20"));
                 if (page < 0 || size <= 0) {
-                    return createResponse(400, Map.of("message", "Query parameters 'page' must be >= 0 and 'size' must be > 0"));
+                    return createErrorResponse(400, "Query parameters 'page' must be >= 0 and 'size' must be > 0");
                 }
             } catch (NumberFormatException e) {
-                return createResponse(400, Map.of("message", "Query parameters 'page' and 'size' must be valid integers"));
+                return createErrorResponse(400, "Query parameters 'page' and 'size' must be valid integers");
             }
 
             // Sorting parameters
             String sort = queryParams.getOrDefault("sort", "date,asc");
             String[] sortParams = sort.split(",");
             if (sortParams.length != 2) {
-                return createResponse(400, Map.of("message", "Query parameter 'sort' must be in the format 'property,direction' (e.g., 'date,asc')"));
+                return createErrorResponse(400, "Query parameter 'sort' must be in the format 'property,direction' (e.g., 'date,asc')");
             }
 
             String sortProperty = sortParams[0].toLowerCase();
@@ -100,12 +102,12 @@ public class FeedbackService {
 
             // Validate sort property
             if (!sortProperty.equals("date") && !sortProperty.equals("rating")) {
-                return createResponse(400, Map.of("message", "Query parameter 'sort' property must be either 'date' or 'rating'"));
+                return createErrorResponse(400, "Query parameter 'sort' property must be either 'date' or 'rating'");
             }
 
             // Validate sort direction
             if (!sortDirection.equals("asc") && !sortDirection.equals("desc")) {
-                return createResponse(400, Map.of("message", "Query parameter 'sort' direction must be either 'asc' or 'desc'"));
+                return createErrorResponse(400, "Query parameter 'sort' direction must be either 'asc' or 'desc'");
             }
 
             boolean isAscending = sortDirection.equals("asc");
@@ -209,11 +211,11 @@ public class FeedbackService {
             ));
             responseBody.put("empty", feedbackList.isEmpty());
 
-            return createResponse(200, responseBody);
+            return createApiResponse(200, responseBody);
 
         } catch (Exception e) {
             logger.severe("Error retrieving feedbacks: " + e.getMessage());
-            return createResponse(500, Map.of("message", "Internal Server Error"));
+            return createErrorResponse(500, "Internal Server Error");
         }
     }
 
@@ -228,33 +230,5 @@ public class FeedbackService {
         dto.setType(item.getString("type"));
         dto.setLocationId(item.getString("locationId"));
         return dto;
-    }
-    private APIGatewayProxyResponseEvent createResponse(int statusCode, String message) {
-        APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
-        response.setHeaders(createCorsHeaders());
-        return response.withStatusCode(statusCode).withBody("{\"message\":\"" + message + "\"}");
-    }
-
-    private Map<String, Object> createEmptyResponse() {
-        Map<String, Object> responseBody = new HashMap<>();
-        responseBody.put("totalPages", 0);
-        responseBody.put("totalElements", 0);
-        responseBody.put("size", 0);
-        responseBody.put("content", Collections.emptyList());
-        responseBody.put("number", 0);
-        responseBody.put("sort", Collections.emptyList());
-        responseBody.put("first", true);
-        responseBody.put("last", true);
-        responseBody.put("numberOfElements", 0);
-        responseBody.put("pageable", Map.of(
-                "offset", 0,
-                "sort", Collections.emptyList(),
-                "paged", true,
-                "pageSize", 0,
-                "pageNumber", 0,
-                "unpaged", true
-        ));
-        responseBody.put("empty", true);
-        return responseBody;
     }
 }

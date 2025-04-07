@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import static com.restaurant.utils.Helper.*;
+
 @DependsOn(resourceType = ResourceType.COGNITO_USER_POOL, name = "${user_pool}")
 @LambdaHandler(
     lambdaName = "restaurant_handler",
@@ -188,26 +190,5 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
             logger.severe("Error handling request: " + e.getMessage());
             return createErrorResponse(500, "Error: " + e.getMessage());
         }
-    }
-    private APIGatewayProxyResponseEvent createErrorResponse(int statusCode, String message) {
-        return new APIGatewayProxyResponseEvent()
-                .withStatusCode(statusCode)
-                .withBody("{\"message\":\"" + message + "\"}")
-                .withHeaders(Map.of("Content-Type", "application/json"));
-    }
-
-//    private APIGatewayProxyResponseEvent createErrorResponseM(String message) {
-//        String safeMessage = message != null ? message : "Unknown error occurred";
-//        return new APIGatewayProxyResponseEvent()
-//                .withStatusCode(400)
-//                .withBody("{\"error\": \"" + safeMessage + "\"}")
-//                .withHeaders(Map.of("Content-Type", "application/json"));
-//    }
-
-    private APIGatewayProxyResponseEvent methodNotAllowed() {
-        return new APIGatewayProxyResponseEvent()
-                .withStatusCode(405)
-                .withBody("{\"error\": \"Method Not Allowed\"}")
-                .withHeaders(Map.of("Content-Type", "application/json"));
     }
 }

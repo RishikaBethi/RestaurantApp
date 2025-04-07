@@ -14,12 +14,12 @@ import com.restaurant.validators.PasswordValidator;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
+import static com.restaurant.utils.Helper.*;
 
 import javax.inject.Inject;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
+
 
 public class SignUpService {
     private final CognitoIdentityProviderClient cognitoClient;
@@ -50,16 +50,16 @@ public class SignUpService {
 
             // Validate fields
             if (!NameValidator.validateName(signUpDto.getFirstName())) {
-                return createResponse(400, "Invalid or missing first name");
+                return createErrorResponse(400, "Invalid or missing first name");
             }
             if (!NameValidator.validateName(signUpDto.getLastName())) {
-                return createResponse(400, "Invalid or missing last name");
+                return createErrorResponse(400, "Invalid or missing last name");
             }
             if (!EmailValidator.validateEmail(signUpDto.getEmail())) {
-                return createResponse(400, "Invalid email format");
+                return createErrorResponse(400, "Invalid email format");
             }
             if (!PasswordValidator.validatePassword(signUpDto.getPassword())) {
-                return createResponse(400, "Password must be 8-16 characters, include uppercase, lowercase, number, and special character");
+                return createErrorResponse(400, "Password must be 8-16 characters, include uppercase, lowercase, number, and special character");
             }
 
             // Cognito sign-up
@@ -92,44 +92,29 @@ public class SignUpService {
                     ));
                 } catch (Exception e) {
                     logger.severe("Error storing user data in DynamoDB: " + e.getMessage());
-                    return createResponse(500, "Error saving user data");
+                    return createErrorResponse(500, "Error saving user data");
                 }
             } catch (UsernameExistsException e) {
-                return createResponse(400, "A user with this email address already exists");
+                return createApiResponse(400, Map.of("message","A user with this email address already exists"));
             } catch (InvalidPasswordException e) {
-                return createResponse(400, "Password does not meet requirements");
+                return createErrorResponse(400, "Password does not meet requirements");
             }catch (InvalidParameterException e) {
-                return createResponse(400, "Invalid email format");}
+                return createErrorResponse(400, "Invalid email format");}
             catch (Exception e) {
                 logger.severe("Cognito error: " + e.getMessage());
-                return createResponse(500, "An error occurred: " + e.getMessage());
+                return createErrorResponse(500, e.getMessage());
             }
 
-            return createResponse(201, "User registered successfully");
+            return createApiResponse(201, Map.of("message","User registered successfully"));
 
         } catch (Exception e) {
             logger.severe("Error in signup: " + e.getMessage());
-            return createResponse(500, "Signup failed: " + e.getMessage());
+            return createErrorResponse(500, "Signup failed: " + e.getMessage());
         }
     }
 
     private boolean isEmailInWaitersTable(String email) {
         Index emailIndex = waitersTable.getIndex("email-index");
         return emailIndex.query("email", email).iterator().hasNext();
-    }
-
-    private static Map<String, String> createCorsHeaders() {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json");
-        headers.put("Access-Control-Allow-Origin", "*");
-        headers.put("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        headers.put("Access-Control-Allow-Headers", "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token");
-        return Collections.unmodifiableMap(headers);
-    }
-
-    private APIGatewayProxyResponseEvent createResponse(int statusCode, String message) {
-        APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
-        response.setHeaders(createCorsHeaders());
-        return response.withStatusCode(statusCode).withBody("{\"message\":\"" + message + "\"}");
     }
 }

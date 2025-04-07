@@ -8,7 +8,7 @@ import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
-import com.restaurant.utils.Helper;
+import static com.restaurant.utils.Helper.*;
 import java.util.logging.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurant.dto.ReservationResponseDTO;
@@ -29,13 +29,13 @@ public class UpdateReservationService {
         try {
             String[] pathParts = path.split("/");
             if (pathParts.length < 3)
-                return Helper.createErrorResponse(400, "Invalid path");
+                return createErrorResponse(400, "Invalid path");
 
             String reservationId = pathParts[pathParts.length - 1];
 
             Map<String, String> requestBody = parseJson(request.getBody());
             if (requestBody == null || requestBody.isEmpty())
-                return Helper.createErrorResponse(400, "Empty body");
+                return createErrorResponse(400, "Empty body");
 
             UpdateItemSpec updateSpec = new UpdateItemSpec().withPrimaryKey("reservationId", reservationId);
 
@@ -53,7 +53,7 @@ public class UpdateReservationService {
             }
 
             if (values.isEmpty())
-                return Helper.createErrorResponse(400, "No editable fields provided");
+                return createErrorResponse(400, "No editable fields provided");
 
             updateExpr.setLength(updateExpr.length() - 2); // remove trailing comma and space
             updateSpec.withUpdateExpression(updateExpr.toString()).withValueMap(values).withNameMap(names);
@@ -63,7 +63,7 @@ public class UpdateReservationService {
             // Fetch updated reservation
             Item updatedItem = reservationTable.getItem(new GetItemSpec().withPrimaryKey("reservationId", reservationId));
             if (updatedItem == null) {
-                return Helper.createErrorResponse(404, "Updated reservation not found");
+                return createErrorResponse(404, "Updated reservation not found");
             }
 
             String timeSlot = updatedItem.getString("timeFrom") + " - " + updatedItem.getString("timeTo");
@@ -79,9 +79,9 @@ public class UpdateReservationService {
                     updatedItem.getString("feedbackId")
             );
 
-            return Helper.createApiResponse(200, dto.toJson());
+            return createApiResponse(200, dto.toJson());
         } catch (Exception e) {
-            return Helper.createErrorResponse(500, "Error updating reservation: " + e.getMessage());
+            return createErrorResponse(500, "Error updating reservation: " + e.getMessage());
         }
     }
 

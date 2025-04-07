@@ -2,17 +2,16 @@ package com.restaurant.services;
 
 import com.amazonaws.services.dynamodbv2.document.*;
 import com.amazonaws.services.dynamodbv2.document.spec.PutItemSpec;
-import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
-import com.restaurant.utils.Helper;
+import static com.restaurant.utils.Helper.*;
 import java.util.*;
 import java.util.logging.Logger;
-import com.restaurant.services.WaiterService;
 import com.restaurant.dto.ReservationResponseDTO;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+
 
 public class BookingService {
     private static final Logger logger = Logger.getLogger(BookingService.class.getName());
@@ -39,24 +38,24 @@ public class BookingService {
             // Parse request body
             Map<String, String> requestBody = parseJson(request.getBody());
             if (requestBody == null || requestBody.isEmpty()) {
-                return Helper.createErrorResponse(400, "Invalid request data: Empty request body.");
+                return createErrorResponse(400, "Invalid request data: Empty request body.");
             }
 
             // Extract user ID from JWT claims
-            Map<String, Object> claims = Helper.extractClaims(request);
+            Map<String, Object> claims = extractClaims(request);
             logger.info("Extracted claims: " + claims); // Debugging purpose
             String userId = (String) claims.get("sub");
             String email = (String) claims.get("email");
 
             if (userId == null || userId.isEmpty()) {
-                return Helper.createErrorResponse(401, "Unauthorized: Missing or invalid token.");
+                return createErrorResponse(401, "Unauthorized: Missing or invalid token.");
             }
 
             // Validate required fields in request body
             List<String> requiredFields = List.of("locationId", "tableNumber", "date", "guestsNumber", "timeFrom", "timeTo");
             for (String field : requiredFields) {
                 if (!requestBody.containsKey(field) || requestBody.get(field).trim().isEmpty()) {
-                    return Helper.createErrorResponse(400, "Missing required field: " + field);
+                    return createErrorResponse(400, "Missing required field: " + field);
                 }
             }
 
@@ -65,10 +64,10 @@ public class BookingService {
             try {
                 guestsNumber = Integer.parseInt(requestBody.get("guestsNumber"));
                 if (guestsNumber <= 0) {
-                    return Helper.createErrorResponse(400, "Invalid guestsNumber: Must be a positive integer.");
+                    return createErrorResponse(400, "Invalid guestsNumber: Must be a positive integer.");
                 }
             } catch (NumberFormatException e) {
-                return Helper.createErrorResponse(400, "Invalid guestsNumber: Must be an integer.");
+                return createErrorResponse(400, "Invalid guestsNumber: Must be an integer.");
             }
 
             String locationId = requestBody.get("locationId");
@@ -84,17 +83,17 @@ public class BookingService {
                 ZonedDateTime nowIST = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"));
 
                 if (reservationStartIST.isBefore(nowIST)) {
-                    return Helper.createErrorResponse(400, "You cannot book a reservation in the past.");
+                    return createErrorResponse(400, "You cannot book a reservation in the past.");
                 }
             } catch (Exception e) {
                 logger.severe("Error parsing reservation time: " + e.getMessage());
-                return Helper.createErrorResponse(400, "Invalid date or time format. Use yyyy-MM-dd for date and HH:mm for time");
+                return createErrorResponse(400, "Invalid date or time format. Use yyyy-MM-dd for date and HH:mm for time");
             }
 
             // Check if table exists in Tables table
             Item tableItem = tablesTable.getItem("locationId", locationId, "tableNumber", tableNumber);
             if (tableItem == null) {
-                return Helper.createErrorResponse(400, "The specified table number does not exist for the given location.");
+                return createErrorResponse(400, "The specified table number does not exist for the given location.");
             }
 
             // Check for existing overlapping reservations for same table/date
@@ -113,9 +112,9 @@ public class BookingService {
                 // Time overlap check
                 if (!(timeTo.compareTo(existingFrom) <= 0 || timeFrom.compareTo(existingTo) >= 0)) {
                     if (reservedBy.equals(email)) {
-                        return Helper.createErrorResponse(409, "You have already booked this table for the same time slot.");
+                        return createErrorResponse(409, "You have already booked this table for the same time slot.");
                     }
-                    return Helper.createErrorResponse(409, "The specified table is already booked for the given date and time.");
+                    return createErrorResponse(409, "The specified table is already booked for the given date and time.");
                 }
             }
 
@@ -164,11 +163,11 @@ public class BookingService {
                     null // feedbackId
             );
 
-            return Helper.createApiResponse(201, dto.toJson());
+            return createApiResponse(201, dto.toJson());
 
         } catch (Exception e) {
             logger.severe("Error creating reservation: " + e.getMessage());
-            return Helper.createErrorResponse(500, "Error creating reservation: " + e.getMessage());
+            return createErrorResponse(500, "Error creating reservation: " + e.getMessage());
         }
     }
 

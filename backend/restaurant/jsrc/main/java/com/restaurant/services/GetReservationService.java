@@ -4,14 +4,13 @@ import com.amazonaws.services.dynamodbv2.document.*;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
-import com.amazonaws.services.dynamodbv2.document.spec.PutItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.restaurant.dto.ReservationResponseDTO;
 import org.json.JSONArray;
 import java.util.logging.Logger;
 import java.util.*;
-import com.restaurant.utils.Helper;
+import static com.restaurant.utils.Helper.*;
 
 public class GetReservationService {
     private static final Logger logger = Logger.getLogger(GetReservationService.class.getName());
@@ -29,18 +28,18 @@ public class GetReservationService {
 
     public APIGatewayProxyResponseEvent handleGetReservations(APIGatewayProxyRequestEvent request) {
         try {
-            Map<String, Object> claims = Helper.extractClaims(request);
+            Map<String, Object> claims = extractClaims(request);
             String email = (String) claims.get("email");
 
             logger.info("Extracted email: " + email);
             if (email == null || email.isEmpty()) {
-                return Helper.createErrorResponse(401, "Unauthorized: Email not found in token.");
+                return createErrorResponse(401, "Unauthorized: Email not found in token.");
             }
 
             Index emailIndex = reservationTable.getIndex("email-index");
             if (emailIndex == null) {
                 logger.severe("DynamoDB index 'email-index' does not exist.");
-                return Helper.createErrorResponse(500, "Server error: Email index not found.");
+                return createErrorResponse(500, "Server error: Email index not found.");
             }
 
             ItemCollection<QueryOutcome> items = emailIndex.query(
@@ -90,9 +89,9 @@ public class GetReservationService {
                 jsonArray.put(dto.toJson());
             }
 
-            return Helper.createApiResponse(200, jsonArray);
+            return createApiResponse(200, jsonArray);
         } catch (Exception e) {
-            return Helper.createErrorResponse(500, "Error fetching reservations: " + e.getMessage());
+            return createErrorResponse(500, "Error fetching reservations: " + e.getMessage());
         }
     }
 }

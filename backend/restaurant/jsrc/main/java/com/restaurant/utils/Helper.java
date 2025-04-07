@@ -14,17 +14,6 @@ public class Helper {
     private static final Logger logger = Logger.getLogger(Helper.class.getName());
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-
-    public static boolean isOverlapping(String start1, String end1, String start2, String end2) {
-        LocalTime s1 = LocalTime.parse(start1);
-        LocalTime e1 = LocalTime.parse(end1);
-        LocalTime s2 = LocalTime.parse(start2);
-        LocalTime e2 = LocalTime.parse(end2);
-
-        return !e1.isBefore(s2) && !e2.isBefore(s1); // Overlap if ranges intersect
-    }
-
-
     /**
      * Creates a successful API response.
      */

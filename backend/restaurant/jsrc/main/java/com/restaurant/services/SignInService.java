@@ -4,12 +4,12 @@ import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
-//import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurant.model.SignInEntity;
+import static com.restaurant.utils.Helper.*;
 import com.restaurant.validators.EmailValidator;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AuthFlowType;
@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
+
 
 public class SignInService {
     private final CognitoIdentityProviderClient cognitoClient;
@@ -50,20 +51,20 @@ public class SignInService {
 
             // Validate input
             if (!EmailValidator.validateEmail(signInEntity.getEmail())) {
-                return createResponse(400, "Invalid Email");
+                return createErrorResponse(400, "Invalid Email");
             }
             if (signInEntity.getEmail() == null || signInEntity.getEmail().isEmpty()) {
-                return createResponse(400, "Email is required");
+                return createErrorResponse(400, "Email is required");
             }
             if (signInEntity.getPassword() == null || signInEntity.getPassword().isEmpty()) {
-                return createResponse(400, "Password is required");
+                return createErrorResponse(400, "Password is required");
             }
 
             // Check if the user is locked out
             Item userItem = usersTable.getItem("email", signInEntity.getEmail());
             if (userItem != null) {
                 if (isAccountLocked(userItem)) {
-                    return createResponse(403, "Your account is temporarily locked due to multiple failed login attempts. Please try again later.");
+                    return createApiResponse(403, Map.of("message","Your account is temporarily locked due to multiple failed login attempts. Please try again later."));
                 }
             }
 
@@ -90,7 +91,7 @@ public class SignInService {
             } catch (UserNotFoundException | NotAuthorizedException e) {
                 // Increment failed login attempts
                 incrementFailedAttempts(signInEntity.getEmail(), userItem);
-                return createResponse(401, "Incorrect email or password. Try again or create an account.");
+                return createErrorResponse(401, "Incorrect email or password. Try again or create an account.");
             }
 
             String accessToken = authResponse.authenticationResult().idToken();
@@ -107,11 +108,11 @@ public class SignInService {
             responseData.put("username", username);
             responseData.put("role", role);
 
-            return createSuccessResponse(responseData);
+            return createApiResponse(201,responseData);
 
         } catch (Exception e) {
             logger.severe("Sign-in failed: " + e.getMessage());
-            return createResponse(500, "Sign-in failed: " + e.getMessage());
+            return createErrorResponse(500, "Sign-in failed: " + e.getMessage());
         }
     }
 
@@ -156,31 +157,5 @@ public class SignInService {
         usersTable.updateItem(new UpdateItemSpec()
                 .withPrimaryKey("email", email)
                 .withUpdateExpression("REMOVE failedAttempts, lockoutUntil"));
-    }
-
-    private APIGatewayProxyResponseEvent createSuccessResponse(Map<String, String> data) {
-        try {
-            String body = objectMapper.writeValueAsString(data);
-            APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
-            response.setHeaders(createCorsHeaders());
-            return response.withStatusCode(201).withBody(body);
-        } catch (Exception e) {
-            return createResponse(500, "Response Error");
-        }
-    }
-
-    private static Map<String, String> createCorsHeaders() {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json");
-        headers.put("Access-Control-Allow-Origin", "*");
-        headers.put("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        headers.put("Access-Control-Allow-Headers", "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token");
-        return Collections.unmodifiableMap(headers);
-    }
-
-    private APIGatewayProxyResponseEvent createResponse(int statusCode, String message) {
-        APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
-        response.setHeaders(createCorsHeaders());
-        return response.withStatusCode(statusCode).withBody("{\"message\":\"" + message + "\"}");
     }
 }

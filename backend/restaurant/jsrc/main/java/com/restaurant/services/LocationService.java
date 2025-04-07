@@ -6,13 +6,12 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurant.dto.DishDTO;
 import com.restaurant.dto.LocationDTO;
+import static com.restaurant.utils.Helper.*;
 
 import javax.inject.Inject;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-//import static org.openjdk.tools.sjavac.Util.getStackTrace;
 
 public class LocationService {
     private static final Logger logger = Logger.getLogger(LocationService.class.getName());
@@ -30,7 +29,7 @@ public class LocationService {
         try {
             if (LOCATIONS_TABLE == null || LOCATIONS_TABLE.isEmpty()) {
                 logger.severe("LOCATIONS_TABLE environment variable is not set");
-                return createResponse(500, "{\"message\":\"Server configuration error: LOCATIONS_TABLE not set\"}");
+                return createErrorResponse(500, "LOCATIONS_TABLE not set");
             }
 
             logger.info("Fetching locations from table: " + LOCATIONS_TABLE);
@@ -50,10 +49,9 @@ public class LocationService {
                 locations.add(location);
             }
 
-            return createResponse(200, objectMapper.writeValueAsString(locations));
+            return createApiResponse(200, objectMapper.writeValueAsString(locations));
         } catch (Exception e) {
-            //logger.severe("Error in getLocations: " + e.getMessage() + ", Stacktrace: " + getStackTrace(e));
-            return createResponse(500, "{\"message\":\"Internal Server Error: " + e.getMessage() + "\"}");
+            return createErrorResponse(500, e.getMessage());
         }
     }
     public APIGatewayProxyResponseEvent getSpecialityDishes(APIGatewayProxyRequestEvent request) {
@@ -69,12 +67,12 @@ public class LocationService {
             logger.info("Fetching speciality dishes for locationId: " + locationId);
             List<DishDTO> dishes = fetchSpecialityDishes(locationId);
 
-            return createResponse(200, objectMapper.writeValueAsString(dishes));
+            return createApiResponse(200, objectMapper.writeValueAsString(dishes));
         } catch (IllegalArgumentException e) {
-            return createResponse(404, "{\"message\":\"" + e.getMessage() + "\"}");
+            return createErrorResponse(404, e.getMessage());
         } catch (Exception e) {
             logger.severe("Error fetching speciality dishes: " + e.getMessage());
-            return createResponse(500, "{\"message\":\"Internal Server Error\"}");
+            return createErrorResponse(500, "Internal Server Error");
         }
     }
 
@@ -168,11 +166,5 @@ public class LocationService {
             logger.severe("DISHES_TABLE environment variable not set");
             throw new IllegalStateException("Dishes table configuration missing");
         }
-    }
-
-    private APIGatewayProxyResponseEvent createResponse(int statusCode, String message) {
-        APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
-        response.setHeaders(createCorsHeaders());
-        return response.withStatusCode(statusCode).withBody("{\"message\":\"" + message + "\"}");
     }
 }

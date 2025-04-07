@@ -8,12 +8,14 @@ import com.amazonaws.services.dynamodbv2.document.*;
 import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.restaurant.dto.AvailableSlotsDTO;
+import static com.restaurant.utils.Helper.createApiResponse;
 import javax.inject.Inject;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+
 
 public class TablesService {
     private final DynamoDB dynamoDB;
@@ -41,7 +43,7 @@ public class TablesService {
             String time = queryParams.get("time");
 
             if (queryParams == null) {
-                return createResponse(200, Collections.emptyList());
+                return createApiResponse(200, Collections.emptyList());
             }
 
             LocalDate selectedDate = date != null ? LocalDate.parse(date) : LocalDate.now();
@@ -50,7 +52,7 @@ public class TablesService {
             //check if the date and time entered by user are before the current date and time
             if ((selectedDate.isBefore(LocalDate.now())) ||
                     (selectedDate.isEqual(LocalDate.now()) && userTime != null && userTime.isBefore(LocalTime.now()))) {
-                return createResponse(400, "Date/Time cannot be in the past");
+                return createApiResponse(400, "Date/Time cannot be in the past");
             }
 
             // Validate guests parameter
@@ -85,7 +87,7 @@ public class TablesService {
             List<Item> availableTables = getAvailableTablesByLocationAndCapacity(locationId, guests);
             List<AvailableSlotsDTO> availableTimeSlots = getAvailableTimeSlots(availableTables, date, time, context);
 
-            return createResponse(200, availableTimeSlots);
+            return createApiResponse(200, availableTimeSlots);
 
         } catch (Exception e) {
             context.getLogger().log("Error: " + e.getMessage());
@@ -206,18 +208,6 @@ public class TablesService {
         headers.put("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         headers.put("Access-Control-Allow-Headers", "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token");
         return Collections.unmodifiableMap(headers);
-    }
-
-    private APIGatewayProxyResponseEvent createResponse(int statusCode, Object data) {
-        try {
-            APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
-            response.setHeaders(createCorsHeaders());
-            response.setStatusCode(statusCode);
-            response.setBody(objectMapper.writeValueAsString(data));
-            return response;
-        } catch (Exception e) {
-            return errorResponseHandler(500, "Error creating response");
-        }
     }
 
     private APIGatewayProxyResponseEvent errorResponseHandler(int statusCode, String message) {

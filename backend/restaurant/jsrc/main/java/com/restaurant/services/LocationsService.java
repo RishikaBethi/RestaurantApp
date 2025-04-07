@@ -1,6 +1,6 @@
 package com.restaurant.services;
 
-import com.amazonaws.services.lambda.runtime.Context;  // Correct import
+import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;

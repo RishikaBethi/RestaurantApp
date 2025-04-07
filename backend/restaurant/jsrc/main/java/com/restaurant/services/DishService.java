@@ -1,7 +1,6 @@
 package com.restaurant.services;
 
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
-import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.ItemCollection;
 import com.amazonaws.services.dynamodbv2.document.ScanOutcome;
 import com.amazonaws.services.dynamodbv2.document.Table;
@@ -9,15 +8,15 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurant.dto.DishDTO;
+import static com.restaurant.utils.Helper.*;
 
 import javax.inject.Inject;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;  // Added for StreamSupport
+import java.util.stream.StreamSupport;
 
 public class DishService {
     private static final Logger logger = Logger.getLogger(DishService.class.getName());
@@ -36,7 +35,7 @@ public class DishService {
         try {
             if (DISHES_TABLE == null || DISHES_TABLE.trim().isEmpty()) {
                 logger.severe("DISHES_TABLE environment variable not set");
-                return createResponse(500, "{\"message\":\"Server configuration error: DISHES_TABLE not set\"}");
+                return createErrorResponse(500, "DISHES_TABLE not set");
             }
 
             Table table = dynamoDB.getTable(DISHES_TABLE);
@@ -80,17 +79,11 @@ public class DishService {
             logger.info("Retrieved " + popularDishes.size() + " popular dishes");
 
             String responseBody = objectMapper.writeValueAsString(popularDishes);
-            return createResponse(200, responseBody);
+            return createApiResponse(200, responseBody);
 
         } catch (Exception e) {
             logger.severe("Error fetching popular dishes: " + e.getMessage());
-            return createResponse(500, "{\"message\":\"Internal Server Error: " + e.getMessage() + "\"}");
+            return createErrorResponse(500, e.getMessage());
         }
-    }
-
-    private APIGatewayProxyResponseEvent createResponse(int statusCode, String message) {
-        APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
-        response.setHeaders(createCorsHeaders());
-        return response.withStatusCode(statusCode).withBody("{\"message\":\"" + message + "\"}");
     }
 }
