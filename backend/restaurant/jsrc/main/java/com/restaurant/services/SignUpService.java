@@ -11,9 +11,9 @@ import com.restaurant.dto.SignUpDTO;
 import com.restaurant.validators.EmailValidator;
 import com.restaurant.validators.NameValidator;
 import com.restaurant.validators.PasswordValidator;
+import com.amazonaws.services.dynamodbv2.document.Table;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
-import com.amazonaws.services.dynamodbv2.document.Table;
 
 import javax.inject.Inject;
 import java.util.Collections;
@@ -83,6 +83,7 @@ public class SignUpService {
                 String role = isEmailInWaitersTable(signUpDto.getEmail()) ? "Waiter" : "Customer";
 
                 try {
+
                     usersTable.putItem(new PutItemSpec().withItem(new Item()
                             .withPrimaryKey("email", signUpDto.getEmail())
                             .withString("firstName", signUpDto.getFirstName())
@@ -97,15 +98,12 @@ public class SignUpService {
                 return createResponse(400, "A user with this email address already exists");
             } catch (InvalidPasswordException e) {
                 return createResponse(400, "Password does not meet requirements");
-            }
-            catch (InvalidParameterException e) {
-                return createResponse(400, "Invalid email format");
-            }
+            }catch (InvalidParameterException e) {
+                return createResponse(400, "Invalid email format");}
             catch (Exception e) {
                 logger.severe("Cognito error: " + e.getMessage());
                 return createResponse(500, "An error occurred: " + e.getMessage());
             }
-
 
             return createResponse(201, "User registered successfully");
 

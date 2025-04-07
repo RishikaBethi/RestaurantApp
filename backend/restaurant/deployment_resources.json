@@ -12,6 +12,10 @@
             "dynamodb:PutItem",
             "dynamodb:Batch*",
             "dynamodb:DeleteItem",
+            "dynamodb:UpdateItem",
+            "dynamodb:Scan",
+            "dynamodb:Scan",
+            "dynamodb:UpdateItem",
             "ssm:PutParameter",
             "ssm:GetParameter",
             "kms:Decrypt",
@@ -56,6 +60,9 @@
       "require_lowercase": true,
       "require_numbers": true
     },
+    "auto_verified_attributes": [
+      "email"
+    ],
     "sms_configuration": {},
     "username_attributes": [
       "email"
@@ -70,13 +77,21 @@
         "ALLOW_ADMIN_USER_PASSWORD_AUTH",
         "ALLOW_CUSTOM_AUTH",
         "ALLOW_USER_PASSWORD_AUTH"
-      ]},
+      ]
+    },
     "tags": {}
   },
   "restaurant-api": {
     "resource_type": "api_gateway",
     "deploy_stage": "dev",
-    "dependencies": [],
+    "authorizer": {
+      "type": "COGNITO_USER_POOLS",
+      "identity_source": "method.request.header.Authorization",
+      "user_pools": [
+        "${pool_name}"
+      ],
+      "ttl": 300
+    },
     "resources": {
       "/auth/sign-up": {
         "enable_cors": true,
@@ -94,9 +109,153 @@
           "enable_proxy": true
         }
       },
+      "/bookings/client": {
+        "enable_cors": true,
+        "POST": {
+          "authorization_type": "NONE",
+          "integration_type": "lambda",
+          "lambda_name": "restaurant_handler",
+          "enable_proxy": true,
+          "api_key_required": false,
+          "method_request_parameters": {},
+          "integration_request_body_template": {},
+          "responses": [],
+          "integration_responses": [],
+          "default_error_pattern": true
+        }
+      },
+      "/reservations": {
+        "enable_cors": true,
+        "GET": {
+          "authorization_type": "NONE",
+          "integration_type": "lambda",
+          "lambda_name": "restaurant_handler",
+          "enable_proxy": true,
+          "api_key_required": false,
+          "method_request_parameters": {},
+          "integration_request_body_template": {},
+          "responses": [],
+          "integration_responses": [],
+          "default_error_pattern": true
+        }
+      },
+      "/reservations/{reservationId}": {
+        "enable_cors": true,
+        "DELETE": {
+          "authorization_type": "NONE",
+          "integration_type": "lambda",
+          "lambda_name": "restaurant_handler",
+          "enable_proxy": true,
+          "api_key_required": false,
+          "method_request_parameters": {},
+          "integration_request_body_template": {},
+          "responses": [],
+          "integration_responses": [],
+          "default_error_pattern": true
+        }
+      },
       "/auth/sign-in": {
         "enable_cors": true,
         "POST": {
+          "authorization_type": "NONE",
+          "integration_type": "lambda",
+          "lambda_name": "restaurant_handler",
+          "api_key_required": false,
+          "method_request_parameters": {},
+          "integration_request_body_template": {},
+          "responses": [],
+          "integration_responses": [],
+          "default_error_pattern": true,
+          "enable_proxy": true
+        }
+      },
+
+      "/dishes/popular": {
+        "enable_cors": false,
+        "GET": {
+          "authorization_type": "NONE",
+          "integration_type": "lambda",
+          "enable_proxy": true,
+          "lambda_name": "restaurant_handler",
+          "api_key_required": false,
+          "method_request_parameters": {},
+          "integration_request_body_template": {},
+          "responses": [],
+          "integration_responses": [],
+          "default_error_pattern": true
+        }
+      },
+      "/locations": {
+        "enable_cors": false,
+        "GET": {
+          "authorization_type": "NONE",
+          "integration_type": "lambda",
+          "enable_proxy": true,
+          "lambda_name": "restaurant_handler",
+          "api_key_required": false,
+          "method_request_parameters": {},
+          "integration_request_body_template": {},
+          "responses": [],
+          "integration_responses": [],
+          "default_error_pattern": true
+        }
+      },
+      "/locations/{id}/feedbacks": {
+        "enable_cors": false,
+        "GET": {
+          "authorization_type": "NONE",
+          "integration_type": "lambda",
+          "enable_proxy": true,
+          "lambda_name": "restaurant_handler",
+          "api_key_required": false,
+          "method_request_parameters": {
+            "method.request.path.id": true,
+            "method.request.querystring.type": false,
+            "method.request.querystring.page": false,
+            "method.request.querystring.size": false,
+            "method.request.querystring.sort": false
+          },
+          "integration_request_body_template": {},
+          "responses": [],
+          "integration_responses": [],
+          "default_error_pattern": true
+        }
+      },
+      "/locations/{id}/speciality-dishes": {
+        "enable_cors": false,
+        "GET": {
+          "authorization_type": "NONE",
+          "integration_type": "lambda",
+          "enable_proxy": true,
+          "lambda_name": "restaurant_handler",
+          "api_key_required": false,
+          "method_request_parameters": {
+            "method.request.path.id": true
+          },
+          "integration_request_body_template": {},
+          "responses": [],
+          "integration_responses": [],
+          "default_error_pattern": true
+        }
+      },
+      "/bookings/tables": {
+        "enable_cors": true,
+        "GET": {
+          "authorization_type": "NONE",
+          "integration_type": "lambda",
+          "lambda_name": "restaurant_handler",
+          "api_key_required": false,
+          "method_request_parameters": {},
+          "integration_request_body_template": {},
+          "responses": [],
+          "integration_responses": [],
+          "default_error_pattern": true,
+          "enable_proxy": true
+        }
+      },
+      "/locations/select-options": {
+        "enable_cors": true,
+        "GET": {
           "authorization_type": "NONE",
           "integration_type": "lambda",
           "lambda_name": "restaurant_handler",
@@ -119,24 +278,6 @@
         "user_pools": [
           "restaurant-user-pool"
         ]
-      }
-    },
-    "Users": {
-      "resource_type": "dynamodb_table",
-      "hash_key_name": "userId",
-      "hash_key_type": "S",
-      "read_capacity": 10,
-      "write_capacity": 10,
-      "global_indexes": [],
-      "autoscaling": [],
-      "tags": {},
-      "attributes": {
-        "userId": "String",
-        "email": "String",
-        "firstName": "String",
-        "lastName": "String",
-        "role": "String",
-        "userAvatarUrl": "String"
       }
     }
   }

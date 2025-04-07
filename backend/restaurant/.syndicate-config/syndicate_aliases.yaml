@@ -1,7 +1,11 @@
 account-id: '864899830479'
-lambdas_alias_name: dev
+lambdas_alias_name: dev4
 logs_expiration: 30
 region: ap-southeast-2
 user_table: "tm7-Users"
 waiter_table: "tm7-Waiters"
 user_pool: "restaurant-user-pool"
+locations_table: "tm7-Locations"
+reservations_table: "tm7-Reservations"
+tables_table: "tm7-Tables"
+orders_table: "tm7-Orders"

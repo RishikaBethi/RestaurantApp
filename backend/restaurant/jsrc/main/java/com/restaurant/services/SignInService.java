@@ -4,7 +4,6 @@ import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
-import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
@@ -33,7 +32,7 @@ public class SignInService {
     private final DynamoDB dynamoDB;
     private final Table usersTable;
     private static final int MAX_FAILED_ATTEMPTS = 3;
-    private static final long LOCKOUT_DURATION_SECONDS = 30 * 60; // 30 minutes
+    private static final long LOCKOUT_DURATION_SECONDS = 30 * 60;
 
     @Inject
     public SignInService(CognitoIdentityProviderClient cognitoClient, ObjectMapper objectMapper, String clientId, DynamoDB dynamoDB) {
