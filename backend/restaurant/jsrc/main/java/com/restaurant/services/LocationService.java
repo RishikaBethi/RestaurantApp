@@ -170,13 +170,9 @@ public class LocationService {
         }
     }
 
-    private APIGatewayProxyResponseEvent createResponse(int statusCode, String body) {
-        return new APIGatewayProxyResponseEvent()
-                .withStatusCode(statusCode)
-                .withBody(body)
-                .withHeaders(Map.of(
-                        "Content-Type", "application/json",
-                        "Access-Control-Allow-Origin", "*"
-                ));
+    private APIGatewayProxyResponseEvent createResponse(int statusCode, String message) {
+        APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
+        response.setHeaders(createCorsHeaders());
+        return response.withStatusCode(statusCode).withBody("{\"message\":\"" + message + "\"}");
     }
 }

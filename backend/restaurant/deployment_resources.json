@@ -115,7 +115,7 @@
       },
 
       "/dishes/popular": {
-        "enable_cors": false,
+        "enable_cors": true,
         "GET": {
           "authorization_type": "NONE",
           "integration_type": "lambda",
@@ -130,7 +130,7 @@
         }
       },
       "/locations": {
-        "enable_cors": false,
+        "enable_cors": true,
         "GET": {
           "authorization_type": "NONE",
           "integration_type": "lambda",
@@ -145,7 +145,7 @@
         }
       },
       "/locations/{id}/feedbacks": {
-        "enable_cors": false,
+        "enable_cors": true,
         "GET": {
           "authorization_type": "NONE",
           "integration_type": "lambda",
@@ -166,7 +166,7 @@
         }
       },
       "/locations/{id}/speciality-dishes": {
-        "enable_cors": false,
+        "enable_cors": true,
         "GET": {
           "authorization_type": "NONE",
           "integration_type": "lambda",

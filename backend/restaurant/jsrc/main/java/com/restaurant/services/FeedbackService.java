@@ -229,20 +229,10 @@ public class FeedbackService {
         dto.setLocationId(item.getString("locationId"));
         return dto;
     }
-
-    private APIGatewayProxyResponseEvent createResponse(int statusCode, Object body) {
-        try {
-            return new APIGatewayProxyResponseEvent()
-                    .withStatusCode(statusCode)
-                    .withBody(objectMapper.writeValueAsString(body))
-                    .withHeaders(Map.of("Content-Type", "application/json"));
-        } catch (Exception e) {
-            logger.severe("Error serializing response: " + e.getMessage());
-            return new APIGatewayProxyResponseEvent()
-                    .withStatusCode(500)
-                    .withBody("{\"message\":\"Internal Server Error\"}")
-                    .withHeaders(Map.of("Content-Type", "application/json"));
-        }
+    private APIGatewayProxyResponseEvent createResponse(int statusCode, String message) {
+        APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
+        response.setHeaders(createCorsHeaders());
+        return response.withStatusCode(statusCode).withBody("{\"message\":\"" + message + "\"}");
     }
 
     private Map<String, Object> createEmptyResponse() {
