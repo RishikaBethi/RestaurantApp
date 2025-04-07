@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { FaUser, FaClock } from "react-icons/fa";
 import ConfirmationModal from "./confirmationModal";
 import axios from "axios";
+import { BASE_API_URL } from "@/constants/constant";
 
 interface Table {
   locationId: string;
@@ -55,7 +56,7 @@ export default function ReservationModal({ isOpen, onClose, table, selectedDate 
 
     // Clear error if all fields are valid
     try {
-      const response = await axios.post("https://6txdnfn1ga.execute-api.ap-southeast-2.amazonaws.com/dev/bookings/client", {
+      const response = await axios.post(`${BASE_API_URL}/bookings/client`, {
         locationId: table.locationId,
         tableNumber: table.tableNumber,
         date: selectedDate || getTodayDate(),

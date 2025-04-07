@@ -1,3 +1,4 @@
+import { BASE_API_URL } from "@/constants/constant";
 import axios from "axios";
 import { useState } from "react";
 
@@ -10,7 +11,7 @@ export function useCancelReservation() {
     setError(null);
     const token = localStorage.getItem("token");
     try {
-      const response=await axios.delete(`https://35cos3vxy6.execute-api.ap-southeast-2.amazonaws.com/dev/reservations/${reservationId}`, {
+      const response=await axios.delete(`${BASE_API_URL}/reservations/${reservationId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

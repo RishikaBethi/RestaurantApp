@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useCancelReservation } from "@/hooks/useCancelReservation";
 import { toast } from "sonner";
+import { BASE_API_URL } from "@/constants/constant";
 
 interface Reservation {
   id: number;
@@ -55,7 +56,7 @@ export default function ReservationsPage() {
   const fetchReservations = async () => {
     const token = localStorage.getItem("token");
     try {
-      const response = await axios.get<Reservation[]>("https://6txdnfn1ga.execute-api.ap-southeast-2.amazonaws.com/dev/reservations",
+      const response = await axios.get<Reservation[]>(`${BASE_API_URL}/reservations`,
         {
           headers: {
             Authorization: `Bearer ${token}`, 

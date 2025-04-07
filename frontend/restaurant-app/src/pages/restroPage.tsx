@@ -5,9 +5,9 @@ import { Star, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import SpecialtyDishCard from "@/components/specialtyDishCard";
 import axios from "axios";
-import ShimmerDishes from "@/components/shimmer/shimmerDishes";
+import ShimmerDishes from "@/components/shimmerUI/shimmerDishes";
 import FeedbackCard from "@/components/feedbackCard"
-import ShimmerFeedback from "@/components/shimmer/shimmerFeedback";
+import ShimmerFeedback from "@/components/shimmerUI/shimmerFeedback";
 import { useFeedbacks, Feedback, FeedbackType, SortOption } from "@/hooks/useFeedbacks";
 import { BASE_API_URL } from "@/constants/constant";
 

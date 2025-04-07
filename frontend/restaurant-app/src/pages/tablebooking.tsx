@@ -4,7 +4,7 @@ import axios from "axios";
 import locationImage from '../assets/homepage.png';
 import ReservationModal from "@/components/reservationModal";
 import AvailableSlotsModal from "@/components/availableSlotsModal";
-import ShimmerTables from "@/components/shimmer/shimmerTables";
+import ShimmerTables from "@/components/shimmerUI/shimmerTables";
 import { BASE_API_URL } from "@/constants/constant";
 
 type Table = {

@@ -1,11 +1,11 @@
 import PopularDishCard from "@/components/popularDishCard";
 import LocationCard from "@/components/locationCard";
 import saladImage from "@/assets/homepage.png";
-import ShimmerDishes from "@/components/shimmer/shimmerDishes";
+import ShimmerDishes from "@/components/shimmerUI/shimmerDishes";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import ShimmerLocations from "@/components/shimmer/shimmerLocations";
+import ShimmerLocations from "@/components/shimmerUI/shimmerLocations";
 import { BASE_API_URL } from "@/constants/constant";
 
 interface Location {
