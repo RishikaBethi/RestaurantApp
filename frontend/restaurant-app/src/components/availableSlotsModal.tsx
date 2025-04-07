@@ -14,11 +14,20 @@ interface AvailableSlotsModalProps {
   isOpen: boolean;
   onClose: () => void;
   table: Table | null;
+  date: string;
 }
 
-export default function AvailableSlotsModal({ isOpen, onClose, table }: AvailableSlotsModalProps) {
+export default function AvailableSlotsModal({ isOpen, onClose, table, date }: AvailableSlotsModalProps) {
   if (!table) return null;
-
+  const formatDateToWords = (dateStr: string): string => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+  
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md p-4 rounded-lg bg-white shadow-lg">
@@ -27,7 +36,7 @@ export default function AvailableSlotsModal({ isOpen, onClose, table }: Availabl
           <p className="text-gray-600 mt-1 text-sm">
             There are <strong>{table.availableSlots.length} slots</strong> available at{" "}
             <strong>{table.locationAddress || "Unknown"}</strong>, Table{" "}
-            {table.tableNumber}, for <strong>October 14, 2024</strong>.
+            {table.tableNumber}, for <strong>{formatDateToWords(date)}</strong>.
           </p>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-2 mt-2">

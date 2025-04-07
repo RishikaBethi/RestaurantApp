@@ -5,6 +5,7 @@ import { FaUser, FaClock } from "react-icons/fa";
 import ConfirmationModal from "./confirmationModal";
 import axios from "axios";
 import { BASE_API_URL } from "@/constants/constant";
+import { toast } from "sonner";
 
 interface Table {
   locationId: string;
@@ -38,6 +39,15 @@ export default function ReservationModal({ isOpen, onClose, table, selectedDate 
     return `${year}-${month}-${day}`;
   };  
 
+  const formatDateToWords = (dateStr: string): string => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };  
+
   if (!table) return null;
 
   // Handle reservation confirmation
@@ -45,10 +55,12 @@ export default function ReservationModal({ isOpen, onClose, table, selectedDate 
      // Validation: Check if all required fields are selected
      if (!fromTime || !toTime) {
       setError("Please select both 'From' and 'To' time.");
+      toast.error("Please select both 'From' and 'To' time.");
       return;
     }
     if (guests < 1) {
       setError("Please select the number of guests.");
+      toast.error("Please select the number of guests.");
       return;
     }
 
@@ -71,9 +83,11 @@ export default function ReservationModal({ isOpen, onClose, table, selectedDate 
       setBookingData(response.data);
       onClose();
       setTimeout(() => setShowConfirmation(true), 100);
-    } catch (err) {
-      console.error("Error making reservation:", err);
-      setError("Failed to make reservation. Please try again or Login to make a reservation");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      const errorMessage = err?.response?.data?.error || "Something went wrong!";
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
   return (
@@ -84,7 +98,7 @@ export default function ReservationModal({ isOpen, onClose, table, selectedDate 
           <DialogTitle className="text-xl font-bold">Make a Reservation</DialogTitle>
           <p className="text-gray-600 mt-1 text-sm">
             You are making a reservation at <strong>{table.locationAddress}</strong>, Table {table.tableNumber}, <br />
-            for <strong>{selectedDate}</strong>.
+            for <strong>{formatDateToWords(selectedDate)}</strong>.
           </p>
         </DialogHeader>
 
@@ -126,15 +140,24 @@ export default function ReservationModal({ isOpen, onClose, table, selectedDate 
               <p className="text-xs text-gray-500 mb-1">From</p>
               <div className="flex items-center border rounded-lg p-2 gap-2 bg-white">
                 <FaClock className="text-gray-500" />
-                <input
-                  type="time"
-                  className="w-full outline-none"
-                  value={fromTime}
-                  onChange={(e) => {
-                    setFromTime(e.target.value);
-                    setToTime(""); // reset toTime
-                  }}
-                />
+                <select
+          className="w-full outline-none"
+          value={fromTime}
+          onChange={(e) => {
+            setFromTime(e.target.value);
+            setToTime(""); // reset To when From changes
+          }}
+        >
+          <option value="">Select</option>
+          {table.availableSlots.map((slot, index) => {
+            const from = slot.split("-")[0];
+            return (
+              <option key={index} value={from}>
+                {from}
+              </option>
+            );
+          })}
+        </select>
               </div>
               </div>
             </div>
@@ -143,13 +166,24 @@ export default function ReservationModal({ isOpen, onClose, table, selectedDate 
               <p className="text-xs text-gray-500 mb-1">To</p>
               <div className="flex items-center border rounded-lg p-2 gap-2 bg-white">
                 <FaClock className="text-gray-500" />
-                <input
-                  type="time"
-                  className="w-full outline-none"
-                  value={toTime}
-                  onChange={(e) => setToTime(e.target.value)}
-                  disabled={!fromTime}
-                />
+                <select
+          className="w-full outline-none"
+          value={toTime}
+          onChange={(e) => setToTime(e.target.value)}
+          disabled={!fromTime}
+        >
+          <option value="">Select</option>
+          {table.availableSlots
+            .filter((slot) => slot.startsWith(fromTime))
+            .map((slot, index) => {
+              const to = slot.split("-")[1];
+              return (
+                <option key={index} value={to}>
+                  {to}
+                </option>
+              );
+            })}
+        </select>
               </div>
             </div>
         </div>
