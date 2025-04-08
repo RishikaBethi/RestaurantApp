@@ -7,6 +7,7 @@ import AvailableSlotsModal from "@/components/availableSlotsModal";
 import ShimmerTables from "@/components/shimmerUI/shimmerTables";
 import { BASE_API_URL } from "@/constants/constant";
 import { toast } from "sonner";
+import { useNavigate } from "react-router";
 
 type Table = {
   locationId: string;
@@ -34,8 +35,16 @@ export default function BookTable() {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [loadingFilteredTables, setLoadingFilteredTables] = useState(false);
+  const navigate=useNavigate();
 
   const openModal = (table: Table) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Please sign in or sign up to make a reservation.");
+      // Redirect to the sign-in page
+      navigate("/login");
+      return;
+  }
     setSelectedTable(table);
     setIsModalOpen(true);
   };

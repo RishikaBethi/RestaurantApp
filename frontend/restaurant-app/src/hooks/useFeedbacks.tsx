@@ -44,11 +44,15 @@ export function useFeedbacks(
 
     setLoading(true);
     const query = getSortQuery();
-    const endpoint = `${BASE_API_URL}/locations/${locationId}/feedbacks?type=${type}&sort=${query}&page=${page}`;
+    const endpoint = `${BASE_API_URL}/locations/${locationId}/feedbacks?type=${type}&sort=${query}&page=${page}&size=4`;
 
     axios.get(endpoint)
       .then((res) => {
-        setFeedbacks(res.data.content || []);
+        if (page === 0) {
+          setFeedbacks(res.data.content || []);
+        } else {
+          setFeedbacks((prev) => [...prev, ...(res.data.content || [])]);
+        }
         setTotalPages(res.data.totalPages);
       })
       .catch((err) => console.error("Error fetching feedbacks:", err))

@@ -8,8 +8,9 @@ import axios from "axios";
 import ShimmerDishes from "@/components/shimmerUI/shimmerDishes";
 import FeedbackCard from "@/components/feedbackCard"
 import ShimmerFeedback from "@/components/shimmerUI/shimmerFeedback";
-import { useFeedbacks, Feedback, FeedbackType, SortOption } from "@/hooks/useFeedbacks";
+import { useFeedbacks, FeedbackType, SortOption } from "@/hooks/useFeedbacks";
 import { BASE_API_URL } from "@/constants/constant";
+
 
 interface SpecialtyDish {
   id: number;
@@ -36,15 +37,7 @@ export default function RestroPage() {
     sortOption,
     page
   );
-  const [allFeedbacks, setAllFeedbacks] = useState<Feedback[]>([]);
-
-  useEffect(() => {
-    if (page === 0) {
-      setAllFeedbacks(feedbacks);
-    } else {
-      setAllFeedbacks((prev) => [...prev, ...feedbacks]);
-    }
-  }, [feedbacks, page]);
+ 
 
   // Reset feedback list when filter/sort changes
   useEffect(() => {
@@ -70,7 +63,7 @@ export default function RestroPage() {
   }, [locationId]);
 
   const loadMore = () => {
-    if (page + 1 < totalPages) {
+    if (page < totalPages) {
       setPage((prev) => prev + 1);
     }
   };
@@ -141,18 +134,18 @@ export default function RestroPage() {
                 <ShimmerFeedback key={i} />
               ))}
             </div>
-          ) : allFeedbacks.length === 0 ? (
+          ) : feedbacks.length === 0 ? (
             <p className="mt-4 text-center text-gray-600 font-semibold">No reviews yet.</p>
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-                {allFeedbacks.map((review) => (
+                {feedbacks.map((review) => (
                   <FeedbackCard key={review.id} {...review} />
                 ))}
                 {feedbackLoading &&
                   [...Array(4)].map((_, i) => <ShimmerFeedback key={`shimmer-${i}`} />)}
               </div>
-              {page + 1 < totalPages && (
+              {page < totalPages && (
                 <div className="text-center mt-6">
                   <Button onClick={loadMore} disabled={feedbackLoading}>
                     {feedbackLoading ? "Loading..." : "Load More"}

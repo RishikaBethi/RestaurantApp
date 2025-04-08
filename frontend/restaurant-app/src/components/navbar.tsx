@@ -17,6 +17,15 @@ export default function Navbar({ isLoggedIn, setIsLoggedIn }: { isLoggedIn: bool
   .map((word: string) => word.charAt(0))
   .join("");
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, [setIsLoggedIn]);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
