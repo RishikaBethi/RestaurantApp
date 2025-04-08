@@ -5,6 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c446cef7-cc2b-4980-b444-7e6778db494b" name="Changes" comment="Adding .idea files">
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/restaurant/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/restaurant/.idea/compiler.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/restaurant/.idea/encodings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/restaurant/.idea/jarRepositories.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/restaurant/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/restaurant/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/restaurant/.syndicate-config/syndicate.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/restaurant/.syndicate-config/syndicate.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/restaurant/jsrc/main/java/com/restaurant/services/UpdateReservationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurant/jsrc/main/java/com/restaurant/services/UpdateReservationService.java" afterDir="false" />
