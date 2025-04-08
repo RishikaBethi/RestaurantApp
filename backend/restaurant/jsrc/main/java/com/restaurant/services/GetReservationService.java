@@ -5,18 +5,28 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
+import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
+import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
+import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
 import com.restaurant.dto.ReservationResponseDTO;
 import org.json.JSONArray;
 import java.util.logging.Logger;
 import java.util.*;
 import static com.restaurant.utils.Helper.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class GetReservationService {
     private static final Logger logger = Logger.getLogger(GetReservationService.class.getName());
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+    static {
+        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Kolkata")); // Set formatter to IST
+    }
     private final Table reservationTable;
     private final Table locationTable;
     private final Table ordersTable;
+    private final Table feedbacksTable;
     private final DynamoDB dynamoDB;
 
     public GetReservationService(DynamoDB dynamoDB) {
@@ -24,10 +34,12 @@ public class GetReservationService {
         this.reservationTable = dynamoDB.getTable(System.getenv("RESERVATIONS_TABLE"));
         this.ordersTable = dynamoDB.getTable(System.getenv("ORDERS_TABLE"));
         this.locationTable = dynamoDB.getTable(System.getenv("LOCATIONS_TABLE"));
+        this.feedbacksTable = dynamoDB.getTable(System.getenv("FEEDBACKS_TABLE"));
     }
 
     public APIGatewayProxyResponseEvent handleGetReservations(APIGatewayProxyRequestEvent request) {
         try {
+            Date now = new Date();
             Map<String, Object> claims = extractClaims(request);
             String email = (String) claims.get("email");
 
@@ -48,13 +60,38 @@ public class GetReservationService {
             );
 
             List<ReservationResponseDTO> reservationDTOs = new ArrayList<>();
+
             for (Item item : items) {
                 Map<String, Object> reservation = item.asMap();
-
                 String reservationId = reservation.getOrDefault("reservationId", "null").toString();
                 String locationId = reservation.getOrDefault("locationId", "null").toString();
                 String orderId = reservation.getOrDefault("orderId", "null").toString();
-                String timeSlot = reservation.get("timeFrom") + " - " + reservation.get("timeTo");
+                String reservationDate = String.valueOf(reservation.get("date"));
+                String timeFromStr = String.valueOf(reservation.get("timeFrom"));
+                String timeToStr = String.valueOf(reservation.get("timeTo"));
+                String guestsNumber = String.valueOf(reservation.get("guestsNumber"));
+                String currentStatus = String.valueOf(reservation.get("status"));
+                String feedbackId = reservation.get("feedbackId") != null ? reservation.get("feedbackId").toString() : null;
+
+                String timeSlot = timeFromStr + " - " + timeToStr;
+
+                Date timeFrom = sdf.parse(reservationDate + "T" + timeFromStr);
+                Date timeTo = sdf.parse(reservationDate + "T" + timeToStr);
+
+                // Handle status transitions
+                if (now.after(timeFrom) && now.before(timeTo)) {
+                    if (!"In progress".equals(currentStatus)) {
+                        feedbackId = ensureFeedbackExists(feedbackId, reservationId, email, locationId, reservationDate);
+                        updateReservationStatus(reservationId, "In progress", feedbackId);
+                        currentStatus = "In progress";
+                    }
+                } else if (now.after(timeTo)) {
+                    if (!"Finished".equals(currentStatus)) {
+                        feedbackId = ensureFeedbackExists(feedbackId, reservationId, email, locationId, reservationDate);
+                        updateReservationStatus(reservationId, "Finished", feedbackId);
+                        currentStatus = "Finished";
+                    }
+                }
 
                 // Get location address
                 Item loc = (locationId.equals("null")) ? null : locationTable.getItem(new GetItemSpec().withPrimaryKey("locationId", locationId));
@@ -70,14 +107,13 @@ public class GetReservationService {
 
                 ReservationResponseDTO dto = new ReservationResponseDTO(
                         reservationId,
-                        String.valueOf(reservation.get("status")),
+                        currentStatus,
                         address,
-                        String.valueOf(reservation.get("date")),
+                        reservationDate,
                         timeSlot,
                         String.valueOf(dishCount),
-                        String.valueOf(reservation.get("guestsNumber")),
-                        reservation.getOrDefault("feedbackId", null) != null ?
-                                reservation.get("feedbackId").toString() : null
+                        guestsNumber,
+                        feedbackId
                 );
 
                 reservationDTOs.add(dto);
@@ -93,5 +129,33 @@ public class GetReservationService {
         } catch (Exception e) {
             return createErrorResponse(500, "Error fetching reservations: " + e.getMessage());
         }
+    }
+
+    private String ensureFeedbackExists(String feedbackId, String reservationId, String email, String locationId, String date) {
+        if (feedbackId == null) {
+            feedbackId = UUID.randomUUID().toString();
+            Item feedbackItem = new Item()
+                    .withPrimaryKey("feedbackId", feedbackId)
+                    .withString("reservationId", reservationId)
+                    .withString("email", email)
+                    .withString("locationId", locationId)
+                    .withString("date", date)
+                    .withNull("comment")
+                    .withNull("rating")
+                    .withNull("type")
+                    .withNull("userName")
+                    .withNull("userAvatarUrl");
+            feedbacksTable.putItem(feedbackItem);
+        }
+        return feedbackId;
+    }
+
+    private void updateReservationStatus(String reservationId, String status, String feedbackId) {
+        UpdateItemSpec updateSpec = new UpdateItemSpec()
+                .withPrimaryKey("reservationId", reservationId)
+                .withUpdateExpression("set #s = :s, feedbackId = :f")
+                .withNameMap(new NameMap().with("#s", "status"))
+                .withValueMap(new ValueMap().withString(":s", status).withString(":f", feedbackId));
+        reservationTable.updateItem(updateSpec);
     }
 }

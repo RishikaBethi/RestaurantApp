@@ -8,7 +8,7 @@ import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.restaurant.model.SignInDTO;
+import com.restaurant.dto.SignInDTO;
 import static com.restaurant.utils.Helper.*;
 import com.restaurant.validators.EmailValidator;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
