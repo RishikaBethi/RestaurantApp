@@ -8,7 +8,7 @@ import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.restaurant.model.SignInEntity;
+import com.restaurant.model.SignInDTO;
 import static com.restaurant.utils.Helper.*;
 import com.restaurant.validators.EmailValidator;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
@@ -47,21 +47,21 @@ public class SignInService {
 
     public APIGatewayProxyResponseEvent handleSignIn(APIGatewayProxyRequestEvent request) {
         try {
-            SignInEntity signInEntity = SignInEntity.fromJson(request.getBody());
+            SignInDTO signInDTO = SignInDTO.fromJson(request.getBody());
 
             // Validate input
-            if (!EmailValidator.validateEmail(signInEntity.getEmail())) {
+            if (!EmailValidator.validateEmail(signInDTO.getEmail())) {
                 return createErrorResponse(400, "Invalid Email");
             }
-            if (signInEntity.getEmail() == null || signInEntity.getEmail().isEmpty()) {
+            if (signInDTO.getEmail() == null || signInDTO.getEmail().isEmpty()) {
                 return createErrorResponse(400, "Email is required");
             }
-            if (signInEntity.getPassword() == null || signInEntity.getPassword().isEmpty()) {
+            if (signInDTO.getPassword() == null || signInDTO.getPassword().isEmpty()) {
                 return createErrorResponse(400, "Password is required");
             }
 
             // Check if the user is locked out
-            Item userItem = usersTable.getItem("email", signInEntity.getEmail());
+            Item userItem = usersTable.getItem("email", signInDTO.getEmail());
             if (userItem != null) {
                 if (isAccountLocked(userItem)) {
                     return createApiResponse(403, Map.of("message","Your account is temporarily locked due to multiple failed login attempts. Please try again later."));
@@ -70,8 +70,8 @@ public class SignInService {
 
             // Cognito sign-in
             Map<String, String> authParams = new HashMap<>();
-            authParams.put("USERNAME", signInEntity.getEmail());
-            authParams.put("PASSWORD", signInEntity.getPassword());
+            authParams.put("USERNAME", signInDTO.getEmail());
+            authParams.put("PASSWORD", signInDTO.getPassword());
 
             InitiateAuthRequest authRequest = InitiateAuthRequest.builder()
                     .authFlow(AuthFlowType.USER_PASSWORD_AUTH)
@@ -85,22 +85,22 @@ public class SignInService {
 
                 // Successful login - reset failed attempts
                 if (userItem != null) {
-                    resetFailedAttempts(signInEntity.getEmail());
+                    resetFailedAttempts(signInDTO.getEmail());
                 }
 
             } catch (UserNotFoundException | NotAuthorizedException e) {
                 // Increment failed login attempts
-                incrementFailedAttempts(signInEntity.getEmail(), userItem);
+                incrementFailedAttempts(signInDTO.getEmail(), userItem);
                 return createErrorResponse(401, "Incorrect email or password. Try again or create an account.");
             }
 
             String accessToken = authResponse.authenticationResult().idToken();
 
             // Fetch user data
-            userItem = usersTable.getItem("email", signInEntity.getEmail());
+            userItem = usersTable.getItem("email", signInDTO.getEmail());
 
             String username = (userItem != null) ? userItem.getString("firstName") + " " + userItem.getString("lastName")
-                    : signInEntity.getEmail();
+                    : signInDTO.getEmail();
             String role = (userItem != null) ? userItem.getString("role") : "CLIENT";
 
             Map<String, String> responseData = new HashMap<>();

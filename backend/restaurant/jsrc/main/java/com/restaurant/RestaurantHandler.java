@@ -36,9 +36,9 @@ import static com.restaurant.utils.Helper.*;
 @EnvironmentVariables(value = {
 		@EnvironmentVariable(key = "USERS_TABLE", value = "${user_table}"),
 		@EnvironmentVariable(key = "WAITERS_TABLE", value = "${waiter_table}"),
-		@EnvironmentVariable(key = "LOCATIONS_TABLE", value = "tm7-Locations"),
-		@EnvironmentVariable(key = "DISHES_TABLE", value = "tm7-Dishes"),
-		@EnvironmentVariable(key = "FEEDBACKS_TABLE", value = "tm7-Feedback"),
+		@EnvironmentVariable(key = "LOCATIONS_TABLE", value = "${locations_table}"),
+		@EnvironmentVariable(key = "DISHES_TABLE", value = "${dishes_table}"),
+		@EnvironmentVariable(key = "FEEDBACKS_TABLE", value = "${feedbacks_table}"),
         @EnvironmentVariable(key = "RESERVATIONS_TABLE", value = "${reservations_table}"),
         @EnvironmentVariable(key = "TABLES_TABLE", value = "${tables_table}"),
         @EnvironmentVariable(key = "COGNITO_USER_POOL_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_USER_POOL_ID),
@@ -48,7 +48,7 @@ import static com.restaurant.utils.Helper.*;
 })
 public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper(); // Added objectMapper
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 	private static final Logger logger = Logger.getLogger(RestaurantHandler.class.getName());
 
 	@Inject
