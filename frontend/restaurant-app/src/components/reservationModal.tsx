@@ -98,7 +98,7 @@ export default function ReservationModal({ isOpen, onClose, table, selectedDate 
           <DialogTitle className="text-xl font-bold">Make a Reservation</DialogTitle>
           <p className="text-gray-600 mt-1 text-sm">
             You are making a reservation at <strong>{table.locationAddress}</strong>, Table {table.tableNumber}, <br />
-            for <strong>{formatDateToWords(selectedDate)}</strong>.
+            for <strong>{formatDateToWords(selectedDate || getTodayDate())}</strong>.
           </p>
         </DialogHeader>
 

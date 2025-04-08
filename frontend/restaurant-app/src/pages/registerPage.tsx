@@ -138,7 +138,7 @@ const RegisterPage: React.FC = () => {
       navigate("/login");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Registration failed. Please try again.";
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || "Registration failed. Please try again.";
       toast.error(errorMessage);
     } finally {
       setLoading(false);
