@@ -171,7 +171,7 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
                 return bookingService.handleCreateReservation(request);
             }
 
-            if ("/bookings/client/".equals(path) && "PUT".equalsIgnoreCase(httpMethod)) {
+            if (path.startsWith("/bookings/client/") && "PUT".equalsIgnoreCase(httpMethod)) {
                 return updateReservationService.handleUpdateReservation(request, path);
             }
 

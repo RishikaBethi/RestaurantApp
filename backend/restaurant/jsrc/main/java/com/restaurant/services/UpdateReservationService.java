@@ -11,7 +11,6 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import static com.restaurant.utils.Helper.*;
 import java.util.logging.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.restaurant.dto.ReservationResponseDTO;
 import java.util.*;
 
 public class UpdateReservationService {
@@ -68,18 +67,8 @@ public class UpdateReservationService {
 
             String timeSlot = updatedItem.getString("timeFrom") + " - " + updatedItem.getString("timeTo");
 
-            ReservationResponseDTO dto = new ReservationResponseDTO(
-                    updatedItem.getString("reservationId"),
-                    updatedItem.getString("status"),
-                    null, // locationAddress will be fetched by GetReservationService
-                    updatedItem.getString("date"),
-                    timeSlot,
-                    "0", // Assuming updated order doesn't imply a preOrder
-                    String.valueOf(updatedItem.get("guestsNumber")),
-                    updatedItem.getString("feedbackId")
-            );
+            return createApiResponse(200, Map.of("message", "The reservation has been updated."));
 
-            return createApiResponse(200, dto.toJson());
         } catch (Exception e) {
             return createErrorResponse(500, "Error updating reservation: " + e.getMessage());
         }
