@@ -74,16 +74,21 @@ const RegisterPage: React.FC = () => {
           setErrors((prev) => ({ ...prev, lastName: "" }));
         }
         break;
-      case "email":
-        if (!/^\S+@\S+\.\S+$/.test(value)) {
-          setErrors((prev) => ({
-            ...prev,
-            email: "Invalid email address. Please ensure it follows the format: username@domain.com.",
-          }));
-        } else {
-          setErrors((prev) => ({ ...prev, email: "" }));
-        }
-        break;
+        case "email":
+          if (
+            !/^[A-Za-z0-9][A-Za-z0-9._-]*[A-Za-z0-9]@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(value) || // Basic email structure
+            value.includes("..") || // Prevent consecutive dots
+            /(^|@|\.)_|\.(?!\w+$)/.test(value) || // Invalid characters or sequences
+            value.startsWith(".") // Cannot start with a dot
+          ) {
+            setErrors((prev) => ({
+              ...prev,
+              email: "Invalid email address. Ensure the username is alphanumeric, may contain '-' or '_', and the domain is valid.",
+            }));
+          } else {
+            setErrors((prev) => ({ ...prev, email: "" }));
+          }
+          break;        
       case "password": {
         const passwordErrors: string[] = [];
         if (!/[A-Z]/.test(value)) passwordErrors.push("At least one uppercase letter required");
