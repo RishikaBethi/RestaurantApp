@@ -202,7 +202,6 @@ public class TablesService {
                         timeSlotsBefore.add(slot);
                     }
                 }
-
                 availableSlots.removeAll(timeSlotsBefore);
             }
 
