@@ -59,16 +59,16 @@ public class UpdateReservationService {
 
             String newGuestsNumber = requestBody.get("guestsNumber");
             if (newGuestsNumber != null) {
+                int newGuests = Integer.parseInt(newGuestsNumber);
                 String locationId = existingReservation.getString("locationId");
-                String tableNumber = existingReservation.getString("tableNumber");
+                Number tableNumber = existingReservation.getNumber("tableNumber");
 
                 if (locationId != null && tableNumber != null) {
                     Item tableItem = tablesTable.getItem(new GetItemSpec()
-                            .withPrimaryKey("locationId", locationId, "tableNumber", tableNumber));
+                            .withPrimaryKey("locationId", locationId, "tableNumber", String.valueOf(tableNumber)));
 
                     if (tableItem != null && tableItem.isPresent("capacity")) {
                         int capacity = tableItem.getInt("capacity");
-                        int newGuests = Integer.parseInt(newGuestsNumber);
 
                         if (newGuests > capacity) {
                             return createErrorResponse(400, "The selected table cannot accommodate " + newGuests +  " guests. Please cancel the current reservation and book a new one.");
@@ -87,7 +87,11 @@ public class UpdateReservationService {
                 if (requestBody.containsKey(key)) {
                     updateExpr.append("#").append(key).append(" = :").append(key).append(", ");
                     names.put("#" + key, key);
-                    values.with(":" + key, requestBody.get(key));
+                    if (key.equals("guestsNumber")) {
+                        values.withNumber(":guestsNumber", Integer.parseInt(requestBody.get(key)));
+                    } else {
+                        values.with(":" + key, requestBody.get(key));
+                    }
                 }
             }
 
@@ -120,6 +124,7 @@ public class UpdateReservationService {
                 dishCount = dishes != null ? dishes.size() : 0;
             }
 
+            String guestsNumberStr = updatedItem.get("guestsNumber") != null ? String.valueOf(updatedItem.getInt("guestsNumber")) : "0";
             ReservationResponseDTO dto = new ReservationResponseDTO(
                     updatedItem.getString("reservationId"),
                     updatedItem.getString("status"),
@@ -127,7 +132,7 @@ public class UpdateReservationService {
                     updatedItem.getString("date"),
                     timeSlot,
                     String.valueOf(dishCount),
-                    String.valueOf(updatedItem.get("guestsNumber")),
+                    guestsNumberStr,
                     updatedItem.getString("feedbackId")
             );
 

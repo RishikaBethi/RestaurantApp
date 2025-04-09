@@ -258,7 +258,7 @@
         }
       },
       "/bookings/client/{reservationId}": {
-        "enable_cors": false,
+        "enable_cors": true,
         "PUT": {
           "authorization_type": "NONE",
           "integration_type": "lambda",
