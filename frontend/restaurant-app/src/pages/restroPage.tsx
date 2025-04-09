@@ -10,6 +10,7 @@ import FeedbackCard from "@/components/feedbackCard"
 import ShimmerFeedback from "@/components/shimmerUI/shimmerFeedback";
 import { useFeedbacks, FeedbackType, SortOption } from "@/hooks/useFeedbacks";
 import { BASE_API_URL } from "@/constants/constant";
+import { useNavigate } from "react-router-dom";
 
 
 interface SpecialtyDish {
@@ -28,6 +29,7 @@ export default function RestroPage() {
   const [selectedFeedbackType, setSelectedFeedbackType] = useState<FeedbackType>("SERVICE");
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate=useNavigate();
   
   // Pagination state
   const [page, setPage] = useState(0);
@@ -37,7 +39,6 @@ export default function RestroPage() {
     sortOption,
     page
   );
- 
 
   // Reset feedback list when filter/sort changes
   useEffect(() => {
@@ -90,7 +91,7 @@ export default function RestroPage() {
           </p>
           <p className="text-gray-700 font-semibold">Total Capacity: {location?.totalCapacity} tables</p>
           <p className="text-gray-700 font-semibold">Average Occupancy: {location?.averageOccupancy}%</p>
-          <Button className="mt-4 bg-green-600 hover:bg-green-700">Book a Table</Button>
+          <Button className="mt-4 bg-green-600 hover:bg-green-700" onClick={()=>navigate("/book-table")}>Book a Table</Button>
         </div>
         <img src={location?.imageUrl} alt="Restaurant" className="rounded-lg h-64 w-auto object-cover md:w-1/2" />
       </div>

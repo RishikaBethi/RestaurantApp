@@ -27,7 +27,7 @@ export default function ReservationModal({ isOpen, onClose, table, selectedDate 
   const [fromTime, setFromTime] = useState("");
   const [toTime, setToTime] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [bookingData, setBookingData] = useState<any | null>(null);
 
@@ -187,9 +187,6 @@ export default function ReservationModal({ isOpen, onClose, table, selectedDate 
               </div>
             </div>
         </div>
-
-        {/* Error Message */}
-        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
 
         {/* Confirm Button */}
         <Button className="w-full mt-2 bg-green-600 hover:bg-green-700 text-white text-lg py-2"

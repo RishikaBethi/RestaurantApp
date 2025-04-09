@@ -2,6 +2,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { useCancelReservation } from "@/hooks/useCancelReservation";
 import { useState } from "react";
+import EditReservationDialog from "./editReservation";
+import { toast } from "sonner";
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -13,13 +15,14 @@ interface ConfirmationModalProps {
     guestsNumber: string;
     locationAddress: string;
     status: string;
-    id: string;
+    id: number;
   } | null;
 }
 
 export default function ConfirmationModal({ isOpen, onClose, bookingData, onReservationCancel }: ConfirmationModalProps) {
   const { cancelReservation, loading } = useCancelReservation();
-  const [error, setError] = useState<string | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
   if (!bookingData) return null;
   const handleCancel = async () => {
     try {
@@ -28,10 +31,25 @@ export default function ConfirmationModal({ isOpen, onClose, bookingData, onRese
       onClose();
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
-      setError("Failed to cancel the reservation.");
+      toast.error("Failed to cancel the reservation.");
     }
   };
+
+  const handleEditOpen = () => {
+    setIsEditOpen(true); // Open the EditReservationDialog
+  };
+
+  const handleEditClose = () => {
+    setIsEditOpen(false); // Close the EditReservationDialog
+  };
+
+  const handleReservationUpdate = () => {
+    setIsEditOpen(false); // Close the EditReservationDialog after updating
+    toast.success("Reservation updated successfully.");
+  };
+
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md p-6 rounded-lg bg-white shadow-lg">
         <DialogHeader>
@@ -50,14 +68,28 @@ export default function ConfirmationModal({ isOpen, onClose, bookingData, onRese
         <p className="text-gray-700 text-sm">
           If you need to modify or cancel your reservation, you can do so up to 30 minutes before the reservation time.
         </p>
-        {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
         <div className="flex justify-between mt-1">
           <Button variant="outline" onClick={handleCancel} disabled={loading}>
             {loading ? "Cancelling..." : "Cancel Reservation"}
           </Button>
-          <Button className="bg-green-600 hover:bg-green-700 text-white">Edit Reservation</Button>
+          <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={handleEditOpen}>Edit Reservation</Button>
         </div>
       </DialogContent>
     </Dialog>
+
+    {/* EditReservationDialog */}
+    <EditReservationDialog
+    isOpen={isEditOpen}
+    reservation={{
+      id: bookingData.id,
+      locationAddress: bookingData.locationAddress,
+      date: bookingData.date,
+      timeSlot: bookingData.timeSlot,
+      guestsNumber: parseInt(bookingData.guestsNumber),
+    }}
+    onClose={handleEditClose}
+    onUpdate={handleReservationUpdate}
+  />
+  </>
   );
 }

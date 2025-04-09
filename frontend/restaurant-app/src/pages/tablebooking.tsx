@@ -13,7 +13,7 @@ type Table = {
   locationId: string;
   locationAddress: string | null;
   availableSlots: string[];
-  tableNumber: string;
+  tableNumber: string; 
   capacity: string;
 };
 
@@ -36,6 +36,16 @@ export default function BookTable() {
   const [selectedTime, setSelectedTime] = useState("");
   const [loadingFilteredTables, setLoadingFilteredTables] = useState(false);
   const navigate=useNavigate();
+
+  const predefinedTimeOptions: string[] = [
+    "10:30",
+    "12:15",
+    "14:00",
+    "15:45",
+    "17:30",
+    "19:15",
+    "21:00",
+  ];
 
   const openModal = (table: Table) => {
     const token = localStorage.getItem("token");
@@ -181,9 +191,18 @@ export default function BookTable() {
 
           <div className="flex items-center border rounded-lg p-2 flex-1 gap-2 bg-white">
             <FaClock className="text-gray-500"/>
-            <input type="time" className="w-full outline-none"
-            value={selectedTime}
-            onChange={(e)=>setSelectedTime(e.target.value)}/>
+            <select
+              className="w-full outline-none"
+              value={selectedTime}
+              onChange={(e) => setSelectedTime(e.target.value)}
+            >
+              <option value="">Select Time</option>
+              {predefinedTimeOptions.map((time) => (
+                <option key={time} value={time}>
+                  {time}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="flex items-center border rounded-lg p-2 flex-1 gap-2 bg-white">
@@ -246,7 +265,8 @@ export default function BookTable() {
       isOpen={isSlotsModalOpen} 
       onClose={() => setIsSlotsModalOpen(false)} 
       table={selectedTableForSlots}
-      date={selectedDate} />
+      date={selectedDate} 
+    />
     </div>
   );
 }

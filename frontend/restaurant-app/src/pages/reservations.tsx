@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useCancelReservation } from "@/hooks/useCancelReservation";
 import { toast } from "sonner";
-import { BASE_API_URL } from "@/constants/constant";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -17,6 +16,8 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import EditReservationDialog from "@/components/editReservation";
+import { BASE_API_URL } from "@/constants/constant";
 
 interface Reservation {
   id: number;
@@ -43,6 +44,8 @@ export default function ReservationsPage() {
   const { cancelReservation } = useCancelReservation();
   const [cancellingId, setCancellingId] = useState<number | null>(null);
   const [selectedReservationId, setSelectedReservationId] = useState<number | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
 
   const handleCancelReservation = async (id: number) => {
     try {
@@ -59,6 +62,11 @@ export default function ReservationsPage() {
       setCancellingId(null);
     }
   };
+
+  const handleEditClick = (reservation: Reservation) => {
+    setSelectedReservation(reservation);
+    setIsEditDialogOpen(true);
+  };  
   
   useEffect(() => {
     if (!isAuthenticated) {
@@ -137,7 +145,7 @@ export default function ReservationsPage() {
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
-                  <Button className="bg-green-600 hover:bg-green-700">Edit</Button>
+                  <Button className="bg-green-600 hover:bg-green-700" onClick={() => handleEditClick(res)}>Edit</Button>
                 </div>
               )}
               {res.status === "In Progress" && (
@@ -151,6 +159,12 @@ export default function ReservationsPage() {
         ))}
       </div>
     </div>
+    <EditReservationDialog
+  isOpen={isEditDialogOpen}
+  reservation={selectedReservation}
+  onClose={() => setIsEditDialogOpen(false)}
+  onUpdate={fetchReservations}
+/>
     </div>
   );
 }
