@@ -3,7 +3,6 @@ package com.restaurant.services;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.amazonaws.services.dynamodbv2.document.*;
 import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
@@ -95,20 +94,22 @@ public class TablesService {
             }
             
 
-            Table locationsData = dynamoDB.getTable(locationsTable);
-            boolean locationExists = false;
-            ScanSpec scanSpecLocations = new ScanSpec();
-            ItemCollection<ScanOutcome> loctionsItem = locationsData.scan(scanSpecLocations);
-            for(Item location : loctionsItem) {
-                String address = location.getString("locationId");
-                if(address.equals(locationId)) {
-                    locationExists = true;
-                    break;
+            if(locationId!=null) {
+                Table locationsData = dynamoDB.getTable(locationsTable);
+                boolean locationExists = false;
+                ScanSpec scanSpecLocations = new ScanSpec();
+                ItemCollection<ScanOutcome> loctionsItem = locationsData.scan(scanSpecLocations);
+                for (Item location : loctionsItem) {
+                    String address = location.getString("locationId");
+                    if (address.equals(locationId)) {
+                        locationExists = true;
+                        break;
+                    }
                 }
-            }
 
-            if(!locationExists) {
-                return createErrorResponse(404, "Location not found");
+                if (!locationExists) {
+                    return createErrorResponse(404, "Location not found");
+                }
             }
 
             List<Item> availableTables = getAvailableTablesByLocationAndCapacity(locationId, guests);
@@ -191,6 +192,19 @@ public class TablesService {
 
             ArrayList<String> availableSlots = new ArrayList<>(timeSlots);
             availableSlots.removeAll(notAvailable);
+
+            if(time!=null) {
+                List<String> timeSlotsBefore = new ArrayList<>();
+                for (String slot : availableSlots) {
+                    LocalTime timeFrom = LocalTime.parse(slot.split("-")[0]);
+                    LocalTime userTime = LocalTime.parse(time);
+                    if (timeFrom.isBefore(userTime)) {
+                        timeSlotsBefore.add(slot);
+                    }
+                }
+
+                availableSlots.removeAll(timeSlotsBefore);
+            }
 
             if (effectiveDate.equals(currentDate)) {
                 availableSlots.removeIf(slot -> {
