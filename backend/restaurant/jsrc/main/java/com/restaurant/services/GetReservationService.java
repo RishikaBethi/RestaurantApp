@@ -140,11 +140,10 @@ public class GetReservationService {
                     .withString("email", email)
                     .withString("locationId", locationId)
                     .withString("date", date)
-                    .withNull("comment")
-                    .withNull("rating")
-                    .withNull("type")
-                    .withNull("userName")
-                    .withNull("userAvatarUrl");
+                    .withString("cuisineComment","")
+                    .withNumber("cuisineRating", 0)
+                    .withString("serviceComment","")
+                    .withNumber("serviceRating", 0);
             feedbacksTable.putItem(feedbackItem);
         }
         return feedbackId;

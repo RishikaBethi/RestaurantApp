@@ -60,9 +60,10 @@ public class UpdateReservationService {
             String newGuestsNumber = requestBody.get("guestsNumber");
             if (newGuestsNumber != null) {
                 String locationId = existingReservation.getString("locationId");
-                String tableNumber = existingReservation.getString("tableNumber");
+                Number tableNumber = existingReservation.getNumber("tableNumber");
 
                 if (locationId != null && tableNumber != null) {
+                    tableNumber = tableNumber.intValue();
                     Item tableItem = tablesTable.getItem(new GetItemSpec()
                             .withPrimaryKey("locationId", locationId, "tableNumber", tableNumber));
 

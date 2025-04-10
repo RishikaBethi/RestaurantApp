@@ -91,7 +91,7 @@ public class BookingService {
             }
 
             // Check if table exists in Tables table
-            Item tableItem = tablesTable.getItem("locationId", locationId, "tableNumber", tableNumber);
+            Item tableItem = tablesTable.getItem("locationId", locationId, "tableNumber", Integer.parseInt(tableNumber));
             if (tableItem == null) {
                 return createErrorResponse(400, "The specified table number does not exist for the given location.");
             }
@@ -143,9 +143,7 @@ public class BookingService {
                     .withPrimaryKey("orderId", orderId, "email", email)
                     .withString("reservationId", reservationId)
                     .withString("locationId", locationId)
-                    .withString("date", date)
                     .withString("state", "Submitted")
-                    .withString("timeSlot", timeSlot)
             ));
 
             // Fetch location address
