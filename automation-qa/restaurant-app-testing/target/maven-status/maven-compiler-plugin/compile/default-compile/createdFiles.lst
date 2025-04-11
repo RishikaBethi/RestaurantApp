@@ -1,5 +1,8 @@
 utils\api\LoginUtilApi.class
 pages\LoginPage.class
 models\Login.class
+models\SignUp$SignUpBuilder.class
+utils\ConfigReader.class
+models\SignUp.class
 utils\ui\LoginUtilUi.class
 customExceptions\Exception.class
