@@ -84,6 +84,9 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
     @Inject
     BookingService bookingService;
 
+    @Inject
+    PostAFeedbackService postAFeedbcak;
+
     public RestaurantHandler() {
 		initDependencies();
 	}
@@ -105,6 +108,13 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
             logger.info("Received request - Path: " + path + ", Method: " + httpMethod +
                     ", Query: " + (queryParams != null ? queryParams.toString() : "none"));
 
+            if(postAFeedbcak==null) {
+                context.getLogger().log("Post a feedback service null");
+            }
+            if(path.equals("/feedbacks") && httpMethod.equalsIgnoreCase("POST")) {
+                return postAFeedbcak.handlePostAFeedback(request, context);
+            }
+
             // Auth routes
             if ("/auth/sign-up".equals(path) && "POST".equals(httpMethod)) {
                 logger.info("Handling signup request");
@@ -113,6 +123,7 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
                 logger.info("Handling sign-in request");
                 return signInService.handleSignIn(request);
             }
+
 
             // Location routes
             else if ("/locations".equals(path) && "GET".equals(httpMethod)) {

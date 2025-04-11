@@ -127,6 +127,12 @@ public class ServiceModule {
         return new BookingService(dynamoDB, waiterService);
     }
 
+    @Provides
+    @Singleton
+    public PostAFeedbackService PostAFeedbackService(DynamoDB dynamoDB) {
+        return new PostAFeedbackService(dynamoDB);
+    }
+
     // Provide WaiterService Dependency
     @Provides
     @Singleton

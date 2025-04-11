@@ -3,6 +3,8 @@ package com.restaurant.utils;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.time.Instant;
 import java.util.*;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
@@ -76,6 +78,25 @@ public class Helper {
             }
 
             Map<String, Object> claims = objectMapper.readValue(payload, Map.class);
+
+//            if (claims.containsKey("exp")) {
+//                Object expObj = claims.get("exp");
+//                if (expObj instanceof Number) {
+//                    long expirationTimestamp = ((Number) expObj).longValue();
+//                    long currentTimestamp = Instant.now().getEpochSecond(); // Current time in seconds
+//
+//                    if (currentTimestamp > expirationTimestamp) {
+//                        logger.warning("JWT token has expired. Expiration: " + expirationTimestamp +
+//                                ", Current time: " + currentTimestamp);
+//                        return Map.of(); // Token expired, return empty map
+//                    }
+//                } else {
+//                    logger.warning("JWT 'exp' claim is present but not a valid number");
+//                    return Map.of();
+//                }
+//            } else {
+//                logger.info("No 'exp' claim found in JWT; assuming no expiration check required");
+//            }
             logger.info("Extracted Claims: " + claims);
             return claims;
 
