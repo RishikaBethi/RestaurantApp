@@ -1,0 +1,74 @@
+package stepDefinitions.api;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsonschema.JsonSchema;
+import context.ShareContext;
+import helpers.specBuilders.RequestBuilder;
+import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
+import org.json.JSONObject;
+import io.restassured.response.Response;
+import models.SignUp;
+import utils.ConfigReader;
+
+
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CommonSteps {
+
+    private final ShareContext shareContext;
+
+    public CommonSteps(ShareContext shareContext)
+    {
+        this.shareContext = shareContext;
+    }
+
+    @Given("the base_uri of the application")
+    public void theBaseURIOfApplication(){
+        shareContext.setBaseUri(ConfigReader.getProperty("base_uri"));
+    }
+
+    @When("the user sends the post request to {string} with the request payload")
+    public void sendSingUpPOSTRequest(String endpoint){
+        Response response = given()
+                .spec(RequestBuilder.sendPostRequestSpec(shareContext))
+                .when()
+                .post(endpoint)
+                .then()
+                .extract().response();
+        shareContext.setResponse(response);
+    }
+
+    @Then("the status code should be {int}")
+    public void validateStatusCode(int statusCode)
+    {
+        shareContext.getResponse().then().statusCode(statusCode);
+    }
+
+    @And("the response should contain success {string} message")
+    public void validateSuccessMessage(String message)
+    {
+        shareContext.getResponse().then().body("message",equalTo(message));
+    }
+
+    @And("the response should contain failed {string} message")
+    public void validateFailedMessage(String message)
+    {
+        shareContext.getResponse().then().body("message",equalTo(message));
+    }
+
+   @And("the response should contain failed error {string} message")
+   public void validateErrorMessage(String error)
+   {
+       shareContext.getResponse().then().body("error",equalTo(error));
+   }
+
+
+
+
+}
