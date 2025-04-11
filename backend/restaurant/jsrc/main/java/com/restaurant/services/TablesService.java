@@ -193,17 +193,17 @@ public class TablesService {
             ArrayList<String> availableSlots = new ArrayList<>(timeSlots);
             availableSlots.removeAll(notAvailable);
 
-            if(time!=null) {
-                List<String> timeSlotsBefore = new ArrayList<>();
-                for (String slot : availableSlots) {
-                    LocalTime timeFrom = LocalTime.parse(slot.split("-")[0]);
-                    LocalTime userTime = LocalTime.parse(time);
-                    if (timeFrom.isBefore(userTime)) {
-                        timeSlotsBefore.add(slot);
-                    }
-                }
-                availableSlots.removeAll(timeSlotsBefore);
-            }
+//            if(time!=null) {
+//                List<String> timeSlotsBefore = new ArrayList<>();
+//                for (String slot : availableSlots) {
+//                    LocalTime timeFrom = LocalTime.parse(slot.split("-")[0], DateTimeFormatter.ofPattern("HH:mm"));
+//                    LocalTime userTime = LocalTime.parse(time);
+//                    if (timeFrom.isBefore(userTime)) {
+//                        timeSlotsBefore.add(slot);
+//                    }
+//                }
+//                availableSlots.removeAll(timeSlotsBefore);
+//            }
 
             if (effectiveDate.equals(currentDate)) {
                 availableSlots.removeIf(slot -> {

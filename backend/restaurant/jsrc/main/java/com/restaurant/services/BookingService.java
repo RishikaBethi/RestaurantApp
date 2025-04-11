@@ -146,6 +146,7 @@ public class BookingService {
                     .withString("date", date)
                     .withString("state", "Submitted")
                     .withString("timeSlot", timeSlot)
+                    .withList("dishItems", new ArrayList<String>())
             ));
 
             // Fetch location address
