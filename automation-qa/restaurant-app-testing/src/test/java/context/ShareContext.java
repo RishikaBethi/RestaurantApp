@@ -8,7 +8,8 @@ public class ShareContext {
     private String baseUri;
     private Object user;
     private Response response;
-    private String token;
+    private String waiterToken;
+    private String customerToken;
 
     public String getBaseUri(){
         return this.baseUri;
@@ -37,15 +38,24 @@ public class ShareContext {
         this.response = response;
     }
 
-    public String getToken(){
-        return this.token;
+    public String getWaiterToken(){
+        return this.waiterToken;
     }
 
-    public void setToken(String token)
+    public void setWaiterToken(String waiterToken)
     {
-        this.token = token;
+        this.waiterToken = waiterToken;
     }
 
+    public String getCustomerToken()
+    {
+        return this.customerToken;
+    }
+
+    public void setCustomerToken(String customerToken)
+    {
+        this.customerToken = customerToken;
+    }
 
 
 

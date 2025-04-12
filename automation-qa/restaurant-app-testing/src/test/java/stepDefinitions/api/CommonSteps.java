@@ -30,7 +30,7 @@ public class CommonSteps {
     }
 
     @When("the user sends the post request to {string} with the request payload")
-    public void sendSingUpPOSTRequest(String endpoint){
+    public void sendPOSTRequest(String endpoint){
         Response response = given()
                 .spec(RequestBuilder.sendPostRequestSpec(shareContext))
                 .when()
@@ -39,6 +39,32 @@ public class CommonSteps {
                 .extract().response();
         shareContext.setResponse(response);
     }
+
+    @When("the user sends the authorized get request to {string} request payload")
+    public void sendAuthorizedGetRequest(String endpoint)
+    {
+        Response response = given()
+                .spec(RequestBuilder.sendAuthorizedCustomerGetRequest(shareContext))
+                .when()
+                .get(endpoint)
+                .then()
+                .extract().response();
+        shareContext.setResponse(response);
+    }
+
+    @When("the user sends the get request to {string} request payload")
+    public void sendGetRequest(String endpoint)
+    {
+        Response response = given()
+                .spec(RequestBuilder.sendGETRequest(shareContext))
+                .when()
+                .get(endpoint)
+                .then()
+                .extract().response();
+        shareContext.setResponse(response);
+
+    }
+
 
     @Then("the status code should be {int}")
     public void validateStatusCode(int statusCode)
@@ -68,5 +94,19 @@ public class CommonSteps {
     public void validateTheSchema(String schema){
         shareContext.getResponse().then().body(matchesJsonSchemaInClasspath("schemas/"+schema+".json"));
    }
+
+   @And("the response should contain the token id of the user based on {string}")
+   public void storeTheTokenOfWaiterAndCustomer(String role)
+   {
+       if(role.equals("Waiter"))
+       {
+           shareContext.setWaiterToken(shareContext.getResponse().jsonPath().getString("token"));
+       }
+       if(role.equals("Customer"))
+       {
+           shareContext.setWaiterToken(shareContext.getResponse().jsonPath().getString("token"));
+       }
+   }
+
 
 }
