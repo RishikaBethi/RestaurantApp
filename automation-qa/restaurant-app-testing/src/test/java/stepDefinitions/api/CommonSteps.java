@@ -1,22 +1,18 @@
 package stepDefinitions.api;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.jsonschema.JsonSchema;
 import context.ShareContext;
 import helpers.specBuilders.RequestBuilder;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.json.JSONObject;
 import io.restassured.response.Response;
-import models.SignUp;
 import utils.ConfigReader;
 
 
 
 import static io.restassured.RestAssured.given;
+import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.hamcrest.Matchers.equalTo;
 
 public class CommonSteps {
@@ -68,7 +64,9 @@ public class CommonSteps {
        shareContext.getResponse().then().body("error",equalTo(error));
    }
 
-
-
+   @And("the response should validate the {string} schema")
+    public void validateTheSchema(String schema){
+        shareContext.getResponse().then().body(matchesJsonSchemaInClasspath("schemas/"+schema+".json"));
+   }
 
 }

@@ -10,11 +10,10 @@ Feature: Signing up into the application
     When the user sends the post request to "/auth/sign-up" with the request payload
     Then the status code should be 201
     And the response should contain success "User registered successfully" message
-    And the request should match the "signUpValidation" schema
 
     Examples:
     |firstName | lastName | email                    | password  |
-    |Suri      |Reddy     |surigantagari@example.com          | Sindhu@123|
+    |John      |Beiden    | john@examp.com            | Sindhu@123|
 
 
   Scenario Outline: Sign Up passing the already registered email
@@ -80,6 +79,19 @@ Feature: Signing up into the application
       |Sushma       |Gantagari    |sushma@exampe.com | Sushma@asd            |Password must be 8-16 characters, include uppercase, lowercase, number, and special character|
       |Sushma       |Gantagari    |sushma@exampe.com | Sushma@34565423456123 |Password must be 8-16 characters, include uppercase, lowercase, number, and special character|
 
+
+    Scenario Outline: SignUp the user with exceeding character limits
+      Given user sends a signup request with the following data
+        |firstName   | lastName    |  email    | password |
+        |<firstName>  | <lastName>  |<email>    |<password>|
+      When the user sends the post request to "/auth/sign-up" with the request payload
+      Then the status code should be 400
+      And the response should contain failed error "<error>" message
+
+      Examples:
+      |firstName                                                                                                                                                         |  lastName                                                                                                                                                                                                         | email          | password        | error                        |
+      |johnsaDFFFFFFFFFFFFFFFFFFFFWWWAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa| Doe                                                                                                                                                                                                               |Jogn@wesf.com   |dffs@we2         |Invalid or missing first name |
+      |John                                                                                                                                                              |doeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee |jogedw@234.com  |gfgbSw22$        |Invalid or missing last name  |
 
 
 

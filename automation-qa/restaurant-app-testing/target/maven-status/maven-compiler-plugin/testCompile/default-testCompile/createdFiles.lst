@@ -1,3 +1,4 @@
+stepDefinitions\api\SignInSteps.class
 runners\Runner.class
 stepDefinitions\api\SignUpSteps.class
 helpers\specBuilders\ResponseBuilder.class

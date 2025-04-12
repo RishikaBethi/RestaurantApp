@@ -6,7 +6,7 @@ import models.SignUp;
 public class ShareContext {
 
     private String baseUri;
-    private SignUp user;
+    private Object user;
     private Response response;
     private String token;
 
@@ -18,11 +18,12 @@ public class ShareContext {
     {
         this.baseUri = baseUri;
     }
-    public SignUp getUser(){
+
+    public Object getUser(){
         return this.user;
     }
 
-    public void setUser(SignUp user)
+    public void setUser(Object user)
     {
         this.user = user;
     }
