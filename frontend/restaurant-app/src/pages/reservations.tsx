@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import EditReservationDialog from "@/components/editReservation";
 import { BASE_API_URL } from "@/constants/constant";
+import FeedbackModal from "@/components/feedbackModal";
 
 interface Reservation {
   id: number;
@@ -46,6 +47,7 @@ export default function ReservationsPage() {
   const [selectedReservationId, setSelectedReservationId] = useState<number | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
   const handleCancelReservation = async (id: number) => {
     try {
@@ -149,15 +151,16 @@ export default function ReservationsPage() {
                 </div>
               )}
               {res.status === "In Progress" && (
-                <Button className="bg-green-600 hover:bg-green-700 w-full">Leave Feedback</Button>
+                <Button className="bg-green-600 hover:bg-green-700 w-full" onClick={() => setShowFeedbackModal(true)}>Leave Feedback</Button>
               )}
               {res.status === "Finished" && (
-                <Button className="bg-green-600 hover:bg-green-700 w-full">Update Feedback</Button>
+                <Button className="bg-green-600 hover:bg-green-700 w-full" onClick={() => setShowFeedbackModal(true)}>Update Feedback</Button>
               )}
             </CardContent>
           </Card>
         ))}
       </div>
+      <FeedbackModal isOpen={showFeedbackModal} onClose={() => setShowFeedbackModal(false)} />
     </div>
     <EditReservationDialog
   isOpen={isEditDialogOpen}
