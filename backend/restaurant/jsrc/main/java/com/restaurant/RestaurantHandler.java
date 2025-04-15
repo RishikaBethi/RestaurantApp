@@ -84,6 +84,15 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
     @Inject
     BookingService bookingService;
 
+    @Inject
+    BookingsByWaiterService bookingsByWaiterService;
+
+    @Inject
+    UpdateReservationByWaiterService updateReservationByWaiterService;
+    
+    @Inject
+    GetReservationByWaiterService getReservationByWaiterService;
+
     public RestaurantHandler() {
 		initDependencies();
 	}
@@ -171,12 +180,24 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
                 return bookingService.handleCreateReservation(request);
             }
 
+            if ("/bookings/waiter".equals(path) && "POST".equalsIgnoreCase(httpMethod)) {
+                return bookingsByWaiterService.handleReservationByWaiter(request);
+            }
+
             if (path.startsWith("/bookings/client/") && "PUT".equalsIgnoreCase(httpMethod)) {
                 return updateReservationService.handleUpdateReservation(request, path);
             }
 
+            if (path.startsWith("/bookings/waiter/") && "PUT".equalsIgnoreCase(httpMethod)) {
+                return updateReservationByWaiterService.handleUpdateReservationByWaiter(request, path);
+            }
+
             if ("/reservations".equals(path) && "GET".equalsIgnoreCase(httpMethod)) {
                 return getReservationService.handleGetReservations(request);
+            }
+
+            if ("/reservations/waiter".equals(path) && "GET".equalsIgnoreCase(httpMethod)) {
+                return getReservationByWaiterService.handleGetReservationsByWaiter(request);
             }
 
             if (path.startsWith("/reservations/") && "DELETE".equalsIgnoreCase(httpMethod)) {

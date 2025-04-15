@@ -47,7 +47,7 @@ public class BookingService {
             String userId = (String) claims.get("sub");
             String email = (String) claims.get("email");
 
-            if (userId == null || userId.isEmpty()) {
+            if (email == null || email.isEmpty()) {
                 return createErrorResponse(401, "Unauthorized: Missing or invalid token.");
             }
 
@@ -58,6 +58,8 @@ public class BookingService {
                     return createErrorResponse(400, "Missing required field: " + field);
                 }
             }
+            logger.info("validated required fields"); // Debugging purpose
+
 
             // Convert guestsNumber to Integer
             int guestsNumber;
@@ -66,6 +68,7 @@ public class BookingService {
                 if (guestsNumber <= 0) {
                     return createErrorResponse(400, "Invalid guestsNumber: Must be a positive integer.");
                 }
+                logger.info("valid guest number"); // Debugging purpose
             } catch (NumberFormatException e) {
                 return createErrorResponse(400, "Invalid guestsNumber: Must be an integer.");
             }
@@ -91,10 +94,12 @@ public class BookingService {
             }
 
             // Check if table exists in Tables table
-            Item tableItem = tablesTable.getItem("locationId", locationId, "tableNumber", tableNumber);
+            int tableNumberInt = Integer.parseInt(tableNumber);
+             Item tableItem = tablesTable.getItem("locationId", locationId, "tableNumber", tableNumberInt);
             if (tableItem == null) {
                 return createErrorResponse(400, "The specified table number does not exist for the given location.");
             }
+            logger.info("validated table existence");
 
             // Check for existing overlapping reservations for same table/date
             ItemCollection<ScanOutcome> existingReservations = reservationTable.scan(
@@ -103,6 +108,7 @@ public class BookingService {
                     new ScanFilter("date").eq(date),
                     new ScanFilter("status").ne("Cancelled")
             );
+            logger.info("checked for existing intervals");
 
             for (Item reservation : existingReservations) {
                 String existingFrom = reservation.getString("timeFrom");
@@ -117,12 +123,15 @@ public class BookingService {
                     return createErrorResponse(409, "The specified table is already booked for the given date and time.");
                 }
             }
+            logger.info("checked for duplicate booking");
 
             String waiterId = waiterService.assignWaiter(requestBody.get("locationId"));
+            logger.info("assigned waiter");
             String reservationId = UUID.randomUUID().toString();
             String orderId = UUID.randomUUID().toString();
             String timeSlot = timeFrom + " - " + timeTo;
 
+            logger.info("saving reservation");
             // Save reservation
             reservationTable.putItem(new PutItemSpec().withItem(new Item()
                     .withPrimaryKey("reservationId", reservationId)
@@ -138,6 +147,9 @@ public class BookingService {
                     .withString("orderId", orderId)
             ));
 
+
+            logger.info("Attempting to create order with orderId: " + orderId + " and email: " + email);
+
             // Save order
             ordersTable.putItem(new PutItemSpec().withItem(new Item()
                     .withPrimaryKey("orderId", orderId, "email", email)
@@ -151,6 +163,7 @@ public class BookingService {
             // Fetch location address
             Item locationItem = locationTable.getItem("locationId", locationId);
             String locationAddress = locationItem != null ? locationItem.getString("address") : null;
+            logger.info("fetched locatio address");
 
             ReservationResponseDTO dto = new ReservationResponseDTO(
                     reservationId,

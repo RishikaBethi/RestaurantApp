@@ -81,13 +81,11 @@ public class GetReservationService {
                 // Handle status transitions
                 if (now.after(timeFrom) && now.before(timeTo)) {
                     if (!"In progress".equals(currentStatus)) {
-                        feedbackId = ensureFeedbackExists(feedbackId, reservationId, email, locationId, reservationDate);
                         updateReservationStatus(reservationId, "In progress", feedbackId);
                         currentStatus = "In progress";
                     }
                 } else if (now.after(timeTo)) {
                     if (!"Finished".equals(currentStatus)) {
-                        feedbackId = ensureFeedbackExists(feedbackId, reservationId, email, locationId, reservationDate);
                         updateReservationStatus(reservationId, "Finished", feedbackId);
                         currentStatus = "Finished";
                     }
@@ -129,25 +127,6 @@ public class GetReservationService {
         } catch (Exception e) {
             return createErrorResponse(500, "Error fetching reservations: " + e.getMessage());
         }
-    }
-
-    private String ensureFeedbackExists(String feedbackId, String reservationId, String email, String locationId, String date) {
-        if (feedbackId == null) {
-            feedbackId = UUID.randomUUID().toString();
-            Item feedbackItem = new Item()
-                    .withPrimaryKey("feedbackId", feedbackId)
-                    .withString("reservationId", reservationId)
-                    .withString("email", email)
-                    .withString("locationId", locationId)
-                    .withString("date", date)
-                    .withNull("comment")
-                    .withNull("rating")
-                    .withNull("type")
-                    .withNull("userName")
-                    .withNull("userAvatarUrl");
-            feedbacksTable.putItem(feedbackItem);
-        }
-        return feedbackId;
     }
 
     private void updateReservationStatus(String reservationId, String status, String feedbackId) {
