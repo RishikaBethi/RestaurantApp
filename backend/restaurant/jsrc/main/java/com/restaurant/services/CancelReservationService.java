@@ -47,13 +47,25 @@ public class CancelReservationService {
             }
 
             String reservationEmail = reservationItem.getString("email");
+            String waiterId = reservationItem.getString("waiterId");
             String status = reservationItem.getString("status");
 
-            // Check if the reservation belongs to the user
-            if (!email.equals(reservationEmail)) {
-                return createErrorResponse(403, "Forbidden: This reservation does not belong to you.");
+            boolean isCustomer = email.equalsIgnoreCase(reservationEmail);
+            boolean isAssignedWaiter = false;
+
+            if (waiterId != null && !waiterId.isEmpty()) {
+                Table waitersTable = dynamoDB.getTable(System.getenv("WAITERS_TABLE"));
+                Item waiterItem = waitersTable.getItem("waiterId", waiterId);
+
+                if (waiterItem != null) {
+                    String assignedWaiterEmail = waiterItem.getString("email");
+                    isAssignedWaiter = email.equalsIgnoreCase(assignedWaiterEmail);
+                }
             }
 
+            if (!isCustomer && !isAssignedWaiter) {
+                return createErrorResponse(403, "Forbidden: You are not authorized to cancel this reservation.");
+            }
             // Check if the reservation is already cancelled or completed
             if (!"Reserved".equalsIgnoreCase(status)) {
                 return createErrorResponse(204, "No active reservation to cancel.");
@@ -78,7 +90,14 @@ public class CancelReservationService {
 
             // Cancel the reservation
             cancelReservationStatus(reservationId, "Cancelled");
-            return createApiResponse(200, Map.of("message", "Reservation Canceled"));
+
+            // Cancel the associated order if it exists
+            String orderId = reservationItem.getString("orderId");
+            if (orderId != null && reservationEmail != null) {
+                cancelOrderState(orderId, reservationEmail);
+            }
+
+            return createApiResponse(200, Map.of("message", "Reservation and associated order Canceled successfully"));
         } catch (Exception e) {
             logger.severe("Error canceling reservation: " + e.getMessage());
             return createErrorResponse(500, "Error canceling reservation: " + e.getMessage());
@@ -101,6 +120,24 @@ public class CancelReservationService {
             return "Failed to update reservation.";
         }
     }
+
+    private void cancelOrderState(String orderId, String email) {
+        try {
+            Table ordersTable = dynamoDB.getTable(System.getenv("ORDERS_TABLE"));
+
+            UpdateItemSpec updateItemSpec = new UpdateItemSpec()
+                    .withPrimaryKey("orderId", orderId, "email", email)
+                    .withUpdateExpression("set #s = :cancelled")
+                    .withNameMap(Collections.singletonMap("#s", "status"))
+                    .withValueMap(new ValueMap().withString(":cancelled", "Cancelled"));
+
+            ordersTable.updateItem(updateItemSpec);
+            logger.info("Order " + orderId + " state updated to Cancelled.");
+        } catch (Exception e) {
+            logger.warning("Failed to update order state: " + e.getMessage());
+        }
+    }
+
 
     // Get all reservations (admin functionality)
     public List<Map<String, Object>> getReservations() {
