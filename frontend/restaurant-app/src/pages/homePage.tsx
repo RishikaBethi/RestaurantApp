@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import ShimmerLocations from "@/components/shimmerUI/shimmerLocations";
 import { BASE_API_URL } from "@/constants/constant";
+import { useNavigate } from "react-router-dom";
 
 interface Location {
   id: string;
@@ -30,6 +31,7 @@ export default function Home() {
   const [popularDishes, setPopularDishes] = useState<PopularDish[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate=useNavigate();
 
   useEffect(() => {
     setLoading(true);
@@ -69,7 +71,7 @@ export default function Home() {
         <div className="text-center p-4">
           <h2 className="text-3xl font-bold">Green & Tasty</h2>
           <p className="text-lg">Fresh, healthy, and sustainable cuisine</p>
-          <button className="mt-4 px-4 py-2 bg-green-600 hover:bg-green-700 rounded text-white">View Menu</button>
+          <button className="mt-4 px-4 py-2 bg-green-600 hover:bg-green-700 rounded text-white" onClick={()=>navigate("/menu")}>View Menu</button>
         </div>
       </header>
  
@@ -78,8 +80,14 @@ export default function Home() {
         <h3 className="text-xl font-semibold">Most Popular Dishes</h3>
         {loading ? <ShimmerDishes /> : error ? <p className="text-red-500">{error}</p> : (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-            {popularDishes.map((dish,index) => (
-              <PopularDishCard key={index} {...dish} />))}
+           {Array.isArray(popularDishes) ? (
+  popularDishes.map((dish, index) => (
+    <PopularDishCard key={index} {...dish} />
+  ))
+) : (
+  <p>No popular dishes available.</p>
+)}
+
           </div>
         )}
       </section>

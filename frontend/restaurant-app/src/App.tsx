@@ -9,6 +9,8 @@ import RegisterPage from "./pages/registerPage";
 import RestroPage from "./pages/restroPage";
 import ReservationsPage from "./pages/reservations";
 import BookTable from "./pages/tablebooking";
+import ReservationDashboard from './pages/waiterReservationPage';
+import Menu from './components/viewMenu';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -25,6 +27,8 @@ function App() {
           <Route path="/restaurant/:locationId" element={<RestroPage />} />
           <Route path="/reservations" element={<ReservationsPage />} />
           <Route path="/book-table" element={<BookTable />} />
+          <Route path="/waiter-reservations" element={<ReservationDashboard/>}/>
+          <Route path="/menu" element={<Menu/>}/>
         </Route>
       </Routes>
     </BrowserRouter>

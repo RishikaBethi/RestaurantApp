@@ -1,1 +1,1 @@
-export const BASE_API_URL="https://tzj3vgzxml.execute-api.ap-southeast-2.amazonaws.com/dev";
+export const BASE_API_URL="https://1mj7ncquc8.execute-api.ap-southeast-2.amazonaws.com/dev";

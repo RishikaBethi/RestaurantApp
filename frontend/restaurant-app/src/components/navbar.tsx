@@ -6,31 +6,27 @@ import image from "../assets/image.png";
  
 export default function Navbar({ isLoggedIn, setIsLoggedIn }: { isLoggedIn: boolean; setIsLoggedIn: (value: boolean) => void }) {
   const navigate = useNavigate();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [avatarDropdownOpen, setAvatarDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  const user=JSON.parse(localStorage.getItem("user")|| '""');
-  const email=localStorage.getItem("email");
-  const role=localStorage.getItem("role");
+ 
+  const user = JSON.parse(localStorage.getItem("user") || '""');
+  const email = localStorage.getItem("email");
+  const role = localStorage.getItem("role") || "";
   const initials = user
-  .split(" ")
-  .map((word: string) => word.charAt(0))
-  .join("");
-
+    .split(" ")
+    .map((word: string) => word.charAt(0))
+    .join("");
+ 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      setIsLoggedIn(true);
-    } else {
-      setIsLoggedIn(false);
-    }
+    setIsLoggedIn(!!token);
   }, [setIsLoggedIn]);
-
-  // Close dropdown when clicking outside
+ 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false);
+        setAvatarDropdownOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -39,55 +35,66 @@ export default function Navbar({ isLoggedIn, setIsLoggedIn }: { isLoggedIn: bool
     };
   }, []);
  
+  // Render menu items based on role
+  const renderLinks = () => {
+    if (role === "Waiter" && isLoggedIn) {
+      return (
+        <>
+          <Link to="/waiter-reservations" className="text-gray-600 hover:text-green-600 text-lg">Reservations</Link>
+          <Link to="/menu" className="text-gray-600 hover:text-green-600 text-lg">Menu</Link>
+        </>
+      );
+    }
+ 
+    // Public links or logged-in customer
+    return (
+      <>
+        <Link to="/" className="text-gray-600 hover:text-green-600 text-lg">Main Page</Link>
+        <Link to="/book-table" className="text-gray-600 hover:text-green-600 text-lg">Book a Table</Link>
+        {isLoggedIn && (
+          <Link to="/reservations" className="text-gray-600 hover:text-green-600 text-lg">Reservations</Link>
+        )}
+      </>
+    );
+  };
+ 
+ 
   return (
-    <nav className="flex justify-between items-center bg-white shadow p-2">
-      {/* Logo */}
-      <Link to="/">
-        <img src={image} alt="Green & Tasty" />
+    <nav className="flex items-center bg-white shadow p-2 relative">
+      <Link to={role === "Waiter" ? "/waiter-reservations" : "/"}>
+        <img src={image} alt="Green & Tasty" className="h-10 w-auto" />
       </Link>
  
-      {/* Menu Links */}
-      <div className="flex items-center gap-6 font-semibold">
-        <Link to="/" className="text-gray-600 hover:text-green-600 text-lg">
-          Main Page
-        </Link>
-        <Link to="/book-table" className="text-gray-600 hover:text-green-600 text-lg">
-          Book a Table
-        </Link>
-        {isLoggedIn && (
-          <Link to="/reservations" className="text-gray-600 hover:text-green-600 text-lg">
-            Reservations
-          </Link>
-        )}
+      <div className="flex-1 hidden md:block" />
+ 
+      {/* Desktop Menu */}
+      <div className="hidden md:flex items-center gap-6 font-semibold">
+        {renderLinks()}
       </div>
  
+      <div className="flex-1 hidden md:block" />
+ 
       {/* Right Section */}
-      <div className="flex items-center">
+      <div className="hidden md:flex items-center">
         {isLoggedIn ? (
-          // Logged-in View (User Dropdown)
           <div className="relative" ref={dropdownRef}>
-            <Avatar className="cursor-pointer" onClick={() => setDropdownOpen(!dropdownOpen)}>
+            <Avatar className="cursor-pointer" onClick={() => setAvatarDropdownOpen(!avatarDropdownOpen)}>
               <AvatarImage src="https://via.placeholder.com/150" alt="User Avatar" />
               <AvatarFallback className="text-xs">{initials}</AvatarFallback>
             </Avatar>
-            {dropdownOpen && (
+            {avatarDropdownOpen && (
               <div className="absolute right-0 mt-2 w-40 bg-white shadow rounded z-50">
-                <div className="p-1 m-1">
-                  <p className="text-xs">{user} ({role})</p>
-                  <p className="text-xs">{email}</p>
+                <div className="p-1 m-1 text-sm">
+                  <p>{user} ({role})</p>
+                  <p>{email}</p>
                 </div>
                 <hr className="border-t-1 border-gray-400" />
-                <Link to="/profile" className="block px-4 py-2 text-sm hover:bg-gray-100">
-                  My Profile
-                </Link>
+                <Link to="/profile" className="block px-4 py-2 text-sm hover:bg-gray-100">My Profile</Link>
                 <button
                   onClick={() => {
-                    localStorage.removeItem("user");
-                    localStorage.removeItem("token");
-                    localStorage.removeItem("role");
-                    localStorage.removeItem("email");
+                    localStorage.clear();
                     setIsLoggedIn(false);
-                    setDropdownOpen(false);
+                    setAvatarDropdownOpen(false);
                     navigate("/login");
                   }}
                   className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
@@ -98,15 +105,106 @@ export default function Navbar({ isLoggedIn, setIsLoggedIn }: { isLoggedIn: bool
             )}
           </div>
         ) : (
-          // Logged-out View (Sign In Button)
-          <Button
-            onClick={() => navigate("/login")}
-            className="bg-green-600 hover:bg-green-700"
-          >
+          <Button onClick={() => navigate("/login")} className="bg-green-600 hover:bg-green-700">
             Sign In
           </Button>
         )}
       </div>
+ 
+      {/* Mobile Hamburger */}
+      <div className="md:hidden ml-auto">
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="text-gray-600 focus:outline-none"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+ 
+      {/* Mobile Dropdown */}
+      {mobileMenuOpen && (
+        <div className="absolute top-14 right-2 w-48 bg-white shadow rounded-md z-50 md:hidden">
+          {role === "WAITER" ? (
+            <>
+              <Link
+                to="/waiter-reservations"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+              >
+                Reservations
+              </Link>
+              <Link
+                to="/menu"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+              >
+                Menu
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+              >
+                Main Page
+              </Link>
+              <Link
+                to="/book-table"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+              >
+                Book a Table
+              </Link>
+              <Link
+                to="/reservations"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+              >
+                Reservations
+              </Link>
+            </>
+          )}
+ 
+          {isLoggedIn ? (
+            <>
+              <Link
+                to="/profile"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+              >
+                My Profile
+              </Link>
+              <button
+                onClick={() => {
+                  localStorage.clear();
+                  setIsLoggedIn(false);
+                  setMobileMenuOpen(false);
+                  navigate("/login");
+                }}
+                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+              >
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                navigate("/login");
+              }}
+              className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+            >
+              Sign In
+            </button>
+          )}
+        </div>
+      )}
     </nav>
   );
 }
+ 
+ 

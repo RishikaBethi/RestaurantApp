@@ -64,7 +64,11 @@ export default function Login({ setIsLoggedIn }: { setIsLoggedIn: (value: boolea
       localStorage.setItem("email",formData.email);
 
       setIsLoggedIn(true);
-      navigate("/", { replace: true });
+      if (role === "Waiter") {
+        navigate("/waiter-reservations", { replace: true });
+      } else {
+        navigate("/", { replace: true }); // default fallback
+      }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || error.response?.data?.message ||"Login failed. Please try again.";
