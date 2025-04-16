@@ -90,6 +90,15 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
     @Inject
     GetLatestFeedback latestFeedback;
 
+    @Inject
+    BookingsByWaiterService bookingsByWaiterService;
+
+    @Inject
+    UpdateReservationByWaiterService updateReservationByWaiterService;
+
+    @Inject
+    GetReservationByWaiterService getReservationByWaiterService;
+
     public RestaurantHandler() {
 		initDependencies();
 	}
@@ -127,7 +136,6 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
                 return signInService.handleSignIn(request);
             }
 
-
             // Location routes
             else if ("/locations".equals(path) && "GET".equals(httpMethod)) {
                 if (queryParams != null && queryParams.containsKey("locationId") && queryParams.containsKey("speciality-dishes")) {
@@ -163,6 +171,16 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
                 return feedbackService.handleGetFeedbacks(request);
             }
 
+            if ("/dishes".equals(path) && "GET".equals(httpMethod)) {
+                logger.info("Handling all dishes request for path: " + path + ", Query: " + (queryParams != null ? queryParams.toString() : "none"));
+                return dishService.getAllDishes(request);
+            }
+
+            // Handle dish by ID retrieval (e.g., /dishes/D101)
+            if (path.startsWith("/dishes/") && "GET".equalsIgnoreCase(httpMethod)) {
+                return dishService.getDishById(request, path);
+            }
+
             if (tablesService == null) {
                 throw new IllegalStateException("Services not injected: tablesService=" + tablesService);
             }
@@ -185,8 +203,16 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
                 return bookingService.handleCreateReservation(request);
             }
 
+            if ("/bookings/waiter".equals(path) && "POST".equalsIgnoreCase(httpMethod)) {
+                return bookingsByWaiterService.handleReservationByWaiter(request);
+            }
+
             if (path.startsWith("/bookings/client/") && "PUT".equalsIgnoreCase(httpMethod)) {
                 return updateReservationService.handleUpdateReservation(request, path);
+            }
+
+            if (path.startsWith("/bookings/waiter/") && "PUT".equalsIgnoreCase(httpMethod)) {
+                return updateReservationByWaiterService.handleUpdateReservationByWaiter(request, path);
             }
 
             if ("/reservations".equals(path) && "GET".equalsIgnoreCase(httpMethod)) {
@@ -201,7 +227,12 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
                 return latestFeedback.returnLatestFeedback(request, context);
             }
 
-			return createErrorResponse(405, "Method Not Allowed: " + path + " with method " + httpMethod);
+            if ("/reservations/waiter".equals(path) && "GET".equalsIgnoreCase(httpMethod)) {
+                return getReservationByWaiterService.handleGetReservationsByWaiter(request);
+            }
+
+
+            return createErrorResponse(405, "Method Not Allowed: " + path + " with method " + httpMethod);
         }
         catch (Exception e) {
             logger.severe("Error handling request: " + e.getMessage());

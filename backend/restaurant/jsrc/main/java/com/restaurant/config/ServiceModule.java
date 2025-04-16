@@ -111,6 +111,12 @@ public class ServiceModule {
 
     @Provides
     @Singleton
+    public GetReservationByWaiterService provideGetReservationByWaiterService(DynamoDB dynamoDB, GetAllLocationsService locationsService) {
+        return new GetReservationByWaiterService(dynamoDB, locationsService);
+    }
+
+    @Provides
+    @Singleton
     public CancelReservationService provideCancelReservationService(DynamoDB dynamoDB) {
         return new CancelReservationService(dynamoDB);
     }
@@ -119,6 +125,12 @@ public class ServiceModule {
     @Singleton
     public UpdateReservationService provideUpdateReservationService(DynamoDB dynamoDB) {
         return new UpdateReservationService(dynamoDB);
+    }
+
+    @Provides
+    @Singleton
+    public UpdateReservationByWaiterService provideUpdateReservationByWaiterService(DynamoDB dynamoDB) {
+        return new UpdateReservationByWaiterService(dynamoDB);
     }
 
     @Provides
@@ -137,6 +149,12 @@ public class ServiceModule {
     @Singleton
     public GetLatestFeedback GetLatestFeedbackService(DynamoDB dynamoDB) {
         return new GetLatestFeedback(dynamoDB);
+    }
+
+    @Provides
+    @Singleton
+    public BookingsByWaiterService provideBookingsByWaiterService(DynamoDB dynamoDB) {
+        return new BookingsByWaiterService(dynamoDB);
     }
 
     // Provide WaiterService Dependency
