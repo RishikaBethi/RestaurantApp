@@ -1,27 +1,108 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
+import axios from "axios";
+import { toast } from "sonner";
 
 interface FeedbackModalProps {
   isOpen: boolean;
   onClose: () => void;
+  reservationId: number | null;
 }
 
-export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
-  const [rating, setRating] = useState(4);
+export default function FeedbackModal({ isOpen, onClose,reservationId }: FeedbackModalProps) {
   const [activeTab, setActiveTab] = useState<"service" | "culinary">("service");
-  const [comment, setComment] = useState("");
+  const [serviceRating, setServiceRating] = useState(4);
+  const [serviceComment, setServiceComment] = useState("");
+  const [cuisineRating, setCuisineRating] = useState(4);
+  const [cuisineComment, setCuisineComment] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [existingFeedback, setExistingFeedback] = useState<any>(null);
 
-  const handleSubmit = () => {
-    const feedback = {
-      type: activeTab,
-      rating,
-      comment,
+  const token=localStorage.getItem("token");
+
+  useEffect(() => {
+    if (!reservationId || !isOpen) return;
+
+    const fetchFeedback = async () => {
+      try {
+        const { data } = await axios.post(
+          "https://1fa57wurq8.execute-api.ap-southeast-2.amazonaws.com/dev/getPreviousFeedback",
+          { reservationId },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, 
+            },}
+        );
+        setExistingFeedback(data);
+        setServiceRating(data.serviceRating || 4);
+        setServiceComment(data.serviceComment || "");
+        setCuisineRating(data.cuisineRating || 4);
+        setCuisineComment(data.cuisineComment || "");
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+        console.log("No previous feedback or error fetching it.");
+        setExistingFeedback(null);
+        setServiceRating(4);
+        setServiceComment("");
+        setCuisineRating(4);
+        setCuisineComment("");
+      }
     };
-    console.log("Submitted feedback:", feedback);
-    // You can replace this with an API call
-    onClose();
+
+    fetchFeedback();
+  }, [reservationId, isOpen]);
+
+  const handleSubmit = async () => {
+    const payload = {
+      reservationId,
+      serviceRating: serviceRating.toString(),
+      cuisineRating: cuisineRating.toString(),
+      serviceComment,
+      cuisineComment,
+    };
+
+    try {
+      const response=await axios.post(
+        "https://1fa57wurq8.execute-api.ap-southeast-2.amazonaws.com/dev/feedbacks",
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, 
+          },}
+      );
+      if (response?.data?.message) {
+        toast.success(response?.data?.message); 
+      } else {
+        toast.success("Feedback submitted successfully!"); 
+      }
+      onClose();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error:any) {
+      const message =
+      error?.response?.data?.error || "Failed to submit feedback.";
+    toast.error(message); 
+    }
+  };
+
+  const rating = activeTab === "service" ? serviceRating : cuisineRating;
+  const comment = activeTab === "service" ? serviceComment : cuisineComment;
+
+  const handleRatingChange = (value: number) => {
+    if (activeTab === "service") {
+      setServiceRating(value);
+    } else {
+      setCuisineRating(value);
+    }
+  };
+
+  const handleCommentChange = (value: string) => {
+    if (activeTab === "service") {
+      setServiceComment(value);
+    } else {
+      setCuisineComment(value);
+    }
   };
 
   return (
@@ -34,26 +115,17 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
 
         {/* Tabs */}
         <div className="flex gap-4 mt-4 mb-6 border-b border-gray-200">
-          <button
-            onClick={() => setActiveTab("service")}
-            className={`pb-2 flex-1 text-center font-medium transition-all ${
-              activeTab === "service"
-                ? "text-green-600 border-b-2 border-green-600"
-                : "text-gray-400"
-            }`}
-          >
-            Service
-          </button>
-          <button
-            onClick={() => setActiveTab("culinary")}
-            className={`pb-2 flex-1 text-center font-medium transition-all ${
-              activeTab === "culinary"
-                ? "text-green-600 border-b-2 border-green-600"
-                : "text-gray-400"
-            }`}
-          >
-            Culinary Experience
-          </button>
+          {["service", "culinary"].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab as "service" | "culinary")}
+              className={`pb-2 flex-1 text-center font-medium transition-all ${
+                activeTab === tab ? "text-green-600 border-b-2 border-green-600" : "text-gray-400"
+              }`}
+            >
+              {tab === "service" ? "Service" : "Culinary Experience"}
+            </button>
+          ))}
         </div>
 
         {/* Main Content */}
@@ -79,7 +151,7 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                 className={`w-6 h-6 cursor-pointer transition ${
                   i < rating ? "text-yellow-500 fill-yellow-500" : "text-gray-300"
                 }`}
-                onClick={() => setRating(i + 1)}
+                onClick={() => handleRatingChange(i + 1)}
               />
             ))}
           </div>
@@ -89,7 +161,7 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
           {/* Comment */}
           <textarea
             value={comment}
-            onChange={(e) => setComment(e.target.value)}
+            onChange={(e) => handleCommentChange(e.target.value)}
             placeholder="Add your comments"
             className="w-full border rounded-lg p-2 mt-2 h-24 resize-none"
           />
@@ -101,7 +173,7 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
             onClick={handleSubmit}
             className="bg-green-600 hover:bg-green-700 w-full mt-4"
           >
-            Submit Feedback
+            {existingFeedback ? "Update Feedback" : "Submit Feedback"}
           </Button>
         </DialogFooter>
       </DialogContent>

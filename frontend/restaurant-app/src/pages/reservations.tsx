@@ -151,16 +151,33 @@ export default function ReservationsPage() {
                 </div>
               )}
               {res.status === "In Progress" && (
-                <Button className="bg-green-600 hover:bg-green-700 w-full" onClick={() => setShowFeedbackModal(true)}>Leave Feedback</Button>
+                <Button className="bg-green-600 hover:bg-green-700 w-full" 
+                onClick={() => {
+                  setShowFeedbackModal(true);
+                  setSelectedReservationId(res.id)
+                  }}>
+                  Leave Feedback</Button>
               )}
               {res.status === "Finished" && (
-                <Button className="bg-green-600 hover:bg-green-700 w-full" onClick={() => setShowFeedbackModal(true)}>Update Feedback</Button>
+                <Button className="bg-green-600 hover:bg-green-700 w-full" 
+                onClick={() => {
+                  setShowFeedbackModal(true);
+                  setSelectedReservationId(res.id)
+                }}>
+                  Update Feedback</Button>
               )}
             </CardContent>
           </Card>
         ))}
       </div>
-      <FeedbackModal isOpen={showFeedbackModal} onClose={() => setShowFeedbackModal(false)} />
+      <FeedbackModal 
+      isOpen={showFeedbackModal} 
+      onClose={() => {
+        setShowFeedbackModal(false);
+        setSelectedReservationId(null); 
+      }}
+      reservationId={selectedReservationId}
+      />
     </div>
     <EditReservationDialog
   isOpen={isEditDialogOpen}
