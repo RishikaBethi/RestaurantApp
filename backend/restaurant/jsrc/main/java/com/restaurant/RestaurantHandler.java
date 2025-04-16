@@ -44,7 +44,7 @@ import static com.restaurant.utils.Helper.*;
         @EnvironmentVariable(key = "COGNITO_USER_POOL_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_USER_POOL_ID),
 		@EnvironmentVariable(key = "COGNITO_CLIENT_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_CLIENT_ID),
 		@EnvironmentVariable(key = "REGION", value = "${region}"),
-        @EnvironmentVariable(key = "ORDERS_TABLE", value = "${orders_table}"),
+        @EnvironmentVariable(key = "ORDERS_TABLE", value = "${orders_table}")
 })
 public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
@@ -83,6 +83,12 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 
     @Inject
     BookingService bookingService;
+
+    @Inject
+    WaiterOrderService waiterOrderService;
+
+    @Inject
+    ProfileService profileService;
 
     public RestaurantHandler() {
 		initDependencies();
@@ -161,7 +167,7 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
                 return tablesService.returnAvailableTablesFilteredByGivenCriteria(request, context);
             }
 
-            else if (path.equals("/locations/select-options") && httpMethod.equalsIgnoreCase("GET")) {
+            if (path.equals("/locations/select-options") && httpMethod.equalsIgnoreCase("GET")) {
                 context.getLogger().log("In locations handler");
                 return locationsService.allAvailableLocations(
                         request, context);
@@ -181,6 +187,22 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 
             if (path.startsWith("/reservations/") && "DELETE".equalsIgnoreCase(httpMethod)) {
                 return cancelReservationService.handleCancelReservation(request, path);
+            }
+
+            else if ("/waiter/open-order".equals(path) && "PUT".equalsIgnoreCase(httpMethod)) {
+                logger.info("Handling create or update order request");
+                return waiterOrderService.handleCreateOrUpdateOrder(request);
+            }
+
+            else if ("/users/profile".equals(path) && "GET".equals(httpMethod)) {
+                logger.info("Handling get user profile request");
+                return profileService.getUserProfile(request);
+            } else if ("/users/profile".equals(path) && "PUT".equals(httpMethod)) {
+                logger.info("Handling update user profile request");
+                return profileService.updateUserProfile(request);
+            } else if ("/users/profile/password".equals(path) && "PUT".equals(httpMethod)) {
+                logger.info("Handling change password request");
+                return profileService.changePassword(request);
             }
 
 			return createErrorResponse(405, "Method Not Allowed: " + path + " with method " + httpMethod);
