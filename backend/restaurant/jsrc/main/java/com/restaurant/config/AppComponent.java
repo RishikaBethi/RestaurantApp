@@ -27,7 +27,7 @@ public interface AppComponent {
     BookingsByWaiterService bookingsByWaiterService();
     UpdateReservationByWaiterService updateReservationByWaiterService();
     GetReservationByWaiterService GetReservationByWaiterService();
-
+    ProfileService profileService();
     @Component.Builder
     interface Builder {
         Builder serviceModule(ServiceModule module); // Allow passing ServiceModule

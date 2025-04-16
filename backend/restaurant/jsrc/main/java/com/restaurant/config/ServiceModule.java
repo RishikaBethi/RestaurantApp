@@ -163,4 +163,18 @@ public class ServiceModule {
     public WaiterService provideWaiterService(DynamoDB dynamoDB) {
         return new WaiterService(dynamoDB);
     }
+
+    @Provides
+    @Singleton
+    public WaiterOrderService provideWaiterOrderService(DynamoDB dynamoDB, ObjectMapper objectMapper) {
+        return new WaiterOrderService(dynamoDB, objectMapper);
+    }
+
+    @Provides
+    @Singleton
+    public ProfileService provideProfileService(DynamoDB dynamoDB, ObjectMapper objectMapper,
+                                                CognitoIdentityProviderClient cognitoClient,
+                                                String clientId) {
+        return new ProfileService(cognitoClient, dynamoDB, objectMapper, clientId);
+    }
 }

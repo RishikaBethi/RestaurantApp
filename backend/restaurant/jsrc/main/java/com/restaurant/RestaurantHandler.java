@@ -44,7 +44,7 @@ import static com.restaurant.utils.Helper.*;
         @EnvironmentVariable(key = "COGNITO_USER_POOL_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_USER_POOL_ID),
 		@EnvironmentVariable(key = "COGNITO_CLIENT_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_CLIENT_ID),
 		@EnvironmentVariable(key = "REGION", value = "${region}"),
-        @EnvironmentVariable(key = "ORDERS_TABLE", value = "${orders_table}"),
+        @EnvironmentVariable(key = "ORDERS_TABLE", value = "${orders_table}")
 })
 public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
@@ -99,6 +99,8 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
     @Inject
     GetReservationByWaiterService getReservationByWaiterService;
 
+    @Inject
+    ProfileService profileService;
     public RestaurantHandler() {
 		initDependencies();
 	}
@@ -229,6 +231,17 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 
             if ("/reservations/waiter".equals(path) && "GET".equalsIgnoreCase(httpMethod)) {
                 return getReservationByWaiterService.handleGetReservationsByWaiter(request);
+            }
+
+            else if ("/users/profile".equals(path) && "GET".equals(httpMethod)) {
+                logger.info("Handling get user profile request");
+                return profileService.getUserProfile(request);
+            } else if ("/users/profile".equals(path) && "PUT".equals(httpMethod)) {
+                logger.info("Handling update user profile request");
+                return profileService.updateUserProfile(request);
+            } else if ("/users/profile/password".equals(path) && "PUT".equals(httpMethod)) {
+                logger.info("Handling change password request");
+                return profileService.changePassword(request);
             }
 
 
