@@ -273,8 +273,7 @@ const WaiterReservations = () => {
         {/* Top bar */}
         <div className="flex justify-between items-center mb-6">
           <p className="text-l font-semibold text-gray-700">
-            You have {reservations.length} reservations for{" "}
-            {format(new Date(), "MMM dd, yyyy")}
+            You have {reservations.length} reservations.
           </p>
           <Button
             className="bg-green-600 text-white hover:bg-green-700"

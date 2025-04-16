@@ -132,14 +132,7 @@ export default function FeedbackModal({ isOpen, onClose,reservationId }: Feedbac
         <div className="flex flex-col items-center gap-4">
           {activeTab === "service" && (
             <div className="text-center">
-              <img
-                src="https://via.placeholder.com/80"
-                alt="Staff member"
-                className="rounded-full mb-2 mx-auto"
-              />
-              <p className="font-semibold">Mario Jast</p>
-              <p className="text-sm text-gray-500">Waiter</p>
-              <p className="text-sm text-yellow-500 font-semibold mt-1">4.96 ★</p>
+              <p className="font-semibold">Waiter</p>
             </div>
           )}
 
