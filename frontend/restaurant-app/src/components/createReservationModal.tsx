@@ -18,9 +18,10 @@ interface Props {
   open: boolean;
   onClose: () => void;
   onReservationSuccess:()=>void;
+  address:string ;
 }
 
-const CreateReservationModal: React.FC<Props> = ({ open, onClose,onReservationSuccess }) => {
+const CreateReservationModal: React.FC<Props> = ({ open, onClose,onReservationSuccess,address }) => {
   const [location, setLocation] = useState("");
   const [customerType, setCustomerType] = useState("visitor");
   const [guests, setGuests] = useState(1);
@@ -28,7 +29,7 @@ const CreateReservationModal: React.FC<Props> = ({ open, onClose,onReservationSu
   const [customerName, setCustomerName] = useState("");
   const [toTime, setToTime] = useState("");
   const [table, setTable] = useState("");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [, setReservationResponse] = useState<any>(null);
 
   const fromTimeOptions = ["10:30", "12:15", "14:00", "15:45", "17:30", "19:15", "21:00"];
@@ -62,6 +63,19 @@ const CreateReservationModal: React.FC<Props> = ({ open, onClose,onReservationSu
       setToTimeOptions([]);
     }
   }, [fromTime]);
+
+  const addressToLocationIdMap: Record<string, string> = {
+    "14 Baratashvili Street": "LOC002",
+    "48 Rustaveli Avenue": "LOC001",
+    "9 Abashidze Street": "LOC003",
+  };
+  
+  useEffect(() => {
+    const id = addressToLocationIdMap[address];
+    if (id) {
+      setLocation(id);
+    }
+  }, [address]);  
 
   const handleSubmit = async () => {
     const token = localStorage.getItem("token");
@@ -104,21 +118,12 @@ const CreateReservationModal: React.FC<Props> = ({ open, onClose,onReservationSu
  
         {/* Location */}
         <div className="space-y-1">
-          <Label className="flex items-center gap-2 text-sm">
-            <MapPin size={16} /> Location
-          </Label>
-          <Select onValueChange={setLocation}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a location" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="LOC002">14 Baratashvili Street</SelectItem>
-              <SelectItem value="LOC001">48 Rustaveli Avenue</SelectItem>
-              <SelectItem value="LOC003">9 Abashidze Street</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
- 
+        <Label className="flex items-center gap-2 text-sm">
+    <MapPin size={16} /> Location
+  </Label>
+  <Input value={address} readOnly className="cursor-default bg-gray-100" />
+</div>
+
         {/* Customer Type */}
         <RadioGroup value={customerType} onValueChange={setCustomerType} className="flex gap-3">
           <div className="flex items-center space-x-2 border rounded-md px-4 py-2 w-full cursor-pointer" onClick={() => setCustomerType("visitor")}>

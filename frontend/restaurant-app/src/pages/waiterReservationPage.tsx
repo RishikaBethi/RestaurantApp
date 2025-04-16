@@ -133,6 +133,7 @@ const WaiterReservations = () => {
   const [postponeSlot, setPostponeSlot] = useState("");
   const [postponeTable, setPostponeTable] = useState("");
   const [postponeGuests, setPostponeGuests] = useState("");
+  const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
 
   const userName = JSON.parse(localStorage.getItem("user") || "");
   const role = localStorage.getItem("role");
@@ -277,7 +278,10 @@ const WaiterReservations = () => {
           </p>
           <Button
             className="bg-green-600 text-white hover:bg-green-700"
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              setSelectedAddress(reservations[0]?.address || ""); // assuming at least one reservation exists
+              setIsModalOpen(true);
+            }}
           >
             + Create New Reservation
           </Button>
@@ -288,6 +292,7 @@ const WaiterReservations = () => {
               fetchReservations();
             }}
             onReservationSuccess={fetchReservations}
+            address={selectedAddress ?? ""}
           />
         </div>
 
@@ -310,12 +315,14 @@ const WaiterReservations = () => {
           <DialogHeader>
             <DialogTitle>Postpone Reservation</DialogTitle>
           </DialogHeader>
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            Date
             <Input
               type="date"
               value={postponeDate}
               onChange={(e) => setPostponeDate(e.target.value)}
             />
+            Time Slot
             <select
               value={postponeSlot}
               onChange={(e) => setPostponeSlot(e.target.value)}
@@ -327,6 +334,7 @@ const WaiterReservations = () => {
                 </option>
               ))}
             </select>
+            Table
             <select
               value={postponeTable}
               onChange={(e) => setPostponeTable(e.target.value)}
@@ -336,7 +344,7 @@ const WaiterReservations = () => {
               <option>Table 2</option>
               <option>Table 3</option>
             </select>
-
+            No of Guests
             <Input
         type="number"
         min={1}
