@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { BASE_API_URL } from "@/constants/constant";
 
 interface DishProps {
   dishId: string;
@@ -36,7 +37,7 @@ export function Dish({ dishId, trigger }: DishProps) {
       try {
         const token=localStorage.getItem("token");
         const response = await axios.get(
-          `https://dc5t69k4t6.execute-api.ap-southeast-2.amazonaws.com/dev/dishes/${dishId}`,
+          `${BASE_API_URL}/dishes/${dishId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`, // Adding token to request header
@@ -73,9 +74,9 @@ export function Dish({ dishId, trigger }: DishProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="max-w-md md:max-w-xl">
+      <DialogContent>
         {loading ? (
-          <div className="text-center py-10">Loading...</div>
+          <div className="text-center py-10 font-bold">Loading...</div>
         ) : dishData ? (
           <div className="space-y-4 text-sm">
             <div className="flex justify-center">
@@ -85,18 +86,18 @@ export function Dish({ dishId, trigger }: DishProps) {
                 className="w-40 h-40 object-cover rounded-full"
               />
             </div>
-            <h2 className="text-xl font-semibold text-center">
+            <p className="text-xl font-semibold text-center">
               {dishData.name}
-            </h2>
-            <p className="text-center text-gray-600">{dishData.description}</p>
-            <div className="text-gray-700 space-y-1">
+            </p>
+            <p className="text-center text-gray-600 pt-0">{dishData.description}</p>
+            <div className="text-gray-700 space-y-0.5">
               <p><strong>Calories:</strong> {dishData.calories}</p>
               <p><strong>Protein:</strong> {dishData.proteins}</p>
               <p><strong>Fats:</strong> {dishData.fats} (mostly healthy fats)</p>
               <p><strong>Carbohydrates:</strong> {dishData.carbohydrates}</p>
               <p><strong>Vitamins and minerals:</strong> {dishData.vitamins}</p>
             </div>
-            <div className="flex justify-between text-gray-900 font-medium pt-2">
+            <div className="flex justify-between text-gray-900 font-medium pt-0.5">
               <span>{dishData.price}</span>
               <span>{dishData.weight}</span>
             </div>

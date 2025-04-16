@@ -98,41 +98,16 @@ export default function BookTable() {
     const month = `${today.getMonth() + 1}`.padStart(2, '0');
     const day = `${today.getDate()}`.padStart(2, '0');
     return `${year}-${month}-${day}`;
-  };  
-
-  const getCurrentTime = (): string => {
-    const now = new Date();
-  
-    // Get localized string in Asia/Kolkata time zone
-    const istString = now.toLocaleString("en-IN", {
-      timeZone: "Asia/Kolkata",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false, // Set to true if you want 12-hour format
-    });
-  
-    return istString;
-  };  
+  };    
 
   const handleFindTable = async () => {
     try {
       setLoadingFilteredTables(true);
-      // Use selectedTime or fallback to current time
-    const baseTime = selectedTime || getCurrentTime();
-
-    // Add +1 minute
-    const [hours, minutes] = baseTime.split(":").map(Number);
-    const date = new Date();
-    date.setHours(hours);
-    date.setMinutes(minutes + 1); // Add 1 minute
-
-    // Format it back to HH:mm
-    const adjustedTime = date.toTimeString().slice(0, 5);
       const response = await axios.get(`${BASE_API_URL}/bookings/tables`, {
         params: {
           locationId: selectedLocation,
           date: selectedDate || getTodayDate(),
-          time: adjustedTime,
+          time: selectedTime,
           guests,
         },
       });

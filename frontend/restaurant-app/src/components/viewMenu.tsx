@@ -4,6 +4,7 @@ import dishImage from "@/assets/dishImage.png";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Dish } from "@/components/dish";
+import { BASE_API_URL } from "@/constants/constant";
 
 // Categories for filtering
 const categories = ["Appetizers", "Main Courses", "Desserts"];
@@ -51,7 +52,7 @@ const MenuPage = () => {
         const sortBy = getSortParam();
 
         const response = await axios.get(
-          `https://1mj7ncquc8.execute-api.ap-southeast-2.amazonaws.com/dev/dishes?dishType=${dishType}&sortBy=${sortBy}`,
+          `${BASE_API_URL}/dishes?dishType=${dishType}&sortBy=${sortBy}`,
           {
             headers: {
               Authorization: `Bearer ${token}`, // Adding token to request header
