@@ -62,67 +62,68 @@ public class PostAFeedbackService {
             String dateString = LocalDate.now(zoneId)
                     .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
-            logger.info(reservationId);
             if(reservationId!=null) {
-                logger.info("Inside if");
-//                ScanSpec scanSpec = new ScanSpec()
-//                        .withFilterExpression("reservationId = :resId")
-//                        .withValueMap(new ValueMap().withString(":resId", reservationId));
-//                Item requiredReservation = reservationTable.scan(scanSpec).iterator().next();
                 Item requiredReservation = reservationTable.getItem("reservationId", reservationId);
-                logger.info(requiredReservation.getString("locationId"));
+                if(requiredReservation==null) {
+                    return createErrorResponse(404, "Reservation not found");
+                }
                 String locationId = requiredReservation.getString("locationId");
-                if((requiredReservation.getString("status")).equals("In Progress")) {
+                String statusOfReservation = requiredReservation.getString("status");
+                String feedbackId = requiredReservation.getString("feedbackId");
+                if(statusOfReservation.equals("In Progress") || statusOfReservation.equals("Finished")) {
                     String serviceRating = requestBody.get("serviceRating");
                     String serviceComment = requestBody.get("serviceComment");
-                    double serviceRatingDouble;
-                    if(serviceRating!=null) {
+                    Double serviceRatingDouble = null; // Allow null if not provided
+                    // Require serviceRating if serviceComment is non-empty
+                    if (serviceComment != null && !serviceComment.trim().isEmpty() &&
+                            (serviceRating == null || serviceRating.trim().isEmpty())) {
+                        return createErrorResponse(400, "Service rating is required when service comment is provided");
+                    }
+                    if (serviceRating != null && !serviceRating.trim().isEmpty()) {
                         try {
                             serviceRatingDouble = Double.parseDouble(serviceRating);
+                        } catch (NumberFormatException e) {
+                            return createErrorResponse(400, "Service rating must be a number");
                         }
-                        catch(NumberFormatException e) {
-                            return createErrorResponse(400, "Rating needs to be a number");
-                        }
-                    }
-                    else {
-                        return createErrorResponse(400,"Rating cannot be empty");
                     }
 
                     String orderId = requiredReservation.getString("orderId");
-//                    ScanSpec scanOrdersTable = new ScanSpec()
-//                            .withFilterExpression("orderId = :ordId")
-//                            .withValueMap(new ValueMap().withString(":ordId", orderId));
-//                    Item order = ordersTable.scan(scanOrdersTable).iterator().next();
-                    Item order = ordersTable.getItem("orderId", orderId);
-                    String feedbackId = UUID.randomUUID().toString();
+                    String userMail = requiredReservation.getString("email");
+                    Item order = ordersTable.getItem("orderId", orderId, "email", userMail);
+                    if(feedbackId==null) feedbackId = UUID.randomUUID().toString();
                     if((order.getString("status")).equals("Finished") && !order.getMap("dishItems").isEmpty()) {
                         String cuisineRating = requestBody.get("cuisineRating");
                         String cuisineComment = requestBody.get("cuisineComment");
-                        double cuisineRatingDouble;
-                        if(cuisineRating!=null) {
+                        Double cuisineRatingDouble = null; // Allow null if not provided
+                        // Only require cuisineRating if cuisineComment is non-empty
+                        if (cuisineComment != null && !cuisineComment.trim().isEmpty() &&
+                                (cuisineRating == null || cuisineRating.trim().isEmpty())) {
+                            return createErrorResponse(400, "Cuisine rating is required when cuisine comment is provided");
+                        }
+                        if (cuisineRating != null && !cuisineRating.trim().isEmpty()) {
                             try {
                                 cuisineRatingDouble = Double.parseDouble(cuisineRating);
+                            } catch (NumberFormatException e) {
+                                return createErrorResponse(400, "Cuisine rating must be a number");
                             }
-                            catch(NumberFormatException e) {
-                                return createErrorResponse(400, "Rating needs to be an integer");
-                            }
-                        }
-                        else {
-                            return createErrorResponse(400, "Rating cannot be empty");
                         }
                         logger.info("Adding to tables");
                         addItemTOTable(feedbackId, locationId, cuisineComment, cuisineRatingDouble, serviceComment, serviceRatingDouble, dateString, email, reservationId);
-                        return createApiResponse(200, "Your feedback is valuable to us");
+                        return createApiResponse(201, Map.of("message", "Feedback has been created"));
                     }
                     else {
                         String cuisineRating = requestBody.get("cuisineRating");
                         String cuisineComment = requestBody.get("cuisineComment");
-                        if(cuisineRating!=null || cuisineComment!=null) {
-                            return createErrorResponse(400,"Cuisine feedback cannot be provided before ordering");
-                        }
                         addItemTOTable(feedbackId, locationId, null, null, serviceComment, serviceRatingDouble, dateString, email, reservationId);
-                        return createApiResponse(200, "Your feedback is valuable to us");
+                        if (cuisineRating != null && !cuisineRating.trim().isEmpty() ||
+                                cuisineComment != null && !cuisineComment.trim().isEmpty()) {
+                            return createErrorResponse(400,"Service feedback saved, but cuisine feedback cannot be provided before ordering");
+                        }
+                        return createApiResponse(201, Map.of("message", "Feedback has been created"));
                     }
+                }
+                else if(statusOfReservation.equals("Reserved") || statusOfReservation.equals("Cancelled")){
+                    return createErrorResponse(400, "Feedback can be provided only once your reservation is in progress or has finished");
                 }
             }
             return createErrorResponse(400, "Reservation ID cannot be null");
@@ -143,34 +144,42 @@ public class PostAFeedbackService {
         }
     }
     
-    public void addItemTOTable(String feedbackId, String locationId, String cuisineComment, Double cuisineRating, String serviceComment, Double serviceRating, String date, String email, String reservationId) {
+    public void addItemTOTable(String feedbackId, String locationId, String cuisineComment, Number cuisineRating, String serviceComment, Number serviceRating, String date, String email, String reservationId) {
         try {
 
             logger.info("Adding items to tables");
-            logger.info("ReservationId "+reservationId);
-            logger.info("FeedbdackId"+feedbackId);
 
-            feedbackTable.putItem(new PutItemSpec().withItem(new Item()
-                    .withPrimaryKey("feedbackId", feedbackId)
-                    .withString("locationId", locationId)
-                    .withString("cuisineComment", cuisineComment)
-                    .withNumber("cuisineRating", cuisineRating)
+
+            Item item = new Item()
+                    .withPrimaryKey("feedbackId", feedbackId, "locationId", locationId)
                     .withString("date", date)
                     .withString("email", email)
-                    .withString("reservationId", reservationId)
-                    .withString("serviceComment", serviceComment)
-                    .withNumber("serviceRating", serviceRating)
-            ));
+                    .withString("reservationId", reservationId);
+
+            // Add optional fields only if non-null
+            if (cuisineComment != null) {
+                item.withString("cuisineComment", cuisineComment);
+            }
+            if (cuisineRating != null) {
+                item.withNumber("cuisineRating", cuisineRating);
+            }
+            if (serviceComment != null) {
+                item.withString("serviceComment", serviceComment);
+            }
+            if (serviceRating != null) {
+                item.withNumber("serviceRating", serviceRating);
+            }
+
+            feedbackTable.putItem(new PutItemSpec().withItem(item));
 
             logger.info("Adding items to reservations table");
 
             reservationTable.updateItem(new UpdateItemSpec()
                     .withPrimaryKey("reservationId", reservationId)
-                    .withUpdateExpression("feedbackId = :feedbackId")
+                    .withUpdateExpression("SET feedbackId = :feedbackId")
                     .withValueMap(new ValueMap().withString(":feedbackId", feedbackId))
             );
 
-            logger.info("Done");
         }
         catch(AmazonDynamoDBException e) {
             logger.severe("Failed to update reservation with feedbackId: " + e.getMessage());

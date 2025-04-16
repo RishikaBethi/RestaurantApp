@@ -85,7 +85,10 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
     BookingService bookingService;
 
     @Inject
-    PostAFeedbackService postAFeedbcak;
+    PostAFeedbackService postAFeedback;
+
+    @Inject
+    GetLatestFeedback latestFeedback;
 
     public RestaurantHandler() {
 		initDependencies();
@@ -108,11 +111,11 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
             logger.info("Received request - Path: " + path + ", Method: " + httpMethod +
                     ", Query: " + (queryParams != null ? queryParams.toString() : "none"));
 
-            if(postAFeedbcak==null) {
+            if(postAFeedback==null) {
                 context.getLogger().log("Post a feedback service null");
             }
             if(path.equals("/feedbacks") && httpMethod.equalsIgnoreCase("POST")) {
-                return postAFeedbcak.handlePostAFeedback(request, context);
+                return postAFeedback.handlePostAFeedback(request, context);
             }
 
             // Auth routes
@@ -192,6 +195,10 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 
             if (path.startsWith("/reservations/") && "DELETE".equalsIgnoreCase(httpMethod)) {
                 return cancelReservationService.handleCancelReservation(request, path);
+            }
+
+            if(path.equals("/getPreviousFeedback") && "POST".equalsIgnoreCase(httpMethod)) {
+                return latestFeedback.returnLatestFeedback(request, context);
             }
 
 			return createErrorResponse(405, "Method Not Allowed: " + path + " with method " + httpMethod);

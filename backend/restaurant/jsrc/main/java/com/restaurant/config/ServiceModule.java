@@ -133,6 +133,12 @@ public class ServiceModule {
         return new PostAFeedbackService(dynamoDB);
     }
 
+    @Provides
+    @Singleton
+    public GetLatestFeedback GetLatestFeedbackService(DynamoDB dynamoDB) {
+        return new GetLatestFeedback(dynamoDB);
+    }
+
     // Provide WaiterService Dependency
     @Provides
     @Singleton
