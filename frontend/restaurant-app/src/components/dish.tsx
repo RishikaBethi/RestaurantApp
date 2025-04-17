@@ -6,6 +6,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { BASE_API_URL } from "@/constants/constant";
+import Spinner from "./shimmerUI/spinner";
 
 interface DishProps {
   dishId: string;
@@ -76,7 +77,7 @@ export function Dish({ dishId, trigger }: DishProps) {
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
         {loading ? (
-          <div className="text-center py-10 font-bold">Loading...</div>
+          <div className="flex justify-center py-10 text-xl"><Spinner/></div>
         ) : dishData ? (
           <div className="space-y-4 text-sm">
             <div className="flex justify-center">

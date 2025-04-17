@@ -19,6 +19,7 @@ import {
 import EditReservationDialog from "@/components/editReservation";
 import { BASE_API_URL } from "@/constants/constant";
 import FeedbackModal from "@/components/feedbackModal";
+import ShimmerReservations from "@/components/shimmerUI/shimmerReservations"; // adjust the path as needed
 
 interface Reservation {
   id: number;
@@ -48,6 +49,7 @@ export default function ReservationsPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const handleCancelReservation = async (id: number) => {
     try {
@@ -79,6 +81,7 @@ export default function ReservationsPage() {
   }, [isAuthenticated, navigate]);
 
   const fetchReservations = async () => {
+    setLoading(true);
     const token = localStorage.getItem("token");
     try {
       const response = await axios.get<Reservation[]>(`${BASE_API_URL}/reservations`,
@@ -90,6 +93,8 @@ export default function ReservationsPage() {
       setReservations(response.data);
     } catch (error) {
       console.error("Failed to fetch reservations:", error);
+    } finally{
+      setLoading(false);
     }
   };
 
@@ -98,6 +103,9 @@ export default function ReservationsPage() {
   return (
     <div><h1 className="text-2xl font-bold text-white bg-green-700 p-4 pl-9">Hello, {user} ({role})</h1>
     <div className="container mx-auto p-2">
+    {loading ? (
+        <ShimmerReservations />
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
         {reservations.map((res) => (
           <Card key={res.id} className="p-4 shadow-lg">
@@ -170,6 +178,7 @@ export default function ReservationsPage() {
           </Card>
         ))}
       </div>
+      )}
       <FeedbackModal 
       isOpen={showFeedbackModal} 
       onClose={() => {

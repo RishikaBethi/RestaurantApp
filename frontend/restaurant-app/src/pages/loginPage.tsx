@@ -64,6 +64,9 @@ export default function Login({ setIsLoggedIn }: { setIsLoggedIn: (value: boolea
       localStorage.setItem("email",formData.email);
 
       setIsLoggedIn(true);
+
+      toast.success(response?.data?.message || "Login successful!");
+
       if (role === "Waiter") {
         navigate("/waiter-reservations", { replace: true });
       } else {

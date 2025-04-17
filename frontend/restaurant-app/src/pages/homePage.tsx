@@ -87,7 +87,6 @@ export default function Home() {
 ) : (
   <p>No popular dishes available.</p>
 )}
-
           </div>
         )}
       </section>

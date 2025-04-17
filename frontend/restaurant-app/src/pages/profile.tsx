@@ -101,6 +101,8 @@ const MyProfile: React.FC = () => {
  
       toast.success(response?.data?.message);
       fetchProfile(); // Refresh data
+      const name=editedData.firstName+" "+editedData.lastName;
+      localStorage.setItem("user", JSON.stringify(name));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
     } catch (error: any) {
       toast.error("Failed to update profile.");

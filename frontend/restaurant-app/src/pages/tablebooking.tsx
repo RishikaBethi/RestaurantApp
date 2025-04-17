@@ -19,6 +19,14 @@ type Table = {
 
 type LocationOption = { id: string; address: string };
 
+const getTodayDate = (): string => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = `${today.getMonth() + 1}`.padStart(2, '0');
+  const day = `${today.getDate()}`.padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}; 
+
 export default function BookTable() {
   const [guests, setGuests] = useState(1);
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
@@ -32,9 +40,10 @@ export default function BookTable() {
   const [loadingTables, setLoadingTables] = useState(true);
   const [error, setError] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState(getTodayDate());
   const [selectedTime, setSelectedTime] = useState("");
   const [loadingFilteredTables, setLoadingFilteredTables] = useState(false);
+  const [searchClicked, setSearchClicked] = useState(false);
   const navigate=useNavigate();
 
   const predefinedTimeOptions: string[] = [
@@ -90,17 +99,10 @@ export default function BookTable() {
       .finally(() => {
         setLoadingLocations(false);
       });
-  }, []);
-
-  const getTodayDate = (): string => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = `${today.getMonth() + 1}`.padStart(2, '0');
-    const day = `${today.getDate()}`.padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };    
+  }, []);   
 
   const handleFindTable = async () => {
+    setSearchClicked(true);
     try {
       setLoadingFilteredTables(true);
       const response = await axios.get(`${BASE_API_URL}/bookings/tables`, {
@@ -114,7 +116,6 @@ export default function BookTable() {
       setFilteredTables(response.data);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      console.error("Error fetching filtered tables:", err);
       const errorMessage = err?.response?.data?.error || "Failed to find tables.";
       toast.error(errorMessage);
     }finally {
@@ -201,6 +202,12 @@ export default function BookTable() {
         <h3 className="text-xl font-semibold mb-4">Avaliable Tables</h3>
         {loadingTables || loadingFilteredTables ? (
           <ShimmerTables />
+        ) : !searchClicked ? (
+        <p className="text-gray-600 text-center mt-4">
+          Please select a location, date, time, and number of guests to view available tables.
+        </p>
+        ) : filteredTables.length === 0 ? (
+        <p className="text-gray-600 text-center mt-4">No available tables found for your selection.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredTables.map((table,index) => (

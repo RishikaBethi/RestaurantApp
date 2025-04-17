@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import axios from "axios";
+import Spinner from "@/components/shimmerUI/spinner";
 
 // Time slots
 const timeSlots = [
@@ -134,11 +135,13 @@ const WaiterReservations = () => {
   const [postponeTable, setPostponeTable] = useState("");
   const [postponeGuests, setPostponeGuests] = useState("");
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const userName = JSON.parse(localStorage.getItem("user") || "");
   const role = localStorage.getItem("role");
 
   const fetchReservations = async () => {
+    setIsLoading(true);
     const token = localStorage.getItem("token");
     if (!token) return;
 
@@ -156,6 +159,8 @@ const WaiterReservations = () => {
       setAllReservations(mapped);
     } catch (error) {
       console.error("Failed to fetch reservations:", error);
+    } finally{
+      setIsLoading(false);
     }
   };
 
@@ -226,6 +231,12 @@ const WaiterReservations = () => {
       toast.error("Failed to postpone reservation.");
     }
   };
+
+  if (isLoading) {
+    return(
+      <div className="flex justify-center text-xl p-4"><Spinner/></div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

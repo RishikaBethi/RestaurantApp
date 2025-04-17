@@ -55,25 +55,25 @@ const RegisterPage: React.FC = () => {
     // Validate input
     switch (id) {
       case "firstName":
-        if (!/^[A-Za-z\-']{1,50}$/.test(value)) {
-          setErrors((prev) => ({
-            ...prev,
-            firstName: "First name must be up to 50 characters. Only Latin letters, hyphens, and apostrophes are allowed.",
-          }));
-        } else {
-          setErrors((prev) => ({ ...prev, firstName: "" }));
-        }
-        break;
-      case "lastName":
-        if (!/^[A-Za-z\-']{1,50}$/.test(value)) {
-          setErrors((prev) => ({
-            ...prev,
-            lastName: "Last name must be up to 50 characters. Only Latin letters, hyphens, and apostrophes are allowed.",
-          }));
-        } else {
-          setErrors((prev) => ({ ...prev, lastName: "" }));
-        }
-        break;
+  if (!/^[A-Za-z][A-Za-z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]{0,24}$/.test(value)) {
+    setErrors((prev) => ({
+      ...prev,
+      firstName: "First name must start with a letter and be up to 25 characters.Only letters,special characters and numbers are allowed.",
+    }));
+  } else {
+    setErrors((prev) => ({ ...prev, firstName: "" }));
+  }
+  break;
+  case "lastName":
+  if (!/^[A-Za-z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]{1,25}$/.test(value)) {
+    setErrors((prev) => ({
+      ...prev,
+      lastName: "Last name can include letters, numbers, and special characters, up to 25 characters.",
+    }));
+  } else {
+    setErrors((prev) => ({ ...prev, lastName: "" }));
+  }
+  break;
         case "email":
           if (
             !/^[A-Za-z0-9][A-Za-z0-9._-]*[A-Za-z0-9]@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(value) || // Basic email structure
@@ -129,7 +129,6 @@ const RegisterPage: React.FC = () => {
       return;
     }
 
-    console.log("Form submitted:", formData);
     setLoading(true);
     try {
       const response = await registerUser({
@@ -139,7 +138,8 @@ const RegisterPage: React.FC = () => {
         password: formData.password,
         confirmPassword: formData.confirmPassword,
       });
-      console.log("Registration successful:", response);
+      const successMessage = response?.data?.message || "Registration successful!";
+      toast.success(successMessage); 
       navigate("/login");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {

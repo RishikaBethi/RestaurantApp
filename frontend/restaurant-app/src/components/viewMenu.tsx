@@ -5,6 +5,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Dish } from "@/components/dish";
 import { BASE_API_URL } from "@/constants/constant";
+import Spinner from "./shimmerUI/spinner";
 
 // Categories for filtering
 const categories = ["Appetizers", "Main Courses", "Desserts"];
@@ -97,9 +98,9 @@ const MenuPage = () => {
   return (
     <div>
       {/* Breadcrumb */}
-      <div className="text-sm text-green-500 px-6 pt-4">
-        <Link to="/" className="text-green-600 hover:underline">Main page</Link> &gt;{" "}
-        <button onClick={handleMenuClick} className="text-green font-medium hover:underline">
+      <div className="text-sm text-gray-500 px-6 pt-4">
+        <Link to="/" className="text-gray-600 hover:underline">Main page</Link> &gt;{" "}
+        <button onClick={handleMenuClick} className="text-black font-medium">
           Menu
         </button>
       </div>
@@ -155,7 +156,7 @@ const MenuPage = () => {
       {/* Menu Cards Section */}
       <div className="p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {isLoading ? (
-          <h1>Loading...</h1>
+          <div className="flex justify-center text-xl"><Spinner/></div>
         ) : filteredMenu.length > 0 ? (
           filteredMenu.map((item) => (
             <Dish

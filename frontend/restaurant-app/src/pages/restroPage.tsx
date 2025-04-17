@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useLocationDetails } from "@/hooks/useLocationDetails";
 import { Button } from "@/components/ui/button";
 import { Star, MapPin } from "lucide-react";
@@ -11,6 +11,7 @@ import ShimmerFeedback from "@/components/shimmerUI/shimmerFeedback";
 import { useFeedbacks, FeedbackType, SortOption } from "@/hooks/useFeedbacks";
 import { BASE_API_URL } from "@/constants/constant";
 import { useNavigate } from "react-router-dom";
+import Spinner from "@/components/shimmerUI/spinner";
 
 
 interface SpecialtyDish {
@@ -71,8 +72,18 @@ export default function RestroPage() {
   
   return (
     <div className="container mx-auto p-6">
+      {/* Breadcrumb */}
+      <div className="text-sm text-gray-500">
+        <Link to="/" className="text-gray-600 hover:underline">Main page</Link> &gt;{" "}
+        {location && (
+          <>
+            <span className="text-black font-medium">Location {location?.address}</span>
+          </>
+        )}
+      </div>
+      
        {locationLoading ? (
-        <p className="text-center font-semibold text-2xl">Loading...</p>
+        <div className="flex justify-center text-xl"><Spinner/></div>
       ) : error || !location ? (
         <p className="text-red-500">{error || "Location not found."}</p>
       ) : (
