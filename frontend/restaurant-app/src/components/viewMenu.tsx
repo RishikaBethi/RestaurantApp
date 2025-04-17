@@ -162,7 +162,14 @@ const MenuPage = () => {
             key={item.id}
             dishId={item.id}
             trigger={
-              <div className="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition cursor-pointer">
+              <div className={`relative bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition cursor-pointer 
+                ${item.state.toLowerCase() === "on stop" ? "opacity-40 pointer-events-none" : ""}`}>
+                  {/* On Stop badge */}
+                  {item.state.toLowerCase() === "on stop" && (
+                    <div className="absolute top-2 right-2 bg-red-200 text-red-600 text-xs px-2 py-0.5 rounded-full font-semibold">
+                      On Stop
+                      </div>
+                    )}
                 <img
                   src={item.image}
                   alt={item.title}

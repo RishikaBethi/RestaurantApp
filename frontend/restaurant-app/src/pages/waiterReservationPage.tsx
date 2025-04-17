@@ -144,7 +144,7 @@ const WaiterReservations = () => {
 
     try {
       const response = await axios.get(
-        `https://ebgfmz7npj.execute-api.ap-southeast-2.amazonaws.com/dev/reservations/waiter`,
+        `https://dtspspshhf.execute-api.ap-southeast-2.amazonaws.com/dev/reservations/waiter`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -168,7 +168,7 @@ const WaiterReservations = () => {
     if (!token) return;
     try {
       await axios.delete(
-        `https://ebgfmz7npj.execute-api.ap-southeast-2.amazonaws.com/dev/reservations/${id}`,
+        `https://dtspspshhf.execute-api.ap-southeast-2.amazonaws.com/dev/reservations/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setReservations((prev) => prev.filter((r) => r.id !== id));
@@ -214,7 +214,7 @@ const WaiterReservations = () => {
 
     try {
       await axios.patch(
-        `https://ebgfmz7npj.execute-api.ap-southeast-2.amazonaws.com/dev/bookings/waiter/${selectedReservation.id}`,
+        `https://dtspspshhf.execute-api.ap-southeast-2.amazonaws.com/dev/bookings/waiter/${selectedReservation.id}`,
         updatedReservation,
         { headers: { Authorization: `Bearer ${token}` } }
       );
