@@ -3,13 +3,19 @@ package com.restaurant.config;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.s3.AmazonS3;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurant.services.*;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import software.amazon.awssdk.services.ses.SesClient;
 
 import dagger.Module;
 import dagger.Provides;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
+
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import com.restaurant.services.ReportsDispatchService;
 
 import javax.inject.Singleton;
 
@@ -17,6 +23,14 @@ import javax.inject.Singleton;
 public class ServiceModule {
 
     private static final String SNS_TOPIC_ARN = System.getenv("SNS_TOPIC_ARN");
+
+    @Provides
+    @Singleton
+    public AmazonS3 provideAmazonS3() {
+        return AmazonS3ClientBuilder.standard()
+                .withRegion("ap-southeast-2")
+                .build();
+    }
 
     @Provides
     @Singleton
@@ -34,6 +48,21 @@ public class ServiceModule {
                 .build();
     }
 
+    @Provides
+    @Singleton
+    public S3Client provideS3Client() {
+        return S3Client.builder()
+                .region(Region.AP_SOUTHEAST_2)
+                .build();
+    }
+
+    @Provides
+    @Singleton
+    public SesClient provideSesClient() {
+        return SesClient.builder()
+                .region(Region.AP_SOUTHEAST_2)
+                .build();
+    }
 
     @Provides
     @Singleton
@@ -87,15 +116,15 @@ public class ServiceModule {
 
     @Provides
     @Singleton
+    public ReportsDispatchService provideReportsDispatchService(DynamoDB dynamoDB, AmazonS3 s3Client, SesClient sesClient){
+        return new ReportsDispatchService(dynamoDB, s3Client, sesClient);
+    }
+
+    @Provides
+    @Singleton
     public DishService provideDishService(DynamoDB dynamoDB, ObjectMapper objectMapper) {
         return new DishService(dynamoDB, objectMapper);
     }
-
-//    @Provides
-//    @Singleton
-//    public DynamoDB provideDynamoDB(AmazonDynamoDB amazonDynamoDB) {
-//        return new DynamoDB(amazonDynamoDB);
-//    }
 
     @Provides
     @Singleton
