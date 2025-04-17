@@ -162,7 +162,7 @@ export default function ReservationModal({ isOpen, onClose, table, selectedDate 
               </div>
             </div>
 
-            <div className="w-1/2 pl-2">
+            <div className="w-1/2">
               <p className="text-xs text-gray-500 mb-1">To</p>
               <div className="flex items-center border rounded-lg p-2 gap-2 bg-white">
                 <FaClock className="text-gray-500" />

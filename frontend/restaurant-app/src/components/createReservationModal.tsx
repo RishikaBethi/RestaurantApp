@@ -92,7 +92,7 @@ const CreateReservationModal: React.FC<Props> = ({ open, onClose,onReservationSu
     };
 
     try {
-      const response = await axios.post("https://dtspspshhf.execute-api.ap-southeast-2.amazonaws.com/dev/bookings/waiter", requestData, {
+      const response = await axios.post("https://5b4szpnw27.execute-api.ap-southeast-2.amazonaws.com/dev/bookings/waiter", requestData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
