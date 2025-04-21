@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Eye, EyeOff, Plus } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
+import { BASE_API_URL } from "@/constants/constant";
  
 const MyProfile: React.FC = () => {
   const email = localStorage.getItem("email");
@@ -56,7 +57,7 @@ const MyProfile: React.FC = () => {
  
     try {
       const response = await axios.get(
-        "https://lhvsg7xyl6.execute-api.ap-southeast-2.amazonaws.com/dev/users/profile",
+        `${BASE_API_URL}/users/profile`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -86,7 +87,7 @@ const MyProfile: React.FC = () => {
   const handleSaveChanges = async () => {
     try {
       const response=await axios.put(
-        "https://lhvsg7xyl6.execute-api.ap-southeast-2.amazonaws.com/dev/users/profile",
+        `${BASE_API_URL}/users/profile`,
         {
           firstName: editedData.firstName,
           lastName: editedData.lastName,
@@ -121,8 +122,8 @@ const MyProfile: React.FC = () => {
     }
  
     try {
-      await axios.put(
-        "https://lhvsg7xyl6.execute-api.ap-southeast-2.amazonaws.com/dev/users/profile/password",
+      const response=await axios.put(
+        `${BASE_API_URL}/users/profile/password`,
         {
           oldPassword,
           newPassword,
@@ -134,7 +135,7 @@ const MyProfile: React.FC = () => {
         }
       );
  
-      toast.success("Password changed successfully!");
+      toast.success(response?.data || "Password changed successfully!");
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
@@ -268,7 +269,7 @@ const MyProfile: React.FC = () => {
                     <Label className="p-2">Old Password</Label>
                     <div className="relative">
                     <Input
-  type="password"
+  type={passwordVisible ? "text" : "password"}
   value={oldPassword}
   onChange={(e) => setOldPassword(e.target.value)}
   className="pr-10 w-full"

@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import axios from "axios";
 import Spinner from "@/components/shimmerUI/spinner";
+import { BASE_API_URL } from "@/constants/constant";
 
 // Time slots
 const timeSlots = [
@@ -147,7 +148,7 @@ const WaiterReservations = () => {
 
     try {
       const response = await axios.get(
-        `https://5b4szpnw27.execute-api.ap-southeast-2.amazonaws.com/dev/reservations/waiter`,
+        `${BASE_API_URL}/reservations/waiter`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -173,7 +174,7 @@ const WaiterReservations = () => {
     if (!token) return;
     try {
       await axios.delete(
-        `https://5b4szpnw27.execute-api.ap-southeast-2.amazonaws.com/dev/reservations/${id}`,
+        `${BASE_API_URL}/reservations/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setReservations((prev) => prev.filter((r) => r.id !== id));
@@ -219,7 +220,7 @@ const WaiterReservations = () => {
 
     try {
       await axios.put(
-        `https://5b4szpnw27.execute-api.ap-southeast-2.amazonaws.com/dev/bookings/waiter/${selectedReservation.id}`,
+        `${BASE_API_URL}/bookings/waiter/${selectedReservation.id}`,
         updatedReservation,
         { headers: { Authorization: `Bearer ${token}` } }
       );

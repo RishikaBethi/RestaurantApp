@@ -55,20 +55,20 @@ const RegisterPage: React.FC = () => {
     // Validate input
     switch (id) {
       case "firstName":
-  if (!/^[A-Za-z][A-Za-z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]{0,24}$/.test(value)) {
+  if (!/^[A-Za-z][A-Za-z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]{0,49}$/.test(value)) {
     setErrors((prev) => ({
       ...prev,
-      firstName: "First name must start with a letter and be up to 25 characters.Only letters,special characters and numbers are allowed.",
+      firstName: "First name must start with a letter and be up to 50 characters.Only letters,special characters and numbers are allowed.",
     }));
   } else {
     setErrors((prev) => ({ ...prev, firstName: "" }));
   }
   break;
   case "lastName":
-  if (!/^[A-Za-z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]{1,25}$/.test(value)) {
+  if (!/^[A-Za-z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]{1,50}$/.test(value)) {
     setErrors((prev) => ({
       ...prev,
-      lastName: "Last name can include letters, numbers, and special characters, up to 25 characters.",
+      lastName: "Last name can include letters, numbers, and special characters, up to 50 characters.",
     }));
   } else {
     setErrors((prev) => ({ ...prev, lastName: "" }));
@@ -95,7 +95,7 @@ const RegisterPage: React.FC = () => {
         if (!/[a-z]/.test(value)) passwordErrors.push("At least one lowercase letter required");
         if (!/\d/.test(value)) passwordErrors.push("At least one number required");
         if (!/[!@#$%^&*]/.test(value)) passwordErrors.push("At least one special character required");
-        if (value.length < 8) passwordErrors.push("Password must be at least 8 characters long");
+        if (value.length < 8 || value.length>16) passwordErrors.push("Password must be at least 8-16 characters long");
         setErrors((prev) => ({ ...prev, password: passwordErrors }));
         break;
       }
@@ -235,7 +235,7 @@ const RegisterPage: React.FC = () => {
                 </button>
               </div>
               <ul className="text-xs mt-2">
-                {["At least one uppercase letter required", "At least one lowercase letter required", "At least one number required", "At least one special character required", "Password must be at least 8 characters long"].map((rule, index) => (
+                {["At least one uppercase letter required", "At least one lowercase letter required", "At least one number required", "At least one special character required", "Password must be at least 8-16 characters long"].map((rule, index) => (
                   <li
                     key={index}
                     className={errors.password.includes(rule) ? "text-red-500" : "text-gray-500"}
