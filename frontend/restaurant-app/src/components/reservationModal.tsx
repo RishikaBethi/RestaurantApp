@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { FaUser, FaClock } from "react-icons/fa";
@@ -20,12 +20,15 @@ interface ReservationModalProps {
   onClose: () => void;
   table: Table | null;
   selectedDate: string;
+  selectedSlot?: { fromTime: string; toTime: string };
+  guests?: number;
 }
 
-export default function ReservationModal({ isOpen, onClose, table, selectedDate }: ReservationModalProps) {
-  const [guests, setGuests] = useState(1);
-  const [fromTime, setFromTime] = useState("");
-  const [toTime, setToTime] = useState("");
+export default function ReservationModal({ isOpen, onClose, table, selectedDate,selectedSlot,
+  guests: initialGuests, }: ReservationModalProps) {
+  const [guests, setGuests] = useState(initialGuests ||1);
+  const [fromTime, setFromTime] = useState(selectedSlot?.fromTime || "");
+  const [toTime, setToTime] = useState(selectedSlot?.toTime || "");
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [, setError] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -47,6 +50,14 @@ export default function ReservationModal({ isOpen, onClose, table, selectedDate 
       day: "numeric",
     });
   };  
+
+  useEffect(() => {
+    if (isOpen) {
+      setFromTime(selectedSlot?.fromTime || "");
+      setToTime(selectedSlot?.toTime || "");
+      setGuests(initialGuests || 1);
+    }
+  }, [isOpen, selectedSlot, initialGuests]); 
 
   if (!table) return null;
 
@@ -90,6 +101,8 @@ export default function ReservationModal({ isOpen, onClose, table, selectedDate 
       toast.error(errorMessage);
     }
   };
+
+
   return (
     <>
     <Dialog open={isOpen} onOpenChange={onClose}>

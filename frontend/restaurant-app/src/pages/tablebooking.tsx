@@ -45,6 +45,20 @@ export default function BookTable() {
   const [loadingFilteredTables, setLoadingFilteredTables] = useState(false);
   const [searchClicked, setSearchClicked] = useState(false);
   const navigate=useNavigate();
+  const [selectedSlot, setSelectedSlot] = useState<{ fromTime: string; toTime: string }>({ fromTime: '', toTime: '' });
+
+  const handleSlotClick = (
+    table: Table,
+    slot: { fromTime: string; toTime: string },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    guests: number
+  ) => {
+    setSelectedTable(table);
+    setSelectedSlot(slot);
+    setIsModalOpen(true);
+  };
+  
+  
 
   const predefinedTimeOptions: string[] = [
     "10:30",
@@ -222,7 +236,15 @@ export default function BookTable() {
                 <p className="mt-2 text-sm text-gray-500">{table.availableSlots.length} slots available:</p>
                 <div className="grid grid-cols-2 gap-2 mt-2">
                   {table.availableSlots.slice(0, 4).map((slot, index) => (
-                    <button key={index} className="text-sm border border-green-500 text-green-600 px-2 py-1 rounded-lg hover:bg-green-100">
+                    <button key={index} className="text-sm border border-green-500 text-green-600 px-2 py-1 rounded-lg hover:bg-green-100"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSlotClick(table, {
+                        fromTime: slot.split("-")[0],
+                        toTime: slot.split("-")[1]
+                      },guests);
+                    }}
+                    >
                       {slot}
                     </button>
                   ))}
@@ -242,12 +264,20 @@ export default function BookTable() {
       </section>
 
       {/* Reservation Modal */}
-      <ReservationModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} table={selectedTable} selectedDate={selectedDate} />
+      <ReservationModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} table={selectedTable} selectedDate={selectedDate}
+      selectedSlot={selectedSlot}  // pass selected slot times
+      guests={guests}  
+       />
       <AvailableSlotsModal 
       isOpen={isSlotsModalOpen} 
       onClose={() => setIsSlotsModalOpen(false)} 
       table={selectedTableForSlots}
       date={selectedDate} 
+      onSlotClick={(slot, guests) => {
+        if (selectedTableForSlots) {
+          handleSlotClick(selectedTableForSlots, slot, guests);
+        }
+      }}
     />
     </div>
   );

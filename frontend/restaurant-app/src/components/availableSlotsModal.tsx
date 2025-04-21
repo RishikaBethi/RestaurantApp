@@ -15,9 +15,11 @@ interface AvailableSlotsModalProps {
   onClose: () => void;
   table: Table | null;
   date: string;
+  onSlotClick: (slot: { fromTime: string; toTime: string },
+  guests: number) => void;
 }
 
-export default function AvailableSlotsModal({ isOpen, onClose, table, date }: AvailableSlotsModalProps) {
+export default function AvailableSlotsModal({ isOpen, onClose, table, date, onSlotClick }: AvailableSlotsModalProps) {
   if (!table) return null;
   const formatDateToWords = (dateStr: string): string => {
     const date = new Date(dateStr);
@@ -40,12 +42,23 @@ export default function AvailableSlotsModal({ isOpen, onClose, table, date }: Av
           </p>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-2 mt-2">
-          {table.availableSlots.map((slot, index) => (
-            <Button key={index} variant="outline" className="text-green-600 border-green-500 hover:text-green-600 hover:bg-green-100">
-              <FaClock className="text-green-600 ml-2" />
-              {slot}
-            </Button>
-          ))}
+        {table.availableSlots.map((slot, index) => {
+  const [fromTime, toTime] = slot.split("-");
+  return (
+    <Button
+      key={index}
+      variant="outline"
+      className="text-green-600 border-green-500 hover:text-green-600 hover:bg-green-100"
+      onClick={() => {
+        onSlotClick({ fromTime, toTime }, 1);
+        onClose();
+      }}
+    >
+      <FaClock className="text-green-600 ml-2" />
+      {slot}
+    </Button>
+  );
+})}
         </div>
       </DialogContent>
     </Dialog>

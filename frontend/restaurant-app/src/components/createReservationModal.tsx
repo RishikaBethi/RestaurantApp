@@ -10,10 +10,11 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Clock, MapPin, User } from "lucide-react";
+import { Calendar, Clock, MapPin, User } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
 import { BASE_API_URL } from "@/constants/constant";
+import { format } from "date-fns";
  
 interface Props {
   open: boolean;
@@ -27,9 +28,10 @@ const CreateReservationModal: React.FC<Props> = ({ open, onClose,onReservationSu
   const [customerType, setCustomerType] = useState("visitor");
   const [guests, setGuests] = useState(1);
   const [fromTime, setFromTime] = useState("");
-  const [customerName, setCustomerName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
   const [toTime, setToTime] = useState("");
   const [table, setTable] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [, setReservationResponse] = useState<any>(null);
 
@@ -80,11 +82,14 @@ const CreateReservationModal: React.FC<Props> = ({ open, onClose,onReservationSu
 
   const handleSubmit = async () => {
     const token = localStorage.getItem("token");
-    const email=localStorage.getItem("email");
+    if (!selectedDate) {
+      toast.error("Please select a date.");
+      return;
+    }
     const requestData = {
-      clientType: customerType === "visitor" ? "VISITOR" : "EXISTING_CUSTOMER",
-      customerEmail: email,
-      date: new Date().toISOString().split("T")[0],
+      clientType: customerType === "visitor" ? "VISITOR" : "CUSTOMER",
+      customerEmail,
+      date: format(selectedDate, "yyyy-MM-dd"),
       guestsNumber: guests.toString(),
       locationId: location,
       tableNumber: table.replace("Table ", ""),
@@ -105,8 +110,8 @@ const CreateReservationModal: React.FC<Props> = ({ open, onClose,onReservationSu
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error:any) {
       console.error("Error creating reservation:", error);
-      const message = error?.response?.data?.error || "Something went wrong.";
-      toast.error(`${message}`);
+      const message = error?.response?.data?.error || error?.response?.data?.message ||"Something went wrong.";
+      toast.error(message);
     }
   };
  
@@ -125,27 +130,41 @@ const CreateReservationModal: React.FC<Props> = ({ open, onClose,onReservationSu
   <Input value={address} readOnly className="cursor-default bg-gray-100" />
 </div>
 
+        {/* Date Picker */}
+        {/* Date Picker */}
+<div className="space-y-1">
+  <Label className="flex items-center gap-2 text-sm">
+    <Calendar size={16} /> Date
+  </Label>
+  <Input
+    type="date"
+    value={selectedDate ? format(selectedDate, "yyyy-MM-dd") : ""}
+    onChange={(e) => setSelectedDate(e.target.value ? new Date(e.target.value) : null)}
+    className="cursor-pointer"
+  />
+</div>
+
         {/* Customer Type */}
         <RadioGroup value={customerType} onValueChange={setCustomerType} className="flex gap-3">
           <div className="flex items-center space-x-2 border rounded-md px-4 py-2 w-full cursor-pointer" onClick={() => setCustomerType("visitor")}>
             <RadioGroupItem value="visitor" id="visitor" />
             <Label htmlFor="visitor">Visitor</Label>
           </div>
-          <div className="flex items-center space-x-2 border rounded-md px-4 py-2 w-full cursor-pointer" onClick={() => setCustomerType("existing")}>
-            <RadioGroupItem value="existing" id="existing" />
-            <Label htmlFor="existing">Existing Customer</Label>
+          <div className="flex items-center space-x-2 border rounded-md px-4 py-2 w-full cursor-pointer" onClick={() => setCustomerType("customer")}>
+            <RadioGroupItem value="customer" id="customer" />
+            <Label htmlFor="customer">Existing Customer</Label>
           </div>
         </RadioGroup>
-        {customerType === "existing" && (
-  <div className="space-y-1">
-    <Label className="text-sm">Customer's Name</Label>
-    <Input
-      placeholder="e.g. Janson Doe"
-      value={customerName}
-      onChange={(e) => setCustomerName(e.target.value)}
-    />
-  </div>
-)}
+        {customerType === "customer" && (
+          <div className="space-y-1">
+            <Label className="text-sm">Customer Email</Label>
+            <Input
+              placeholder="e.g. customer@example.com"
+              value={customerEmail}
+              onChange={(e) => setCustomerEmail(e.target.value)}
+            />
+          </div>
+        )}
         {/* Guests */}
         <div className="flex items-center justify-between border rounded-md px-4 py-2">
           <Label className="flex items-center gap-2 text-sm">

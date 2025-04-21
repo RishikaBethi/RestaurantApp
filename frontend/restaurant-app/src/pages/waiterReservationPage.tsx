@@ -158,8 +158,11 @@ const WaiterReservations = () => {
       }));
       setReservations(mapped);
       setAllReservations(mapped);
-    } catch (error) {
-      console.error("Failed to fetch reservations:", error);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message || "Failed to fetch reservations.";
+      toast.error(errorMessage);
     } finally{
       setIsLoading(false);
     }
@@ -179,8 +182,8 @@ const WaiterReservations = () => {
       );
       setReservations((prev) => prev.filter((r) => r.id !== id));
       toast.success("Reservation cancelled successfully");
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      console.error("Failed to cancel reservation:", error);
       toast.error("Failed to cancel reservation.");
     }
   };
@@ -227,9 +230,11 @@ const WaiterReservations = () => {
       toast.success("Reservation postponed successfully");
       setSelectedReservation(null);
       fetchReservations();
-    } catch (error) {
-      console.error("Failed to update reservation:", error);
-      toast.error("Failed to postpone reservation.");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message || error.response?.data?.error || "Failed to postpone reservation.";
+      toast.error(errorMessage);
     }
   };
 
