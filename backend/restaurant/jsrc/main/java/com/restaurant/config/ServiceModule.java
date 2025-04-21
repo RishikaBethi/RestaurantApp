@@ -186,18 +186,12 @@ public class ServiceModule {
         return new BookingsByWaiterService(dynamoDB);
     }
 
-    // Provide WaiterService Dependency
     @Provides
     @Singleton
     public WaiterService provideWaiterService(DynamoDB dynamoDB) {
         return new WaiterService(dynamoDB);
     }
 
-    @Provides
-    @Singleton
-    public WaiterOrderService provideWaiterOrderService(DynamoDB dynamoDB, ObjectMapper objectMapper) {
-        return new WaiterOrderService(dynamoDB, objectMapper);
-    }
 
     @Provides
     @Singleton

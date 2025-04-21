@@ -73,8 +73,8 @@ public class BookingsByWaiterService {
             }
 
             String waiterId = waiter.getString("waiterId");
-            String waiterLocationId = waiter.getString("locationId"); // ← USE THIS DIRECTLY
-            String locationId = waiterLocationId; // ← Default location to waiter's assigned one
+            String waiterLocationId = waiter.getString("locationId");
+            String locationId = waiterLocationId;
 
             // Remove locationId from required fields
             List<String> requiredFields = List.of("tableNumber", "date", "guestsNumber", "timeFrom", "timeTo", "customerEmail", "clientType");
@@ -84,7 +84,7 @@ public class BookingsByWaiterService {
                 }
             }
 
-            // ... [clientType logic remains unchanged]
+
             String clientType = requestBody.get("clientType");
             String customerEmail = null;
             String userEmail;

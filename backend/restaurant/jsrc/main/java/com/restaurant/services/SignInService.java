@@ -20,7 +20,6 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.UserNotFoun
 
 import javax.inject.Inject;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;

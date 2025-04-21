@@ -49,10 +49,10 @@ public class SignUpService {
             SignUpDTO signUpDto = SignUpDTO.fromJson(request.getBody());
 
             // Validate fields
-            if (!NameValidator.validateName(signUpDto.getFirstName())) {
+            if (!NameValidator.validateFirstName(signUpDto.getFirstName())) {
                 return createErrorResponse(400, "Invalid or missing first name");
             }
-            if (!NameValidator.validateName(signUpDto.getLastName())) {
+            if (!NameValidator.validateLastName(signUpDto.getLastName())) {
                 return createErrorResponse(400, "Invalid or missing last name");
             }
             if (!EmailValidator.validateEmail(signUpDto.getEmail())) {

@@ -10,11 +10,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurant.dto.UpdateReservationByWaiterResponseDTO;
 import com.restaurant.utils.Helper;
 import org.json.JSONObject;
-
 import java.util.*;
 import java.util.logging.Logger;
 
-import static com.restaurant.utils.Helper.*;
 
 public class UpdateReservationByWaiterService {
     private static final Logger logger = Logger.getLogger(UpdateReservationByWaiterService.class.getName());
