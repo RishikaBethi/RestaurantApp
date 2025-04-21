@@ -30,11 +30,13 @@ public class PostAFeedbackService {
     private final Table reservationTable;
     private final Table ordersTable;
     private final Table feedbackTable;
+    private final Table usersTable;
 
     public PostAFeedbackService(DynamoDB dynamoDB) {
         this.reservationTable = dynamoDB.getTable(System.getenv("RESERVATIONS_TABLE"));
         this.ordersTable = dynamoDB.getTable(System.getenv("ORDERS_TABLE"));
         this.feedbackTable = dynamoDB.getTable(System.getenv("FEEDBACKS_TABLE"));
+        this.usersTable = dynamoDB.getTable(System.getenv("USERS_TABLE"));
     }
 
     public APIGatewayProxyResponseEvent handlePostAFeedback(APIGatewayProxyRequestEvent request, Context context) {
@@ -51,6 +53,10 @@ public class PostAFeedbackService {
             logger.info("Extracted claims: " + claims); // Debugging purpose
             String userId = (String) claims.get("sub");
             String email = (String) claims.get("email");
+
+            Item userDetails = usersTable.getItem("email",email);
+            String userAvatarUrl = userDetails.getString("imageUrl");
+            String userName = userDetails.getString("firstName")+" "+userDetails.getString("lastName");
 
             if (userId == null || userId.isEmpty()) {
                 return createErrorResponse(401, "Unauthorized: Missing or invalid token.");
@@ -108,13 +114,13 @@ public class PostAFeedbackService {
                             }
                         }
                         logger.info("Adding to tables");
-                        addItemTOTable(feedbackId, locationId, cuisineComment, cuisineRatingDouble, serviceComment, serviceRatingDouble, dateString, email, reservationId);
+                        addItemTOTable(feedbackId, locationId, cuisineComment, cuisineRatingDouble, serviceComment, serviceRatingDouble, dateString, email, reservationId, userAvatarUrl, userName);
                         return createApiResponse(201, Map.of("message", "Feedback has been created"));
                     }
                     else {
                         String cuisineRating = requestBody.get("cuisineRating");
                         String cuisineComment = requestBody.get("cuisineComment");
-                        addItemTOTable(feedbackId, locationId, null, null, serviceComment, serviceRatingDouble, dateString, email, reservationId);
+                        addItemTOTable(feedbackId, locationId, null, null, serviceComment, serviceRatingDouble, dateString, email, reservationId, userAvatarUrl, userName);
                         if (cuisineRating != null && !cuisineRating.trim().isEmpty() ||
                                 cuisineComment != null && !cuisineComment.trim().isEmpty()) {
                             return createErrorResponse(400,"Service feedback saved, but cuisine feedback cannot be provided before ordering");
@@ -144,7 +150,7 @@ public class PostAFeedbackService {
         }
     }
     
-    public void addItemTOTable(String feedbackId, String locationId, String cuisineComment, Number cuisineRating, String serviceComment, Number serviceRating, String date, String email, String reservationId) {
+    public void addItemTOTable(String feedbackId, String locationId, String cuisineComment, Number cuisineRating, String serviceComment, Number serviceRating, String date, String email, String reservationId, String userAvatarUrl, String userName) {
         try {
 
             logger.info("Adding items to tables");
@@ -154,7 +160,8 @@ public class PostAFeedbackService {
                     .withPrimaryKey("feedbackId", feedbackId, "locationId", locationId)
                     .withString("date", date)
                     .withString("email", email)
-                    .withString("reservationId", reservationId);
+                    .withString("reservationId", reservationId)
+                    .withString("userName", userName);
 
             // Add optional fields only if non-null
             if (cuisineComment != null) {
@@ -168,6 +175,10 @@ public class PostAFeedbackService {
             }
             if (serviceRating != null) {
                 item.withNumber("serviceRating", serviceRating);
+            }
+
+            if(userAvatarUrl != null) {
+                item.withString("userAvatarUrl", userAvatarUrl);
             }
 
             feedbackTable.putItem(new PutItemSpec().withItem(item));
