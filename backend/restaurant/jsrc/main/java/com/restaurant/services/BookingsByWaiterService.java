@@ -68,27 +68,23 @@ public class BookingsByWaiterService {
                 waiter = iterator.next();
             }
 
-
             if (waiter == null) {
                 return Helper.createErrorResponse(403, "Unauthorized: Waiter not found.");
             }
 
             String waiterId = waiter.getString("waiterId");
-            String waiterLocationId = waiter.getString("locationId");
-            String requestedLocationId = requestBody.get("locationId");
+            String waiterLocationId = waiter.getString("locationId"); // ← USE THIS DIRECTLY
+            String locationId = waiterLocationId; // ← Default location to waiter's assigned one
 
-            if (!waiterLocationId.equals(requestedLocationId)) {
-                return Helper.createErrorResponse(403, "Waiters can only make reservations for their assigned location.");
-            }
-
-            // Validate required fields
-            List<String> requiredFields = List.of("locationId", "tableNumber", "date", "guestsNumber", "timeFrom", "timeTo", "customerEmail", "clientType");
+            // Remove locationId from required fields
+            List<String> requiredFields = List.of("tableNumber", "date", "guestsNumber", "timeFrom", "timeTo", "customerEmail", "clientType");
             for (String field : requiredFields) {
                 if (!requestBody.containsKey(field) || requestBody.get(field).trim().isEmpty()) {
                     return Helper.createErrorResponse(400, "Missing required field: " + field);
                 }
             }
 
+            // ... [clientType logic remains unchanged]
             String clientType = requestBody.get("clientType");
             String customerEmail = null;
             String userEmail;
@@ -104,23 +100,22 @@ public class BookingsByWaiterService {
                 userEmail = customerEmail;
 
             } else if ("VISITOR".equalsIgnoreCase(clientType)) {
-                // Extract waiter's email from JWT claims
                 userEmail = (String) claims.get("email");
-
                 if (userEmail == null || userEmail.isEmpty()) {
                     return Helper.createErrorResponse(400, "Waiter's email not found in token");
                 }
 
                 customerEmail = userEmail;
                 fullName = getUserFullName(userEmail);
-
             } else {
                 return Helper.createErrorResponse(400, "Invalid clientType. Must be either 'CUSTOMER' or 'VISITOR'");
             }
+
             if (fullName == null || fullName.isBlank()) {
                 return Helper.createErrorResponse(500, "Could not fetch user name for " + userEmail);
             }
 
+            // Parse and validate guestsNumber
             int guestsNumber;
             try {
                 guestsNumber = Integer.parseInt(requestBody.get("guestsNumber"));
@@ -131,7 +126,7 @@ public class BookingsByWaiterService {
                 return Helper.createErrorResponse(400, "guestsNumber must be an integer.");
             }
 
-            String locationId = requestBody.get("locationId");
+            // Time and table details
             String tableNumber = requestBody.get("tableNumber");
             String date = requestBody.get("date");
             String timeFrom = requestBody.get("timeFrom");
@@ -160,13 +155,9 @@ public class BookingsByWaiterService {
                 }
             } catch (NumberFormatException e) {
                 return Helper.createErrorResponse(400, "Invalid table number format. Must be a number.");
-            } catch (Exception e) {
-                logger.severe("Error validating table existence: " + e.getMessage());
-                return Helper.createErrorResponse(500, "Internal error while validating table.");
             }
 
-
-            // Check for overlapping reservations
+            // Overlapping reservation check
             ItemCollection<ScanOutcome> existingReservations = reservationsTable.scan(
                     new ScanFilter("locationId").eq(locationId),
                     new ScanFilter("tableNumber").eq(Integer.parseInt(tableNumber)),
@@ -212,20 +203,17 @@ public class BookingsByWaiterService {
 
             Item orderItem = ordersTable.getItem("orderId", orderId, "email", userEmail);
             int preOrderCount = 0;
-
             if (orderItem != null && orderItem.hasAttribute("dishItems")) {
                 Map<String, Number> dishItems = orderItem.getMap("dishItems");
                 preOrderCount = dishItems != null ? dishItems.size() : 0;
             }
- 
+
             Item locationItem = locationTable.getItem("locationId", locationId);
             String locationAddress = locationItem != null ? locationItem.getString("address") : null;
 
-            // Calculate reservation status based on time
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             ZonedDateTime nowIST = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"));
-            ZonedDateTime fromTimeIST = LocalDateTime.parse(date + " " + timeFrom, formatter).atZone(ZoneId.of("Asia/Kolkata"));
-            ZonedDateTime toTimeIST = LocalDateTime.parse(date + " " + timeTo, formatter).atZone(ZoneId.of("Asia/Kolkata"));
+            ZonedDateTime fromTimeIST = LocalDateTime.parse(date + " " + timeFrom, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")).atZone(ZoneId.of("Asia/Kolkata"));
+            ZonedDateTime toTimeIST = LocalDateTime.parse(date + " " + timeTo, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")).atZone(ZoneId.of("Asia/Kolkata"));
 
             String status;
             if (nowIST.isBefore(fromTimeIST)) {
@@ -266,6 +254,7 @@ public class BookingsByWaiterService {
             return Helper.createErrorResponse(500, "Internal error: " + e.getMessage());
         }
     }
+
 
     private String getUserFullName(String email) {
         try {
