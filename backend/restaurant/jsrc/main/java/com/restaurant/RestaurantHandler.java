@@ -44,7 +44,7 @@ import static com.restaurant.utils.Helper.*;
         @EnvironmentVariable(key = "COGNITO_USER_POOL_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_USER_POOL_ID),
 		@EnvironmentVariable(key = "COGNITO_CLIENT_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_CLIENT_ID),
 		@EnvironmentVariable(key = "REGION", value = "${region}"),
-        @EnvironmentVariable(key = "ORDERS_TABLE", value = "${orders_table}"),
+        @EnvironmentVariable(key = "ORDERS_TABLE", value = "${orders_table}")
 })
 public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
@@ -84,6 +84,23 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
     @Inject
     BookingService bookingService;
 
+    @Inject
+    PostAFeedbackService postAFeedback;
+
+    @Inject
+    GetLatestFeedback latestFeedback;
+
+    @Inject
+    BookingsByWaiterService bookingsByWaiterService;
+
+    @Inject
+    UpdateReservationByWaiterService updateReservationByWaiterService;
+
+    @Inject
+    GetReservationByWaiterService getReservationByWaiterService;
+
+    @Inject
+    ProfileService profileService;
     public RestaurantHandler() {
 		initDependencies();
 	}
@@ -104,6 +121,13 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 
             logger.info("Received request - Path: " + path + ", Method: " + httpMethod +
                     ", Query: " + (queryParams != null ? queryParams.toString() : "none"));
+
+            if(postAFeedback==null) {
+                context.getLogger().log("Post a feedback service null");
+            }
+            if(path.equals("/feedbacks") && httpMethod.equalsIgnoreCase("POST")) {
+                return postAFeedback.handlePostAFeedback(request, context);
+            }
 
             // Auth routes
             if ("/auth/sign-up".equals(path) && "POST".equals(httpMethod)) {
@@ -149,6 +173,16 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
                 return feedbackService.handleGetFeedbacks(request);
             }
 
+            if ("/dishes".equals(path) && "GET".equals(httpMethod)) {
+                logger.info("Handling all dishes request for path: " + path + ", Query: " + (queryParams != null ? queryParams.toString() : "none"));
+                return dishService.getAllDishes(request);
+            }
+
+            // Handle dish by ID retrieval (e.g., /dishes/D101)
+            if (path.startsWith("/dishes/") && "GET".equalsIgnoreCase(httpMethod)) {
+                return dishService.getDishById(request, path);
+            }
+
             if (tablesService == null) {
                 throw new IllegalStateException("Services not injected: tablesService=" + tablesService);
             }
@@ -171,8 +205,16 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
                 return bookingService.handleCreateReservation(request);
             }
 
+            if ("/bookings/waiter".equals(path) && "POST".equalsIgnoreCase(httpMethod)) {
+                return bookingsByWaiterService.handleReservationByWaiter(request);
+            }
+
             if (path.startsWith("/bookings/client/") && "PUT".equalsIgnoreCase(httpMethod)) {
                 return updateReservationService.handleUpdateReservation(request, path);
+            }
+
+            if (path.startsWith("/bookings/waiter/") && "PUT".equalsIgnoreCase(httpMethod)) {
+                return updateReservationByWaiterService.handleUpdateReservationByWaiter(request, path);
             }
 
             if ("/reservations".equals(path) && "GET".equalsIgnoreCase(httpMethod)) {
@@ -183,7 +225,27 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
                 return cancelReservationService.handleCancelReservation(request, path);
             }
 
-			return createErrorResponse(405, "Method Not Allowed: " + path + " with method " + httpMethod);
+            if(path.equals("/getPreviousFeedback") && "POST".equalsIgnoreCase(httpMethod)) {
+                return latestFeedback.returnLatestFeedback(request, context);
+            }
+
+            if ("/reservations/waiter".equals(path) && "GET".equalsIgnoreCase(httpMethod)) {
+                return getReservationByWaiterService.handleGetReservationsByWaiter(request);
+            }
+
+            else if ("/users/profile".equals(path) && "GET".equals(httpMethod)) {
+                logger.info("Handling get user profile request");
+                return profileService.getUserProfile(request);
+            } else if ("/users/profile".equals(path) && "PUT".equals(httpMethod)) {
+                logger.info("Handling update user profile request");
+                return profileService.updateUserProfile(request);
+            } else if ("/users/profile/password".equals(path) && "PUT".equals(httpMethod)) {
+                logger.info("Handling change password request");
+                return profileService.changePassword(request);
+            }
+
+
+            return createErrorResponse(405, "Method Not Allowed: " + path + " with method " + httpMethod);
         }
         catch (Exception e) {
             logger.severe("Error handling request: " + e.getMessage());

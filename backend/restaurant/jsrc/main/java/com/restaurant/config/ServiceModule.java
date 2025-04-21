@@ -140,6 +140,12 @@ public class ServiceModule {
 
     @Provides
     @Singleton
+    public GetReservationByWaiterService provideGetReservationByWaiterService(DynamoDB dynamoDB, GetAllLocationsService locationsService) {
+        return new GetReservationByWaiterService(dynamoDB, locationsService);
+    }
+
+    @Provides
+    @Singleton
     public CancelReservationService provideCancelReservationService(DynamoDB dynamoDB) {
         return new CancelReservationService(dynamoDB);
     }
@@ -152,8 +158,32 @@ public class ServiceModule {
 
     @Provides
     @Singleton
+    public UpdateReservationByWaiterService provideUpdateReservationByWaiterService(DynamoDB dynamoDB) {
+        return new UpdateReservationByWaiterService(dynamoDB);
+    }
+
+    @Provides
+    @Singleton
     public BookingService provideBookingService(DynamoDB dynamoDB, WaiterService waiterService) {
         return new BookingService(dynamoDB, waiterService);
+    }
+
+    @Provides
+    @Singleton
+    public PostAFeedbackService PostAFeedbackService(DynamoDB dynamoDB) {
+        return new PostAFeedbackService(dynamoDB);
+    }
+
+    @Provides
+    @Singleton
+    public GetLatestFeedback GetLatestFeedbackService(DynamoDB dynamoDB) {
+        return new GetLatestFeedback(dynamoDB);
+    }
+
+    @Provides
+    @Singleton
+    public BookingsByWaiterService provideBookingsByWaiterService(DynamoDB dynamoDB) {
+        return new BookingsByWaiterService(dynamoDB);
     }
 
     // Provide WaiterService Dependency
@@ -161,5 +191,19 @@ public class ServiceModule {
     @Singleton
     public WaiterService provideWaiterService(DynamoDB dynamoDB) {
         return new WaiterService(dynamoDB);
+    }
+
+    @Provides
+    @Singleton
+    public WaiterOrderService provideWaiterOrderService(DynamoDB dynamoDB, ObjectMapper objectMapper) {
+        return new WaiterOrderService(dynamoDB, objectMapper);
+    }
+
+    @Provides
+    @Singleton
+    public ProfileService provideProfileService(DynamoDB dynamoDB, ObjectMapper objectMapper,
+                                                CognitoIdentityProviderClient cognitoClient,
+                                                String clientId) {
+        return new ProfileService(cognitoClient, dynamoDB, objectMapper, clientId);
     }
 }
