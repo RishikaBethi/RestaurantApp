@@ -188,7 +188,7 @@ public class ProfileService {
             return Helper.createErrorResponse(400, e.getMessage());
         } catch (NotAuthorizedException e) {
             logger.severe("Authentication error: " + e.getMessage());
-            return Helper.createErrorResponse(401, "Incorrect old password");
+            return Helper.createErrorResponse(400, "Incorrect old password");
         } catch (UserNotFoundException e) {
             logger.severe("User not found error: " + e.getMessage());
             return Helper.createErrorResponse(404, "User not found");
