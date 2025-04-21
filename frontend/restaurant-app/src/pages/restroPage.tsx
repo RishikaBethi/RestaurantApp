@@ -22,6 +22,8 @@ interface SpecialtyDish {
   imageUrl: string;
 }
 
+const FEEDBACKS_PER_PAGE = 4;
+
 export default function RestroPage() {
   const { locationId } = useParams<{ locationId: string }>();
   const { location, loading: locationLoading } = useLocationDetails(locationId);
@@ -31,19 +33,17 @@ export default function RestroPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const navigate=useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
   
-  // Pagination state
-  const [page, setPage] = useState(0);
-  const { feedbacks, loading: feedbackLoading, totalPages } = useFeedbacks(
+  const { feedbacks, loading: feedbackLoading } = useFeedbacks(
     locationId,
     selectedFeedbackType,
     sortOption,
-    page
   );
 
   // Reset feedback list when filter/sort changes
   useEffect(() => {
-    setPage(0);
+    setCurrentPage(1);
   }, [selectedFeedbackType, sortOption]);
 
   useEffect(() => {
@@ -64,10 +64,14 @@ export default function RestroPage() {
       });
   }, [locationId]);
 
-  const loadMore = () => {
-    if (page < totalPages) {
-      setPage((prev) => prev + 1);
-    }
+  const totalPages = Math.ceil(feedbacks.length / FEEDBACKS_PER_PAGE);
+  const currentFeedbacks = feedbacks.slice(
+    (currentPage - 1) * FEEDBACKS_PER_PAGE,
+    currentPage * FEEDBACKS_PER_PAGE
+  );
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
   
   return (
@@ -140,7 +144,7 @@ export default function RestroPage() {
         </select>
       </div>
 
-      {feedbackLoading && page === 0 ? (
+      {feedbackLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
               {[...Array(4)].map((_, i) => (
                 <ShimmerFeedback key={i} />
@@ -151,19 +155,23 @@ export default function RestroPage() {
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-                {feedbacks.map((review) => (
+                {currentFeedbacks.map((review) => (
                   <FeedbackCard key={review.id} {...review} />
                 ))}
                 {feedbackLoading &&
                   [...Array(4)].map((_, i) => <ShimmerFeedback key={`shimmer-${i}`} />)}
               </div>
-              {page < totalPages && (
-                <div className="text-center mt-6">
-                  <Button onClick={loadMore} disabled={feedbackLoading}>
-                    {feedbackLoading ? "Loading..." : "Load More"}
+              <div className="flex justify-center mt-6 gap-2">
+                {[...Array(totalPages)].map((_, index) => (
+                  <Button
+                    key={index}
+                    onClick={() => handlePageChange(index + 1)}
+                    className={`rounded-full ${currentPage === index + 1 ? "bg-green-600 text-white" : "bg-gray-200"}`}
+                  >
+                    {index + 1}
                   </Button>
-                </div>
-              )}
+                ))}
+              </div>
             </>
           )}
       </>

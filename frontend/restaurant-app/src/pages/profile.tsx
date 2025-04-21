@@ -107,7 +107,7 @@ const MyProfile: React.FC = () => {
       localStorage.setItem("user", JSON.stringify(name));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
     } catch (error: any) {
-      toast.error("Failed to update profile.");
+      toast.error(error?.response?.data?.error || "Failed to update profile.");
     }
   };
  
@@ -223,34 +223,54 @@ const MyProfile: React.FC = () => {
                   </div>
  
                   <form className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="firstName">First Name</Label>
-                      <Input
-                        id="firstName"
-                        value={editedData.firstName}
-                        onChange={(e) =>
-                          setEditedData((prev) => ({
-                            ...prev,
-                            firstName: e.target.value,
-                          }))
-                        }
-                        className="mt-1 w-full"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="lastName">Last Name</Label>
-                      <Input
-                        id="lastName"
-                        value={editedData.lastName}
-                        onChange={(e) =>
-                          setEditedData((prev) => ({
-                            ...prev,
-                            lastName: e.target.value,
-                          }))
-                        }
-                        className="mt-1 w-full"
-                      />
-                    </div>
+                  <div className="flex flex-col">
+  <Label htmlFor="firstName" className="mb-1">First Name</Label>
+  <Input
+    id="firstName"
+    value={editedData.firstName}
+    onChange={(e) =>
+      setEditedData((prev) => ({
+        ...prev,
+        firstName: e.target.value,
+      }))
+    }
+    className={`mt-1 w-full border ${
+      /^[a-zA-Z][a-zA-Z0-9\s@#%&*()!]{0,49}$/.test(editedData.firstName)
+        ? "border-gray-300"
+        : "border-red-500"
+    } p-2 rounded-lg focus:outline-none`}
+  />
+  {!/^[a-zA-Z][a-zA-Z0-9\s@#%&*()!]{0,49}$/.test(editedData.firstName) && (
+    <p className="text-sm text-red-500 mt-1">
+      First name must start with a letter and be up to 50 characters. Only letters, special characters, and numbers are allowed.
+    </p>
+  )}
+</div>
+<div className="flex flex-col">
+  <Label htmlFor="lastName" className="mb-1">Last Name</Label>
+  <Input
+    id="lastName"
+    value={editedData.lastName}
+    onChange={(e) =>
+      setEditedData((prev) => ({
+        ...prev,
+        lastName: e.target.value,
+      }))
+    }
+    className={`mt-1 w-full border ${
+      editedData.lastName.trim() === "" ||
+      !/^[a-zA-Z0-9\s@#%&*()!]{1,50}$/.test(editedData.lastName)
+        ? "border-red-500"
+        : "border-gray-300"
+    } p-2 rounded-lg focus:outline-none`}
+  />
+  {(editedData.lastName.trim() === "" ||
+    !/^[a-zA-Z0-9\s@#%&*()!]{1,50}$/.test(editedData.lastName)) && (
+    <p className="text-sm text-red-500 mt-1">
+      Last name can include letters, numbers, and special characters, up to 50 characters.
+    </p>
+  )}
+</div>
                     <div className="sm:col-span-2">
                       <Button
                         onClick={(e) => {

@@ -19,7 +19,7 @@ const FeedbackCard = ({
     <div className="bg-white shadow rounded-lg p-4">
       <div className="flex items-center gap-3">
         <img
-          src={userAvatarUrl || "https://example.com/avatars/emily_j.jpg"}
+          src={userAvatarUrl || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"}
           alt="avatar"
           className="rounded-full w-10 h-10 object-cover"
         />

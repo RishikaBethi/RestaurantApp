@@ -18,11 +18,9 @@ export function useFeedbacks(
   locationId: string | undefined,
   type: FeedbackType,
   sortOption: SortOption,
-  page: number
 ) {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [totalPages, setTotalPages] = useState<number>(1);
 
   const getSortQuery = () => {
     switch (sortOption) {
@@ -44,20 +42,18 @@ export function useFeedbacks(
 
     setLoading(true);
     const query = getSortQuery();
-    const endpoint = `${BASE_API_URL}/locations/${locationId}/feedbacks?type=${type}&sort=${query}&page=${page}&size=4`;
+    const endpoint = `${BASE_API_URL}/locations/${locationId}/feedbacks?type=${type}&sort=${query}`;
 
-    axios.get(endpoint)
+    axios
+      .get(endpoint)
       .then((res) => {
-        if (page === 0) {
-          setFeedbacks(res.data.content || []);
-        } else {
-          setFeedbacks((prev) => [...prev, ...(res.data.content || [])]);
-        }
-        setTotalPages(res.data.totalPages);
+        setFeedbacks(res.data.content || []);
       })
-      .catch((err) => console.error("Error fetching feedbacks:", err))
+      .catch((err) => {
+        console.error("Error fetching feedbacks:", err);
+      })
       .finally(() => setLoading(false));
-  }, [locationId, type, sortOption, page]);
+  }, [locationId, type, sortOption]);
 
-  return { feedbacks, loading, totalPages };
+  return { feedbacks, loading };
 }

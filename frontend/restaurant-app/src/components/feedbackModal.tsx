@@ -14,9 +14,9 @@ interface FeedbackModalProps {
 
 export default function FeedbackModal({ isOpen, onClose,reservationId }: FeedbackModalProps) {
   const [activeTab, setActiveTab] = useState<"service" | "culinary">("service");
-  const [serviceRating, setServiceRating] = useState(4);
+  const [serviceRating, setServiceRating] = useState(0);
   const [serviceComment, setServiceComment] = useState("");
-  const [cuisineRating, setCuisineRating] = useState(4);
+  const [cuisineRating, setCuisineRating] = useState(0);
   const [cuisineComment, setCuisineComment] = useState("");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [existingFeedback, setExistingFeedback] = useState<any>(null);
@@ -38,18 +38,18 @@ export default function FeedbackModal({ isOpen, onClose,reservationId }: Feedbac
             },}
         );
         setExistingFeedback(data);
-        setServiceRating(data.serviceRating || 4);
+        setServiceRating(data.serviceRating || 0);
         setServiceComment(data.serviceComment || "");
-        setCuisineRating(data.cuisineRating || 4);
+        setCuisineRating(data.cuisineRating || 0);
         setCuisineComment(data.cuisineComment || "");
         setWaiterName(data.waiterName || "");
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         console.log("No previous feedback or error fetching it.");
         setExistingFeedback(null);
-        setServiceRating(4);
+        setServiceRating(0);
         setServiceComment("");
-        setCuisineRating(4);
+        setCuisineRating(0);
         setCuisineComment("");
       }
     };
