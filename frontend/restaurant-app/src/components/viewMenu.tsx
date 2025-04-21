@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import saladImage from "@/assets/homepage.png";
 import dishImage from "@/assets/dishImage.png";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -6,6 +6,7 @@ import axios from "axios";
 import { Dish } from "@/components/dish";
 import { BASE_API_URL } from "@/constants/constant";
 import Spinner from "./shimmerUI/spinner";
+import { toast } from "sonner";
 
 // Categories for filtering
 const categories = ["Appetizers", "Main Courses", "Desserts"];
@@ -28,6 +29,18 @@ const MenuPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const toastShownRef = useRef(false); // Track whether toast has been shown
+
+  // Redirect to login if not logged in
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token && !toastShownRef.current) {
+      toast.error("Please login to browse or view the menu.");
+      toastShownRef.current = true; // Mark the toast as shown
+      navigate("/login");
+    }
+  }, [navigate]);
+  
   const getSortParam = () => {
     switch (sortOrder) {
       case "Price Low to High":
