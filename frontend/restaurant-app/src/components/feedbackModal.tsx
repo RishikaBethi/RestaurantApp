@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
-import { BASE_API_URL } from "@/constants/constant";
+//import { BASE_API_URL } from "@/constants/constant";
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -20,6 +20,7 @@ export default function FeedbackModal({ isOpen, onClose,reservationId }: Feedbac
   const [cuisineComment, setCuisineComment] = useState("");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [existingFeedback, setExistingFeedback] = useState<any>(null);
+  const [waiterName,setWaiterName]=useState("");
 
   const token=localStorage.getItem("token");
 
@@ -29,7 +30,7 @@ export default function FeedbackModal({ isOpen, onClose,reservationId }: Feedbac
     const fetchFeedback = async () => {
       try {
         const { data } = await axios.post(
-          `${BASE_API_URL}/getPreviousFeedback`,
+          `https://aelam52ao5.execute-api.ap-southeast-2.amazonaws.com/dev/getPreviousFeedback`,
           { reservationId },
           {
             headers: {
@@ -41,6 +42,7 @@ export default function FeedbackModal({ isOpen, onClose,reservationId }: Feedbac
         setServiceComment(data.serviceComment || "");
         setCuisineRating(data.cuisineRating || 4);
         setCuisineComment(data.cuisineComment || "");
+        setWaiterName(data.waiterName || "");
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         console.log("No previous feedback or error fetching it.");
@@ -66,7 +68,7 @@ export default function FeedbackModal({ isOpen, onClose,reservationId }: Feedbac
 
     try {
       const response=await axios.post(
-        `${BASE_API_URL}/feedbacks`,
+        `https://aelam52ao5.execute-api.ap-southeast-2.amazonaws.com/dev/feedbacks`,
         payload,
         {
           headers: {
@@ -133,7 +135,7 @@ export default function FeedbackModal({ isOpen, onClose,reservationId }: Feedbac
         <div className="flex flex-col items-center gap-4">
           {activeTab === "service" && (
             <div className="text-center">
-              <p className="font-semibold">Waiter</p>
+              <p className="font-semibold">Waiter: {waiterName}</p>
             </div>
           )}
 

@@ -28,6 +28,7 @@ const MyProfile: React.FC = () => {
  
   const [activeTab, setActiveTab] = useState("general");
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [oldVisible,setOldVisible]=useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -269,13 +270,18 @@ const MyProfile: React.FC = () => {
                     <Label className="p-2">Old Password</Label>
                     <div className="relative">
                     <Input
-  type={passwordVisible ? "text" : "password"}
+  type={oldVisible ? "text" : "password"}
   value={oldPassword}
   onChange={(e) => setOldPassword(e.target.value)}
   className="pr-10 w-full"
 />
- 
-                      <Eye className="absolute right-2 top-2.5 w-5 h-5 text-gray-500" />
+                    <button
+                        type="button"
+                        onClick={() => setOldVisible(!oldVisible)}
+                        className="absolute right-2 top-2.5"
+                      >
+                        {oldVisible ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
                     </div>
                   </div>
  

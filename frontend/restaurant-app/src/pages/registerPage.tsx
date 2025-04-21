@@ -55,7 +55,7 @@ const RegisterPage: React.FC = () => {
     // Validate input
     switch (id) {
       case "firstName":
-  if (!/^[A-Za-z][A-Za-z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]{0,49}$/.test(value)) {
+  if (!/^[A-Za-z][A-Za-z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]{1,50}$/.test(value)) {
     setErrors((prev) => ({
       ...prev,
       firstName: "First name must start with a letter and be up to 50 characters.Only letters,special characters and numbers are allowed.",
