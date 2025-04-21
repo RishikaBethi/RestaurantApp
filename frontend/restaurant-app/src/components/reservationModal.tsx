@@ -56,8 +56,12 @@ export default function ReservationModal({ isOpen, onClose, table, selectedDate,
       setFromTime(selectedSlot?.fromTime || "");
       setToTime(selectedSlot?.toTime || "");
       setGuests(initialGuests || 1);
+    } else {
+      setFromTime("");
+      setToTime("");
+      setGuests(1);
     }
-  }, [isOpen, selectedSlot, initialGuests]); 
+  }, [isOpen, selectedSlot, initialGuests]);   
 
   if (!table) return null;
 

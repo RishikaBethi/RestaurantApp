@@ -49,17 +49,12 @@ export default function BookTable() {
 
   const handleSlotClick = (
     table: Table,
-    slot: { fromTime: string; toTime: string },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    guests: number
-  ) => {
+    slot: { fromTime: string; toTime: string }  ) => {
     setSelectedTable(table);
     setSelectedSlot(slot);
     setIsModalOpen(true);
   };
   
-  
-
   const predefinedTimeOptions: string[] = [
     "10:30",
     "12:15",
@@ -242,7 +237,7 @@ export default function BookTable() {
                       handleSlotClick(table, {
                         fromTime: slot.split("-")[0],
                         toTime: slot.split("-")[1]
-                      },guests);
+                      });
                     }}
                     >
                       {slot}
@@ -264,7 +259,13 @@ export default function BookTable() {
       </section>
 
       {/* Reservation Modal */}
-      <ReservationModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} table={selectedTable} selectedDate={selectedDate}
+      <ReservationModal isOpen={isModalOpen} 
+      onClose={() => {
+        setIsModalOpen(false);
+        setSelectedTable(null); // Reset selected table
+        setSelectedSlot({ fromTime: "", toTime: "" });
+      }} 
+      table={selectedTable} selectedDate={selectedDate}
       selectedSlot={selectedSlot}  // pass selected slot times
       guests={guests}  
        />
@@ -273,9 +274,9 @@ export default function BookTable() {
       onClose={() => setIsSlotsModalOpen(false)} 
       table={selectedTableForSlots}
       date={selectedDate} 
-      onSlotClick={(slot, guests) => {
+      onSlotClick={(slot) => {
         if (selectedTableForSlots) {
-          handleSlotClick(selectedTableForSlots, slot, guests);
+          handleSlotClick(selectedTableForSlots, slot);
         }
       }}
     />
