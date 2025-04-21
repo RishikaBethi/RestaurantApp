@@ -75,13 +75,17 @@ public class GetReservationByWaiterService {
                 return createErrorResponse(500, "Waiter's assigned location not found.");
             }
 
-            // Build filter expression
-            ValueMap valueMap = new ValueMap().withString(":waiterId", waiterId);
+            ValueMap valueMap = new ValueMap()
+                    .withString(":waiterId", waiterId)
+                    .withString(":cancelledStatus", "Cancelled");
+
             Map<String, String> nameMap = new HashMap<>();
             nameMap.put("#waiterId", "waiterId");
+            nameMap.put("#status", "status");
 
             List<String> filterExpressions = new ArrayList<>();
             filterExpressions.add("#waiterId = :waiterId");
+            filterExpressions.add("#status <> :cancelledStatus");
 
             // Get optional filter parameters
             Map<String, String> queryParams = request.getQueryStringParameters() != null ? request.getQueryStringParameters() : new HashMap<>();
