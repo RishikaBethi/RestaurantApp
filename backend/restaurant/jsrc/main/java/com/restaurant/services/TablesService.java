@@ -113,6 +113,9 @@ public class TablesService {
             }
 
             List<Item> availableTables = getAvailableTablesByLocationAndCapacity(locationId, guests);
+            if(availableTables.isEmpty()) {
+                return createErrorResponse(400, "We are sorry! We couldn't find tables as per your criteria :(");
+            }
             List<AvailableSlotsDTO> availableTimeSlots = getAvailableTimeSlots(availableTables, date, time, context);
 
             JSONArray jsonArray = new JSONArray();
@@ -193,18 +196,20 @@ public class TablesService {
             ArrayList<String> availableSlots = new ArrayList<>(timeSlots);
             availableSlots.removeAll(notAvailable);
 
-//            if(time!=null) {
-//                List<String> timeSlotsBefore = new ArrayList<>();
-//                for (String slot : availableSlots) {
-//                    LocalTime timeFrom = LocalTime.parse(slot.split("-")[0], DateTimeFormatter.ofPattern("HH:mm"));
-//                    LocalTime userTime = LocalTime.parse(time);
-//                    if (timeFrom.isBefore(userTime)) {
-//                        timeSlotsBefore.add(slot);
-//                    }
-//                }
-//                availableSlots.removeAll(timeSlotsBefore);
-//            }
+            //to filter time slots after user selected time slots
+            if(time!=null) {
+                List<String> timeSlotsBefore = new ArrayList<>();
+                for (String slot : availableSlots) {
+                    LocalTime timeFrom = LocalTime.parse(slot.split("-")[0], DateTimeFormatter.ofPattern("HH:mm"));
+                    LocalTime userTime = LocalTime.parse(time);
+                    if (timeFrom.isBefore(userTime)) {
+                        timeSlotsBefore.add(slot);
+                    }
+                }
+                availableSlots.removeAll(timeSlotsBefore);
+            }
 
+            //to remove time slots from today that have passed
             if (effectiveDate.equals(currentDate)) {
                 availableSlots.removeIf(slot -> {
                     String[] times = slot.split("-");

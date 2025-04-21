@@ -141,6 +141,18 @@ public class ServiceModule {
 
     @Provides
     @Singleton
+    public PostAFeedbackService PostAFeedbackService(DynamoDB dynamoDB) {
+        return new PostAFeedbackService(dynamoDB);
+    }
+
+    @Provides
+    @Singleton
+    public GetLatestFeedback GetLatestFeedbackService(DynamoDB dynamoDB) {
+        return new GetLatestFeedback(dynamoDB);
+    }
+
+    @Provides
+    @Singleton
     public BookingsByWaiterService provideBookingsByWaiterService(DynamoDB dynamoDB) {
         return new BookingsByWaiterService(dynamoDB);
     }
@@ -150,5 +162,19 @@ public class ServiceModule {
     @Singleton
     public WaiterService provideWaiterService(DynamoDB dynamoDB) {
         return new WaiterService(dynamoDB);
+    }
+
+    @Provides
+    @Singleton
+    public WaiterOrderService provideWaiterOrderService(DynamoDB dynamoDB, ObjectMapper objectMapper) {
+        return new WaiterOrderService(dynamoDB, objectMapper);
+    }
+
+    @Provides
+    @Singleton
+    public ProfileService provideProfileService(DynamoDB dynamoDB, ObjectMapper objectMapper,
+                                                CognitoIdentityProviderClient cognitoClient,
+                                                String clientId) {
+        return new ProfileService(cognitoClient, dynamoDB, objectMapper, clientId);
     }
 }
