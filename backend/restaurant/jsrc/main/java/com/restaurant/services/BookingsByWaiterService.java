@@ -100,12 +100,8 @@ public class BookingsByWaiterService {
                 userEmail = customerEmail;
 
             } else if ("VISITOR".equalsIgnoreCase(clientType)) {
-                userEmail = (String) claims.get("email");
-                if (userEmail == null || userEmail.isEmpty()) {
-                    return Helper.createErrorResponse(400, "Waiter's email not found in token");
-                }
-
-                customerEmail = userEmail;
+                userEmail = email;
+                customerEmail = email;
                 fullName = getUserFullName(userEmail);
             } else {
                 return Helper.createErrorResponse(400, "Invalid clientType. Must be either 'CUSTOMER' or 'VISITOR'");
