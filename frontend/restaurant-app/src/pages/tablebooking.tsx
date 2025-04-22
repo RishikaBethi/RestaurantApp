@@ -39,9 +39,9 @@ export default function BookTable() {
   const [loadingLocations, setLoadingLocations] = useState(true);
   const [loadingTables, setLoadingTables] = useState(true);
   const [error, setError] = useState("");
-  const [selectedLocation, setSelectedLocation] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState("LOC001");
   const [selectedDate, setSelectedDate] = useState(getTodayDate());
-  const [selectedTime, setSelectedTime] = useState("");
+  const [selectedTime, setSelectedTime] = useState("10:30");
   const [loadingFilteredTables, setLoadingFilteredTables] = useState(false);
   const [searchClicked, setSearchClicked] = useState(false);
   const navigate=useNavigate();
@@ -116,9 +116,9 @@ export default function BookTable() {
       setLoadingFilteredTables(true);
       const response = await axios.get(`${BASE_API_URL}/bookings/tables`, {
         params: {
-          locationId: selectedLocation,
+          locationId: selectedLocation || "LOC001",
           date: selectedDate || getTodayDate(),
-          time: selectedTime,
+          time: selectedTime || "10:30",
           guests,
         },
       });
