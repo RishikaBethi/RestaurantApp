@@ -312,6 +312,21 @@
           "default_error_pattern": true,
           "enable_proxy": true
         }
+      },
+      "/reports": {
+        "enable_cors": true,
+        "GET": {
+          "authorization_type": "NONE",
+          "integration_type": "lambda",
+          "lambda_name": "restaurant_handler",
+          "enable_proxy": true,
+          "api_key_required": false,
+          "method_request_parameters": {},
+          "integration_request_body_template": {},
+          "responses": [],
+          "integration_responses": [],
+          "default_error_pattern": true
+        }
       }
     },
     "tags": {},
@@ -330,7 +345,11 @@
     "resource_type": "eventbridge_rule",
     "rule_type": "schedule",
     "tags": {},
-    "expression": "rate(1 hour)"
+    "expression": "cron(0 7? * MON *)",
+    "lambda_target": {
+      "function_name": "tm7-report_sender-devr",
+      "role": "tm7-lambda-sender-role-devr"
+    }
   },
   "restaurant-weekly-reports": {
     "policy": {

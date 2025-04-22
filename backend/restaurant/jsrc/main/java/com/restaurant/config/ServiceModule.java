@@ -162,4 +162,10 @@ public class ServiceModule {
     public WaiterService provideWaiterService(DynamoDB dynamoDB) {
         return new WaiterService(dynamoDB);
     }
+
+    @Provides
+    @Singleton
+    public GetReportsService provideGetReportsService(DynamoDB dynamoDB) {
+        return new GetReportsService(dynamoDB);
+    }
 }

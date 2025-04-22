@@ -67,8 +67,8 @@ public class ReportsDispatchService {
 
             // Get the current date and the date 7 days ago in IST
             ZonedDateTime today = ZonedDateTime.now(istZone);
-            ZonedDateTime weekAgo = today.minusDays(7);
-            ZonedDateTime previousStart = today.minusDays(14);
+            ZonedDateTime weekAgo = today.minusDays(6);
+            ZonedDateTime previousStart = today.minusDays(13);
             ZonedDateTime previousEnd = today.minusDays(7);
 
             // Extract the local date from the ZonedDateTime
@@ -120,7 +120,12 @@ public class ReportsDispatchService {
     }
 
     private String generateWaiterCSV(List<Item> currentItems, List<Item> previousItems, LocalDate reportStart, LocalDate reportEnd) {
-        StringBuilder sb = new StringBuilder("Location,Waiter,Waiter's e-mail,Report period start,Report period end,Waiter working hours,Waiter Orders processed,Delta of Waiter Orders processed to previous period in %,Average Service Feedback Waiter (1 to 5),Minimum Service Feedback Waiter (1 to 5),Delta of Average Service Feedback Waiter to previous period in %\n");
+        StringBuilder sb = new StringBuilder(
+                "Location,Waiter,Waiter's e-mail,Report period start,Report period end,Waiter working hours," +
+                        "Waiter Orders processed,Delta of Waiter Orders processed to previous period in %," +
+                        "Average Service Feedback Waiter (1 to 5),Minimum Service Feedback Waiter (1 to 5)," +
+                        "Delta of Average Service Feedback Waiter to previous period in %\n"
+        );
 
         // Group previous stats by waiterId
         Map<String, List<Item>> previousStatsMap = new HashMap<>();
@@ -141,13 +146,10 @@ public class ReportsDispatchService {
 
             int totalOrders = current.stream().mapToInt(i -> i.getInt("ordersProcessed")).sum();
             int prevOrders = previous.stream().mapToInt(i -> i.getInt("ordersProcessed")).sum();
+
             double deltaOrders;
             if (prevOrders == 0) {
-                if(totalOrders==0) {
-                    deltaOrders = 0.0;
-                } else{
-                    deltaOrders=100.0;
-                }
+                deltaOrders = totalOrders == 0 ? 0.0 : 100.0;
             } else {
                 deltaOrders = ((double)(totalOrders - prevOrders) * 100) / prevOrders;
             }
@@ -160,12 +162,13 @@ public class ReportsDispatchService {
             int prevFeedbackCount = previous.stream().mapToInt(i -> i.getInt("serviceFeedbackCount")).sum();
             double prevAvgFeedback = prevFeedbackCount == 0 ? 0 : prevTotalFeedback / prevFeedbackCount;
 
-            int deltaAvgFeedback;
+            double deltaAvgFeedback;
             if (prevAvgFeedback == 0) {
-                deltaAvgFeedback = avgFeedback > 0 ? 100 : 0;
+                deltaAvgFeedback = avgFeedback > 0 ? 100.0 : 0.0;
             } else {
-                deltaAvgFeedback = (int)(((avgFeedback - prevAvgFeedback) * 100) / prevAvgFeedback);
+                deltaAvgFeedback = ((avgFeedback - prevAvgFeedback) * 100) / prevAvgFeedback;
             }
+
             double minFeedback = current.stream().mapToDouble(i -> i.getDouble("minServiceFeedback")).min().orElse(0.0);
 
             Set<String> allSlots = new HashSet<>();
@@ -176,7 +179,8 @@ public class ReportsDispatchService {
                     allSlots.addAll(i.getStringSet("workedSlots"));
                 }
             }
-            int workingHours = allSlots.size() * 90 / 60; // assuming 1.5 hours per slot
+
+            double workingHours = allSlots.size() * 1.5;
 
             String[] waiterInfo = getWaiterInfo(waiterId);
             String waiterName = waiterInfo[0];
@@ -187,77 +191,103 @@ public class ReportsDispatchService {
                     .append(email).append(",")
                     .append(reportStart).append(",")
                     .append(reportEnd).append(",")
-                    .append(workingHours).append(",")
+                    .append(String.format("%.2f", workingHours)).append(",")
                     .append(totalOrders).append(",")
-                    .append((deltaOrders >= 0 ? "+" : "")).append(deltaOrders).append("%,")
+                    .append((deltaOrders >= 0 ? "+" : "")).append(String.format("%.2f", deltaOrders)).append("%,")
                     .append(String.format("%.2f", avgFeedback)).append(",")
                     .append(String.format("%.2f", minFeedback)).append(",")
-                    .append((deltaAvgFeedback >= 0 ? "+" : "")).append(deltaAvgFeedback).append("%\n");
+                    .append((deltaAvgFeedback >= 0 ? "+" : "")).append(String.format("%.2f", deltaAvgFeedback)).append("%\n");
         }
+
         return sb.toString();
     }
 
 
     private String generateLocationCSV(List<Item> items, List<Item> previousItems, LocalDate reportStart, LocalDate reportEnd) {
-        StringBuilder sb = new StringBuilder("Location,Report period start,Report period end,Orders processed within location,Delta of orders processed within location to previous period (in %),Average cuisine Feedback by Restaurant location (1 to 5),Minimum cuisine Feedback by Restaurant location (1 to 5),Delta of average cuisine Feedback by Restaurant location to previous period (in %),Revenue for orders within reported period,Delta of revenue for orders to previous period %\n");
+        StringBuilder sb = new StringBuilder(
+                "Location,Report period start,Report period end,Orders processed within location," +
+                        "Delta of orders processed within location to previous period (in %)," +
+                        "Average cuisine Feedback by Restaurant location (1 to 5)," +
+                        "Minimum cuisine Feedback by Restaurant location (1 to 5)," +
+                        "Delta of average cuisine Feedback by Restaurant location to previous period (in %)," +
+                        "Revenue for orders within reported period,Delta of revenue for orders to previous period %\n"
+        );
 
-        Map<String, Item> previousMap = previousItems.stream()
-                .collect(Collectors.toMap(i -> i.getString("locationId"), i -> i));
+        // Group and aggregate previous items
+        Map<String, List<Item>> previousGrouped = previousItems.stream()
+                .collect(Collectors.groupingBy(i -> i.getString("locationId")));
 
-        for (Item item : items) {
-            String locationId = item.getString("locationId");
-            int ordersProcessed = item.getInt("ordersProcessed");
-            double revenue = item.getDouble("revenue");
-            double totalCuisineFeedback = item.getDouble("totalCuisineFeedback");
-            int feedbackCount = item.getInt("cuisineFeedbackCount");
-            double minCuisineFeedback = item.getDouble("minCuisineFeedback");
-            double avgCuisineFeedback = feedbackCount > 0 ? totalCuisineFeedback / feedbackCount : 0.0;
+        Map<String, Item> previousAggregated = new HashMap<>();
+        for (Map.Entry<String, List<Item>> entry : previousGrouped.entrySet()) {
+            String locationId = entry.getKey();
+            List<Item> prevItems = entry.getValue();
 
-            // Previous period data
-            Item prevItem = previousMap.get(locationId);
+            int totalOrders = prevItems.stream().mapToInt(i -> i.getInt("ordersProcessed")).sum();
+            double totalRevenue = prevItems.stream().mapToDouble(i -> i.getDouble("revenue")).sum();
+            double totalFeedback = prevItems.stream().mapToDouble(i -> i.getDouble("totalCuisineFeedback")).sum();
+            int feedbackCount = prevItems.stream().mapToInt(i -> i.getInt("cuisineFeedbackCount")).sum();
+            double minFeedback = prevItems.stream()
+                    .mapToDouble(i -> i.getDouble("minCuisineFeedback"))
+                    .min().orElse(0.0);
+
+            Item aggregated = new Item();
+            aggregated.withInt("ordersProcessed", totalOrders);
+            aggregated.withDouble("revenue", totalRevenue);
+            aggregated.withDouble("totalCuisineFeedback", totalFeedback);
+            aggregated.withInt("cuisineFeedbackCount", feedbackCount);
+            aggregated.withDouble("minCuisineFeedback", minFeedback);
+            previousAggregated.put(locationId, aggregated);
+        }
+
+        // Group current items by location
+        Map<String, List<Item>> currentGrouped = items.stream()
+                .collect(Collectors.groupingBy(i -> i.getString("locationId")));
+
+        for (Map.Entry<String, List<Item>> entry : currentGrouped.entrySet()) {
+            String locationId = entry.getKey();
+            List<Item> currItems = entry.getValue();
+
+            int ordersProcessed = currItems.stream().mapToInt(i -> i.getInt("ordersProcessed")).sum();
+            double revenue = currItems.stream().mapToDouble(i -> i.getDouble("revenue")).sum();
+            double totalFeedback = currItems.stream().mapToDouble(i -> i.getDouble("totalCuisineFeedback")).sum();
+            int feedbackCount = currItems.stream().mapToInt(i -> i.getInt("cuisineFeedbackCount")).sum();
+            double minFeedback = currItems.stream()
+                    .mapToDouble(i -> i.getDouble("minCuisineFeedback"))
+                    .min().orElse(0.0);
+            double avgFeedback = feedbackCount > 0 ? totalFeedback / feedbackCount : 0.0;
+
+            Item prevItem = previousAggregated.get(locationId);
             int prevOrders = prevItem != null ? prevItem.getInt("ordersProcessed") : 0;
             double prevRevenue = prevItem != null ? prevItem.getDouble("revenue") : 0.0;
             double prevTotalFeedback = prevItem != null ? prevItem.getDouble("totalCuisineFeedback") : 0.0;
             int prevFeedbackCount = prevItem != null ? prevItem.getInt("cuisineFeedbackCount") : 0;
             double prevAvgFeedback = prevFeedbackCount > 0 ? prevTotalFeedback / prevFeedbackCount : 0.0;
 
-            // Safe delta calculations
-            double deltaOrders;
-            if (prevOrders == 0) {
-                if(ordersProcessed==0) {
-                    deltaOrders = 0.0;
-                } else{
-                    deltaOrders=100.0;
-                }
-            } else {
-                deltaOrders = ((double)(ordersProcessed - prevOrders) * 100) / prevOrders;
-            }
+            // Delta calculations
+            double deltaOrders = (prevOrders == 0)
+                    ? (ordersProcessed == 0 ? 0.0 : 100.0)
+                    : ((double) (ordersProcessed - prevOrders) * 100) / prevOrders;
 
-            double deltaAvgFeedback;
-            if (prevAvgFeedback == 0.0) {
-                deltaAvgFeedback = avgCuisineFeedback > 0 ? 100.0 : 0.0;
-            } else {
-                deltaAvgFeedback = ((avgCuisineFeedback - prevAvgFeedback) * 100) / prevAvgFeedback;
-            }
+            double deltaAvgFeedback = (prevAvgFeedback == 0.0)
+                    ? (avgFeedback > 0 ? 100.0 : 0.0)
+                    : ((avgFeedback - prevAvgFeedback) * 100) / prevAvgFeedback;
 
-            double deltaRevenue;
-            if (prevRevenue == 0.0) {
-                deltaRevenue = revenue > 0 ? 100.0 : 0.0;
-            } else {
-                deltaRevenue = ((revenue - prevRevenue) * 100) / prevRevenue;
-            }
+            double deltaRevenue = (prevRevenue == 0.0)
+                    ? (revenue > 0 ? 100.0 : 0.0)
+                    : ((revenue - prevRevenue) * 100) / prevRevenue;
 
             sb.append(locationId).append(",")
                     .append(reportStart).append(",")
                     .append(reportEnd).append(",")
                     .append(ordersProcessed).append(",")
-                    .append((deltaOrders >= 0 ? "+" : "")).append(String.format("%.2f", Math.abs(deltaOrders))).append("%,")
-                    .append(String.format("%.2f", avgCuisineFeedback)).append(",")
-                    .append(String.format("%.2f", minCuisineFeedback)).append(",")
-                    .append((deltaAvgFeedback >= 0 ? "+" : "")).append(String.format("%.2f", Math.abs(deltaAvgFeedback))).append("%,")
+                    .append((deltaOrders >= 0 ? "+" : "")).append(String.format("%.2f", deltaOrders)).append("%,")
+                    .append(String.format("%.2f", avgFeedback)).append(",")
+                    .append(String.format("%.2f", minFeedback)).append(",")
+                    .append((deltaAvgFeedback >= 0 ? "+" : "")).append(String.format("%.2f", deltaAvgFeedback)).append("%,")
                     .append(String.format("%.2f", revenue)).append(",")
-                    .append((deltaRevenue >= 0 ? "+" : "")).append(String.format("%.2f", Math.abs(deltaRevenue))).append("%\n");
+                    .append((deltaRevenue >= 0 ? "+" : "")).append(String.format("%.2f", deltaRevenue)).append("%\n");
         }
+
         return sb.toString();
     }
 
@@ -286,7 +316,7 @@ public class ReportsDispatchService {
                 .withString("reportDescription", reportDescription)
                 .withString("downloadLink", downloadLink)
                 .withString("locationId", locationId)
-                .withString("reportType", reportType) // e.g., "Staff" or "Location"
+                .withString("reportType", reportType)
                 .withString("startPeriod", startPeriod.toString())
                 .withString("endPeriod", endPeriod.toString());
 

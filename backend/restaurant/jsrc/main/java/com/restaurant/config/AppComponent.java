@@ -26,6 +26,7 @@ public interface AppComponent {
     UpdateReservationService updateReservationService();
     WaiterService waiterService();
     BookingService bookingService();
+    GetReportsService getReportsService();
 
     @Component.Builder
     interface Builder {

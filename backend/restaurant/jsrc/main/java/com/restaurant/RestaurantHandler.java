@@ -41,6 +41,7 @@ import static com.restaurant.utils.Helper.*;
 		@EnvironmentVariable(key = "FEEDBACKS_TABLE", value = "${feedbacks_table}"),
         @EnvironmentVariable(key = "RESERVATIONS_TABLE", value = "${reservations_table}"),
         @EnvironmentVariable(key = "TABLES_TABLE", value = "${tables_table}"),
+        @EnvironmentVariable(key = "REPORTS_TABLE", value = "${reports_table}"),
         @EnvironmentVariable(key = "COGNITO_USER_POOL_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_USER_POOL_ID),
 		@EnvironmentVariable(key = "COGNITO_CLIENT_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_CLIENT_ID),
 		@EnvironmentVariable(key = "REGION", value = "${region}"),
@@ -83,6 +84,9 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 
     @Inject
     BookingService bookingService;
+
+    @Inject
+    GetReportsService getReportsService;
 
     public RestaurantHandler() {
 		initDependencies();
@@ -181,6 +185,10 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 
             if (path.startsWith("/reservations/") && "DELETE".equalsIgnoreCase(httpMethod)) {
                 return cancelReservationService.handleCancelReservation(request, path);
+            }
+
+            if ("/reports".equals(path) && "GET".equalsIgnoreCase(httpMethod)) {
+                return getReportsService.handleGetReports(request);
             }
 
 			return createErrorResponse(405, "Method Not Allowed: " + path + " with method " + httpMethod);
