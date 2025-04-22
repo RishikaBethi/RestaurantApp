@@ -33,7 +33,15 @@ const MyProfile: React.FC = () => {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
- 
+  const [touchedFields, setTouchedFields] = useState({
+    firstName: false,
+    lastName: false,
+  });
+  
+  // Update touched state on blur
+  const handleBlur = (field: "firstName" | "lastName") => {
+    setTouchedFields((prev) => ({ ...prev, [field]: true }));
+  };  
  
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -136,10 +144,20 @@ const MyProfile: React.FC = () => {
         }
       );
  
-      toast.success(response?.data || "Password changed successfully!");
+      toast.success(response?.data?.message || "Password changed successfully!");
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
+
+      setTimeout(() => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("email");
+        localStorage.removeItem("role");
+  
+        // Redirect to login page
+        window.location.href = "/login";
+      }, 2000);
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error.response?.data?.error || "Failed to change password.");
@@ -234,13 +252,14 @@ const MyProfile: React.FC = () => {
         firstName: e.target.value,
       }))
     }
-    className={`mt-1 w-full border ${
-      /^[a-zA-Z][a-zA-Z0-9\s@#%&*()!]{0,49}$/.test(editedData.firstName)
-        ? "border-gray-300"
-        : "border-red-500"
+    onBlur={() => handleBlur("firstName")}
+    className={`mt-1 w-full border ${ touchedFields.firstName &&
+      !/^[a-zA-Z][a-zA-Z0-9\s@#%&*()!]{0,49}$/.test(editedData.firstName)
+        ? "border-red-500"
+        : "border-gray-300"
     } p-2 rounded-lg focus:outline-none`}
   />
-  {!/^[a-zA-Z][a-zA-Z0-9\s@#%&*()!]{0,49}$/.test(editedData.firstName) && (
+  {touchedFields.firstName && !/^[a-zA-Z][a-zA-Z0-9\s@#%&*()!]{0,49}$/.test(editedData.firstName) && (
     <p className="text-sm text-red-500 mt-1">
       First name must start with a letter and be up to 50 characters. Only letters, special characters, and numbers are allowed.
     </p>
@@ -257,14 +276,16 @@ const MyProfile: React.FC = () => {
         lastName: e.target.value,
       }))
     }
+    onBlur={() => handleBlur("lastName")}
     className={`mt-1 w-full border ${
-      editedData.lastName.trim() === "" ||
-      !/^[a-zA-Z0-9\s@#%&*()!]{1,50}$/.test(editedData.lastName)
+      touchedFields.lastName &&
+      (editedData.lastName.trim() === "" ||
+      !/^[a-zA-Z0-9\s@#%&*()!]{1,50}$/.test(editedData.lastName))
         ? "border-red-500"
         : "border-gray-300"
     } p-2 rounded-lg focus:outline-none`}
   />
-  {(editedData.lastName.trim() === "" ||
+  {touchedFields.lastName && (editedData.lastName.trim() === "" ||
     !/^[a-zA-Z0-9\s@#%&*()!]{1,50}$/.test(editedData.lastName)) && (
     <p className="text-sm text-red-500 mt-1">
       Last name can include letters, numbers, and special characters, up to 50 characters.
