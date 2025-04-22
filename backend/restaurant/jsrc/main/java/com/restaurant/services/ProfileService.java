@@ -87,10 +87,10 @@ public class ProfileService {
             if (firstName == null || lastName == null) {
                 return Helper.createErrorResponse(400, "First name and last name are required.");
             }
-            if (!NameValidator.validateName(firstName)) {
+            if (!NameValidator.validateFirstName(firstName)) {
                 return Helper.createErrorResponse(400, "Invalid or missing first name");
             }
-            if (!NameValidator.validateName(lastName)) {
+            if (!NameValidator.validateLastName(lastName)) {
                 return Helper.createErrorResponse(400, "Invalid or missing last name");
             }
 

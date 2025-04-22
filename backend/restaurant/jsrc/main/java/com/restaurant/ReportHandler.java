@@ -78,7 +78,7 @@ public class ReportHandler implements RequestHandler<SQSEvent, Void> {
                 handleEvent(eventNode);
             } catch (Exception e) {
                 logger.severe("Error while processing SQS message: " + e.getMessage());
-                // Optionally: send to DLQ or log failed message for retry
+
             }
         }
         return null;

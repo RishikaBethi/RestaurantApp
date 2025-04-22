@@ -110,39 +110,37 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
                     ", Query: " + (queryParams != null ? queryParams.toString() : "none"));
 
             // Auth routes
-            if ("/auth/sign-up".equals(path) && "POST".equals(httpMethod)) {
+            if (path.equals("/auth/sign-up") && httpMethod.equalsIgnoreCase("POST")) {
                 logger.info("Handling signup request");
                 return signUpService.handleSignUp(request);
-            } else if ("/auth/sign-in".equals(path) && "POST".equals(httpMethod)) {
+            }
+            if (path.equals("/auth/sign-in") && httpMethod.equalsIgnoreCase("POST")) {
                 logger.info("Handling sign-in request");
                 return signInService.handleSignIn(request);
             }
 
-            // Location routes
-            else if ("/locations".equals(path) && "GET".equals(httpMethod)) {
+             // Location routes
+             if (path.equals("/locations") && httpMethod.equalsIgnoreCase("GET")) {
                 if (queryParams != null && queryParams.containsKey("locationId") && queryParams.containsKey("speciality-dishes")) {
                     logger.info("Routing to getSpecialityDishes with query parameters: " + queryParams);
                     return locationService.getSpecialityDishes(request);
                 }
                 logger.info("Handling locations request");
                 return locationService.getLocations(request);
-            } else if (path.startsWith("/locations/") && path.endsWith("/speciality-dishes") && "GET".equals(httpMethod)) {
-                String[] pathParts = path.split("/");
-                if (pathParts.length >= 3) {
-                    String locationId = pathParts[pathParts.length - 2];
-                    if (queryParams == null) {
-                        queryParams = new HashMap<>();
-                    }
-                    queryParams.put("locationId", locationId);
-                    request.setQueryStringParameters(queryParams);
-                    logger.info("Extracted locationId: " + locationId);
+             }
+
+             if (path.startsWith("/locations/") && path.endsWith("/speciality-dishes") && httpMethod.equalsIgnoreCase("GET")) {
                     return locationService.getSpecialityDishes(request);
-                }
-                return createErrorResponse(400, "Invalid speciality-dishes path format");
-            }
+             }
+
+             if (path.equals("/locations/select-options") && httpMethod.equalsIgnoreCase("GET")) {
+                logger.info("In locations handler");
+                return locationsService.allAvailableLocations(
+                        request, context);
+             }
 
             // Dishes route
-            else if ("/dishes/popular".equals(path) && "GET".equals(httpMethod)) {
+            if (path.equals("/dishes/popular") && httpMethod.equalsIgnoreCase("GET")) {
                 logger.info("Handling popular dishes request");
                 return dishService.getPopularDishes(request);
             }
@@ -153,15 +151,29 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
                 return feedbackService.handleGetFeedbacks(request);
             }
 
-            if (tablesService == null) {
-                throw new IllegalStateException("Services not injected: tablesService=" + tablesService);
-            }
-            if (locationsService == null) {
-                throw new IllegalStateException("Services not injected: locationsService=" + locationsService);
+            if (path.equals("/dishes") && httpMethod.equalsIgnoreCase("GET")) {
+                logger.info("Handling all dishes request for path: " + path + ", Query: " + (queryParams != null ? queryParams.toString() : "none"));
+                return dishService.getAllDishes(request);
             }
 
-            else if (path.equals("/bookings/tables") && httpMethod.equalsIgnoreCase("GET")) {
-                context.getLogger().log("In bookings handler");
+
+            if (path.startsWith("/dishes/") && httpMethod.equalsIgnoreCase("GET")) {
+                return dishService.getDishById(request, path);
+            }
+
+            // Feedback route
+            if (path.matches("/locations/[^/]+/feedbacks") && httpMethod.equalsIgnoreCase("GET")) {
+                logger.info("Handling feedback retrieval request");
+                return feedbackService.handleGetFeedbacks(request);
+            }
+
+            if(path.equals("/feedbacks") && httpMethod.equalsIgnoreCase("POST")) {
+                return postAFeedback.handlePostAFeedback(request, context);
+            }
+
+
+            if (path.equals("/bookings/tables") && httpMethod.equalsIgnoreCase("GET")) {
+                logger.info("In bookings handler");
                 return tablesService.returnAvailableTablesFilteredByGivenCriteria(request, context);
             }
 
@@ -171,27 +183,55 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
                         request, context);
             }
 
-            if ("/bookings/client".equals(path) && "POST".equalsIgnoreCase(httpMethod)) {
+            if (path.equals("/bookings/client") && httpMethod.equalsIgnoreCase("POST")) {
                 return bookingService.handleCreateReservation(request);
             }
 
-            if (path.startsWith("/bookings/client/") && "PUT".equalsIgnoreCase(httpMethod)) {
+            if (path.equals("/bookings/waiter") && httpMethod.equalsIgnoreCase("POST")) {
+                return bookingsByWaiterService.handleReservationByWaiter(request);
+            }
+
+            if (path.startsWith("/bookings/client/") && httpMethod.equalsIgnoreCase("PUT")) {
                 return updateReservationService.handleUpdateReservation(request, path);
             }
 
-            if ("/reservations".equals(path) && "GET".equalsIgnoreCase(httpMethod)) {
+            if (path.startsWith("/bookings/waiter/") && httpMethod.equalsIgnoreCase("PUT")) {
+                return updateReservationByWaiterService.handleUpdateReservationByWaiter(request, path);
+            }
+
+            if (path.equals("/reservations") && httpMethod.equalsIgnoreCase("GET")) {
                 return getReservationService.handleGetReservations(request);
             }
 
-            if (path.startsWith("/reservations/") && "DELETE".equalsIgnoreCase(httpMethod)) {
+            if (path.startsWith("/reservations/") && httpMethod.equalsIgnoreCase("DELETE")) {
                 return cancelReservationService.handleCancelReservation(request, path);
             }
 
+            if (path.equals("/getPreviousFeedback") && httpMethod.equalsIgnoreCase("POST")) {
+                return latestFeedback.returnLatestFeedback(request, context);
+            }
+
+            if (path.equals("/reservations/waiter") && httpMethod.equalsIgnoreCase("GET")) {
+                return getReservationByWaiterService.handleGetReservationsByWaiter(request);
             if ("/reports".equals(path) && "GET".equalsIgnoreCase(httpMethod)) {
                 return getReportsService.handleGetReports(request);
             }
 
-			return createErrorResponse(405, "Method Not Allowed: " + path + " with method " + httpMethod);
+            if (path.equals("/users/profile") && httpMethod.equalsIgnoreCase("GET")) {
+                logger.info("Handling get user profile request");
+                return profileService.getUserProfile(request);
+            }
+            if (path.equals("/users/profile") && httpMethod.equalsIgnoreCase("PUT")) {
+                logger.info("Handling update user profile request");
+                return profileService.updateUserProfile(request);
+            }
+            if (path.equals("/users/profile/password") && httpMethod.equalsIgnoreCase("PUT")) {
+                logger.info("Handling change password request");
+                return profileService.changePassword(request);
+            }
+
+
+            return createErrorResponse(405, "Method Not Allowed: " + path + " with method " + httpMethod);
         }
         catch (Exception e) {
             logger.severe("Error handling request: " + e.getMessage());

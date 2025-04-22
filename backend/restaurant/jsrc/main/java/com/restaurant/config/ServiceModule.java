@@ -140,6 +140,12 @@ public class ServiceModule {
 
     @Provides
     @Singleton
+    public GetReservationByWaiterService provideGetReservationByWaiterService(DynamoDB dynamoDB, GetAllLocationsService locationsService) {
+        return new GetReservationByWaiterService(dynamoDB, locationsService);
+    }
+
+    @Provides
+    @Singleton
     public CancelReservationService provideCancelReservationService(DynamoDB dynamoDB) {
         return new CancelReservationService(dynamoDB);
     }
@@ -152,17 +158,47 @@ public class ServiceModule {
 
     @Provides
     @Singleton
+    public UpdateReservationByWaiterService provideUpdateReservationByWaiterService(DynamoDB dynamoDB) {
+        return new UpdateReservationByWaiterService(dynamoDB);
+    }
+
+    @Provides
+    @Singleton
     public BookingService provideBookingService(DynamoDB dynamoDB, WaiterService waiterService) {
         return new BookingService(dynamoDB, waiterService);
     }
 
-    // Provide WaiterService Dependency
+    @Provides
+    @Singleton
+    public PostAFeedbackService PostAFeedbackService(DynamoDB dynamoDB) {
+        return new PostAFeedbackService(dynamoDB);
+    }
+
+    @Provides
+    @Singleton
+    public GetLatestFeedback GetLatestFeedbackService(DynamoDB dynamoDB) {
+        return new GetLatestFeedback(dynamoDB);
+    }
+
+    @Provides
+    @Singleton
+    public BookingsByWaiterService provideBookingsByWaiterService(DynamoDB dynamoDB) {
+        return new BookingsByWaiterService(dynamoDB);
+    }
+
     @Provides
     @Singleton
     public WaiterService provideWaiterService(DynamoDB dynamoDB) {
         return new WaiterService(dynamoDB);
     }
 
+
+    @Provides
+    @Singleton
+    public ProfileService provideProfileService(DynamoDB dynamoDB, ObjectMapper objectMapper,
+                                                CognitoIdentityProviderClient cognitoClient,
+                                                String clientId) {
+        return new ProfileService(cognitoClient, dynamoDB, objectMapper, clientId);
     @Provides
     @Singleton
     public GetReportsService provideGetReportsService(DynamoDB dynamoDB) {
