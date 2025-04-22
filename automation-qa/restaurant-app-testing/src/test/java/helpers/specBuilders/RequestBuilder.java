@@ -39,4 +39,27 @@ public class RequestBuilder {
                 .setBaseUri(shareContext.getBaseUri())
                 .build();
     }
+
+    public static RequestSpecification sendAuthorizedDeleteRequest(ShareContext shareContext){
+        return new RequestSpecBuilder()
+                .setAuth(oauth2(shareContext.getCustomerToken()))
+                .setBaseUri(shareContext.getBaseUri())
+                .build();
+    }
+
+    public static RequestSpecification sendDeleteRequest(ShareContext shareContext){
+        return new RequestSpecBuilder()
+                .setBaseUri(shareContext.getBaseUri())
+                .setContentType("application/json")
+                .build();
+    }
+
+    public static RequestSpecification sendAuthorizedPostRequest(ShareContext shareContext){
+        return new RequestSpecBuilder()
+                .setBaseUri(shareContext.getBaseUri())
+                .setContentType("application/json")
+                .setAuth(oauth2(shareContext.getCustomerToken()))
+                .setBody(shareContext.getUser())
+                .build();
+    }
 }

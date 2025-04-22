@@ -99,3 +99,8 @@ Feature: Display the locations for authorized and unauthorized users
       |LOC003v1     |type=CUISINE_EXPERIENCE&sort=date,desc|
       |LO3rC001     |type=SERVICE&page=1&size=5            |
       |LO34f001     |type=SERVICE&?sort=date_asc           |
+
+  Scenario: Verify the return of available locations
+    When the user sends the authorized get request to "/locations/select-options" request payload
+    Then the status code should be 200
+    And the response should validate the "ValidateTableOptions" schema
