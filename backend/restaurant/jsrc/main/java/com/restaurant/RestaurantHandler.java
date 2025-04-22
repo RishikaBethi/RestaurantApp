@@ -88,6 +88,24 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
     @Inject
     GetReportsService getReportsService;
 
+    @Inject
+    PostAFeedbackService postAFeedback;
+
+    @Inject
+    GetLatestFeedback latestFeedback;
+
+    @Inject
+    BookingsByWaiterService bookingsByWaiterService;
+
+    @Inject
+    UpdateReservationByWaiterService updateReservationByWaiterService;
+
+    @Inject
+    GetReservationByWaiterService getReservationByWaiterService;
+
+    @Inject
+    ProfileService profileService;
+
     public RestaurantHandler() {
 		initDependencies();
 	}
@@ -119,25 +137,25 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
                 return signInService.handleSignIn(request);
             }
 
-             // Location routes
-             if (path.equals("/locations") && httpMethod.equalsIgnoreCase("GET")) {
+            // Location routes
+            if (path.equals("/locations") && httpMethod.equalsIgnoreCase("GET")) {
                 if (queryParams != null && queryParams.containsKey("locationId") && queryParams.containsKey("speciality-dishes")) {
                     logger.info("Routing to getSpecialityDishes with query parameters: " + queryParams);
                     return locationService.getSpecialityDishes(request);
                 }
                 logger.info("Handling locations request");
                 return locationService.getLocations(request);
-             }
+            }
 
-             if (path.startsWith("/locations/") && path.endsWith("/speciality-dishes") && httpMethod.equalsIgnoreCase("GET")) {
-                    return locationService.getSpecialityDishes(request);
-             }
+            if (path.startsWith("/locations/") && path.endsWith("/speciality-dishes") && httpMethod.equalsIgnoreCase("GET")) {
+                return locationService.getSpecialityDishes(request);
+            }
 
-             if (path.equals("/locations/select-options") && httpMethod.equalsIgnoreCase("GET")) {
+            if (path.equals("/locations/select-options") && httpMethod.equalsIgnoreCase("GET")) {
                 logger.info("In locations handler");
                 return locationsService.allAvailableLocations(
                         request, context);
-             }
+            }
 
             // Dishes route
             if (path.equals("/dishes/popular") && httpMethod.equalsIgnoreCase("GET")) {
@@ -167,7 +185,7 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
                 return feedbackService.handleGetFeedbacks(request);
             }
 
-            if(path.equals("/feedbacks") && httpMethod.equalsIgnoreCase("POST")) {
+            if (path.equals("/feedbacks") && httpMethod.equalsIgnoreCase("POST")) {
                 return postAFeedback.handlePostAFeedback(request, context);
             }
 
@@ -175,9 +193,7 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
             if (path.equals("/bookings/tables") && httpMethod.equalsIgnoreCase("GET")) {
                 logger.info("In bookings handler");
                 return tablesService.returnAvailableTablesFilteredByGivenCriteria(request, context);
-            }
-
-            else if (path.equals("/locations/select-options") && httpMethod.equalsIgnoreCase("GET")) {
+            } else if (path.equals("/locations/select-options") && httpMethod.equalsIgnoreCase("GET")) {
                 context.getLogger().log("In locations handler");
                 return locationsService.allAvailableLocations(
                         request, context);
@@ -213,6 +229,8 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 
             if (path.equals("/reservations/waiter") && httpMethod.equalsIgnoreCase("GET")) {
                 return getReservationByWaiterService.handleGetReservationsByWaiter(request);
+            }
+
             if ("/reports".equals(path) && "GET".equalsIgnoreCase(httpMethod)) {
                 return getReportsService.handleGetReports(request);
             }
@@ -229,11 +247,9 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
                 logger.info("Handling change password request");
                 return profileService.changePassword(request);
             }
-
-
             return createErrorResponse(405, "Method Not Allowed: " + path + " with method " + httpMethod);
-        }
-        catch (Exception e) {
+
+        } catch (Exception e) {
             logger.severe("Error handling request: " + e.getMessage());
             return createErrorResponse(500, "Error: " + e.getMessage());
         }

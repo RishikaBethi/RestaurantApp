@@ -192,13 +192,14 @@ public class ServiceModule {
         return new WaiterService(dynamoDB);
     }
 
-
     @Provides
     @Singleton
     public ProfileService provideProfileService(DynamoDB dynamoDB, ObjectMapper objectMapper,
                                                 CognitoIdentityProviderClient cognitoClient,
                                                 String clientId) {
         return new ProfileService(cognitoClient, dynamoDB, objectMapper, clientId);
+    }
+
     @Provides
     @Singleton
     public GetReportsService provideGetReportsService(DynamoDB dynamoDB) {
