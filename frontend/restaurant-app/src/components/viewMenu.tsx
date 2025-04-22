@@ -131,8 +131,8 @@ const MenuPage = () => {
       </div>
 
       {/* Category Filter and Sort */}
-      <div className="flex flex-wrap items-center justify-between px-6 py-4">
-        <div className="flex gap-2">
+      <div className="flex flex-wrap items-center justify-between px-6 py-4 gap-4">
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setSelectedCategory("All")}
             className={`border px-4 py-1 rounded-full ${selectedCategory === "All" ? "bg-green-500 text-white" : "text-green-600 border-green-500"}`}
@@ -150,13 +150,13 @@ const MenuPage = () => {
           ))}
         </div>
 
-        <div className="flex items-center gap-2">
-          <label htmlFor="sort" className="text-sm text-gray-600">Sort by:</label>
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <label htmlFor="sort" className="text-sm text-gray-600 w-1/3 md:w-auto text-center md:text-left">Sort by:</label>
           <select
             id="sort"
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value)}
-            className="border rounded-md px-2 py-1 text-sm"
+            className="border rounded-md px-2 py-1 text-sm w-2/3 md:w-auto"
           >
             <option>Popularity Descending</option>
             <option>Popularity Ascending</option>

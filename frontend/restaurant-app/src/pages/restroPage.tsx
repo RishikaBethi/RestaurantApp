@@ -108,7 +108,7 @@ export default function RestroPage() {
           <p className="text-gray-700 font-semibold">Average Occupancy: {location?.averageOccupancy}%</p>
           <Button className="mt-4 bg-green-600 hover:bg-green-700" onClick={()=>navigate("/book-table")}>Book a Table</Button>
         </div>
-        <img src={location?.imageUrl} alt="Restaurant" className="rounded-lg h-64 w-auto object-cover md:w-1/2" />
+        <img src={location?.imageUrl} alt="Restaurant" className="rounded-lg w-full max-h-64 object-cover md:w-1/2" />
       </div>
 
       <h2 className="text-2xl font-semibold mt-10">Specialty Dishes</h2>
