@@ -40,14 +40,33 @@ public class CommonSteps {
         shareContext.setResponse(response);
     }
 
+    @When("the user sends the authorized post request to {string} with the request payload")
+    public void sendAuthenticatedPOSTRequest(String endpoint){
+
+        System.out.println("Access Token: " + shareContext.getCustomerToken());
+        System.out.println("Base URI: " + shareContext.getBaseUri());
+        System.out.println("Request Payload: " + shareContext.getUser());
+
+
+        Response response = given()
+                .spec(RequestBuilder.sendAuthorizedPostRequest(shareContext))
+                .when()
+                .post(endpoint)
+                .then()
+                .extract().response();
+        shareContext.setResponse(response);
+    }
+
     @When("the user sends the authorized get request to {string} request payload")
     public void sendAuthorizedGetRequest(String endpoint)
     {
         Response response = given()
                 .spec(RequestBuilder.sendAuthorizedCustomerGetRequest(shareContext))
+                .log().all()
                 .when()
                 .get(endpoint)
                 .then()
+                .log().all()
                 .extract().response();
         shareContext.setResponse(response);
     }
@@ -63,6 +82,29 @@ public class CommonSteps {
                 .extract().response();
         shareContext.setResponse(response);
 
+    }
+
+    @When("the user sends the authorized delete request to {string} request payload")
+    public void sendAuthorizedDeleteRequest(String endpoint){
+        Response response = given()
+                .spec(RequestBuilder.sendAuthorizedDeleteRequest(shareContext))
+                .when()
+                .delete(endpoint)
+                .then()
+                .extract().response();
+        shareContext.setResponse(response);
+
+    }
+
+    @When("the user sends the delete request to {string} request payload")
+    public void sendDeleteRequest(String endpoint){
+        Response response = given()
+                .spec(RequestBuilder.sendDeleteRequest(shareContext))
+                .when()
+                .delete(endpoint)
+                .then()
+                .extract().response();
+        shareContext.setResponse(response);
     }
 
 

@@ -24,7 +24,6 @@ public class SignInSteps {
     public void sendSignInData(DataTable dataTable)
     {
         List<Map<String,String>> data= dataTable.asMaps();
-       // System.out.println(data);
         SignIn user = new SignIn.SignInBuilder()
                 .setEmail(data.get(0).get("email"))
                 .setPassword(data.get(0).get("password"))
@@ -38,6 +37,14 @@ public class SignInSteps {
     {
         role = role.trim();
         shareContext.getResponse().then().body("role",equalTo(role));
+        if(role.equals("Customer"))
+        {
+            shareContext.setCustomerToken(shareContext.getResponse().jsonPath().getString("accessToken"));
+        }
+        else if(role.equals("Waiter"))
+        {
+            shareContext.setWaiterToken(shareContext.getResponse().jsonPath().getString("accessToken"));
+        }
     }
 
     @And("the response should contain failed error or message for {int} based on {string} message")
@@ -52,5 +59,10 @@ public class SignInSteps {
             shareContext.getResponse().then().body("message",equalTo(message));
         }
 
+    }
+
+    @And("the token is stored")
+    public void storeToken(){
+        shareContext.setCustomerToken(shareContext.getResponse().jsonPath().getString("accessToken"));
     }
 }

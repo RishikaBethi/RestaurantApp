@@ -95,4 +95,3 @@ Feature: Signing up into the application
 
 
 
-

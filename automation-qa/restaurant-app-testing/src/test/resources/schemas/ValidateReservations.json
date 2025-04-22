@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "array",
+  "items": [
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "locationAddress": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "timeSlot": {
+          "type": "string"
+        },
+        "preOrder": {
+          "type": "string"
+        },
+        "guestsNumber": {
+          "type": "string"
+        },
+        "feedbackId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "status",
+        "locationAddress",
+        "date",
+        "timeSlot",
+        "preOrder",
+        "guestsNumber",
+        "feedbackId"
+      ]
+    }
+  ]
+}
