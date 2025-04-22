@@ -8,6 +8,13 @@ interface FeedbackCardProps {
   comment: string;
 }
 
+const getImageMimeType = (base64: string) => {
+  if (base64.startsWith("/9j")) return "image/jpeg";
+  if (base64.startsWith("iVBOR")) return "image/png";
+  if (base64.startsWith("R0lGOD")) return "image/gif";
+  return "image/png"; // fallback
+};
+
 const FeedbackCard = ({
   userName,
   userAvatarUrl,
@@ -15,12 +22,20 @@ const FeedbackCard = ({
   rate,
   comment,
 }: FeedbackCardProps) => {
+  const fallbackAvatar =
+    "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
+
+  const mimeType = userAvatarUrl ? getImageMimeType(userAvatarUrl) : null;
+  const avatarSrc = userAvatarUrl
+      ? `data:${mimeType};base64,${userAvatarUrl}`
+      : fallbackAvatar;
+
   return (
     <div className="bg-white shadow rounded-lg p-4">
       <div className="flex items-center gap-3">
         <img
-          src={userAvatarUrl || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"}
-          alt="avatar"
+           src={avatarSrc}
+           alt={`${userName}'s avatar`}
           className="rounded-full w-10 h-10 object-cover"
         />
         <div>
@@ -30,7 +45,7 @@ const FeedbackCard = ({
           </p>
         </div>
         <div className="ml-auto flex">
-          {[...Array(Math.round(parseFloat(rate)))].map((_, i) => (
+          {Array.from({ length: Math.min(5, Math.max(0, Math.round(Number(rate) || 0))) }).map((_, i) => (
             <Star key={i} className="w-3 h-3 text-yellow-500" fill={i < Math.round(Number(rate)) ? "gold" : "none"} />
           ))}
         </div>
