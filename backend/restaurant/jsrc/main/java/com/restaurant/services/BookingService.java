@@ -5,10 +5,14 @@ import com.amazonaws.services.dynamodbv2.document.spec.PutItemSpec;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+
 import static com.restaurant.utils.Helper.*;
+
 import java.util.*;
 import java.util.logging.Logger;
+
 import com.restaurant.dto.ReservationResponseDTO;
+
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 
@@ -91,7 +95,7 @@ public class BookingService {
             }
 
             // Check if table exists in Tables table
-            Item tableItem = tablesTable.getItem("locationId", locationId, "tableNumber", tableNumber);
+            Item tableItem = tablesTable.getItem("locationId", locationId, "tableNumber", Integer.parseInt(tableNumber));
             if (tableItem == null) {
                 return createErrorResponse(400, "The specified table number does not exist for the given location.");
             }
@@ -144,9 +148,9 @@ public class BookingService {
                     .withString("reservationId", reservationId)
                     .withString("locationId", locationId)
                     .withString("date", date)
-                    .withString("state", "Submitted")
+                    .withString("status", "Submitted")
                     .withString("timeSlot", timeSlot)
-                    .withList("dishItems", new ArrayList<String>())
+                    .withMap("dishItems", new HashMap<String, Number>())
             ));
 
             // Fetch location address
