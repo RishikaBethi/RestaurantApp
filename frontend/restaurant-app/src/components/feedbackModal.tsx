@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
+import { BASE_API_URL } from "@/constants/constant";
 //import { BASE_API_URL } from "@/constants/constant";
 
 interface FeedbackModalProps {
@@ -30,7 +31,7 @@ export default function FeedbackModal({ isOpen, onClose,reservationId }: Feedbac
     const fetchFeedback = async () => {
       try {
         const { data } = await axios.post(
-          `https://aelam52ao5.execute-api.ap-southeast-2.amazonaws.com/dev/getPreviousFeedback`,
+          `${BASE_API_URL}/getPreviousFeedback`,
           { reservationId },
           {
             headers: {
@@ -68,7 +69,7 @@ export default function FeedbackModal({ isOpen, onClose,reservationId }: Feedbac
 
     try {
       const response=await axios.post(
-        `https://aelam52ao5.execute-api.ap-southeast-2.amazonaws.com/dev/feedbacks`,
+        `${BASE_API_URL}/feedbacks`,
         payload,
         {
           headers: {

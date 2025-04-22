@@ -32,20 +32,13 @@ const availableTimes = [
   "21:00",
 ];
 
-const calculateToTimes = (fromTime: string): string[] => {
+const calculateToTime = (fromTime: string): string => {
   const [fromHours, fromMinutes] = fromTime.split(":").map(Number);
-
-  // Create a base UTC Date object for the "From" time
   const fromDateTime = new Date(Date.UTC(2000, 0, 1, fromHours, fromMinutes));
-
-  // Add 90 minutes to calculate the minimum "To" time
-  const minToDateTime = new Date(fromDateTime.getTime() + 90 * 60000);
-
-  // Format the minimum "To" time as "HH:mm"
-  const minToTime = `${String(minToDateTime.getUTCHours()).padStart(2, "0")}:${String(minToDateTime.getUTCMinutes()).padStart(2, "0")}`;
-
-  // Filter "To" times to include only those starting from the calculated minimum
-  return availableTimes.filter((time) => time >= minToTime);
+  const toDateTime = new Date(fromDateTime.getTime() + 90 * 60000);
+  return `${String(toDateTime.getUTCHours()).padStart(2, "0")}:${String(
+    toDateTime.getUTCMinutes()
+  ).padStart(2, "0")}`;
 };
 
 export default function EditReservationDialog({
@@ -72,18 +65,18 @@ export default function EditReservationDialog({
         to,
         guestsNumber: reservation.guestsNumber,
       });
-      setToOptions(calculateToTimes(from));
+      setToOptions([calculateToTime(from)]);
     }
   }, [reservation]);
 
   const handleFromChange = (fromTime: string) => {
-    const newToOptions = calculateToTimes(fromTime);
+    const toTime = calculateToTime(fromTime);
     setFormData((prev) => ({
       ...prev,
       from: fromTime,
       to: "",
     }));
-    setToOptions(newToOptions)
+    setToOptions([toTime])
   };
 
   const handleChange = (field: string, value: string | number) => {
