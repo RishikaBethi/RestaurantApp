@@ -77,7 +77,7 @@ public class BookingsByWaiterService {
             String locationId = waiterLocationId;
 
             // Remove locationId from required fields
-            List<String> requiredFields = List.of("tableNumber", "date", "guestsNumber", "timeFrom", "timeTo", "customerEmail", "clientType");
+            List<String> requiredFields = List.of("tableNumber", "date", "guestsNumber", "timeFrom", "timeTo", "clientType");
             for (String field : requiredFields) {
                 if (!requestBody.containsKey(field) || requestBody.get(field).trim().isEmpty()) {
                     return Helper.createErrorResponse(400, "Missing required field: " + field);
@@ -91,6 +91,7 @@ public class BookingsByWaiterService {
             String fullName;
 
             if ("CUSTOMER".equalsIgnoreCase(clientType)) {
+                requiredFields.add("customerEmail");
                 customerEmail = requestBody.get("customerEmail");
 
                 if (!isCustomerRegistered(customerEmail)) {
