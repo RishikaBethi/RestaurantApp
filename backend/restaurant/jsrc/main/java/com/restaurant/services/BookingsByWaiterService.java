@@ -77,7 +77,7 @@ public class BookingsByWaiterService {
             String locationId = waiterLocationId;
 
             // Remove locationId from required fields
-            List<String> requiredFields = List.of("tableNumber", "date", "guestsNumber", "timeFrom", "timeTo", "customerEmail", "clientType");
+            List<String> requiredFields = new ArrayList<>(List.of("tableNumber", "date", "guestsNumber", "timeFrom", "timeTo", "clientType"));
             for (String field : requiredFields) {
                 if (!requestBody.containsKey(field) || requestBody.get(field).trim().isEmpty()) {
                     return Helper.createErrorResponse(400, "Missing required field: " + field);
@@ -91,6 +91,7 @@ public class BookingsByWaiterService {
             String fullName;
 
             if ("CUSTOMER".equalsIgnoreCase(clientType)) {
+                requiredFields.add("customerEmail");
                 customerEmail = requestBody.get("customerEmail");
 
                 if (!isCustomerRegistered(customerEmail)) {
@@ -100,12 +101,8 @@ public class BookingsByWaiterService {
                 userEmail = customerEmail;
 
             } else if ("VISITOR".equalsIgnoreCase(clientType)) {
-                userEmail = (String) claims.get("email");
-                if (userEmail == null || userEmail.isEmpty()) {
-                    return Helper.createErrorResponse(400, "Waiter's email not found in token");
-                }
-
-                customerEmail = userEmail;
+                userEmail = email;
+                customerEmail = email;
                 fullName = getUserFullName(userEmail);
             } else {
                 return Helper.createErrorResponse(400, "Invalid clientType. Must be either 'CUSTOMER' or 'VISITOR'");

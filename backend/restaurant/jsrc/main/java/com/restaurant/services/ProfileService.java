@@ -19,7 +19,12 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.AuthFlowTyp
 import software.amazon.awssdk.services.cognitoidentityprovider.model.InvalidParameterException;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.NotAuthorizedException;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.UserNotFoundException;
+
+import javax.imageio.ImageIO;
 import javax.inject.Inject;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -97,9 +102,18 @@ public class ProfileService {
             // Validate Base64 string if provided
             if (base64encodedImage != null && !base64encodedImage.isEmpty()) {
                 try {
-                    Base64.getDecoder().decode(base64encodedImage);
+                    byte[] decodedBytes = Base64.getDecoder().decode(base64encodedImage);
+                    if (decodedBytes.length < 100) {
+                        return Helper.createErrorResponse(400, "Invalid Base64 encoded image data.");
+                    }
+                    BufferedImage image = ImageIO.read(new ByteArrayInputStream(decodedBytes));
+                    if (image == null) {
+                        return Helper.createErrorResponse(400, "Invalid Base64 encoded image data.");
+                    }
                 } catch (IllegalArgumentException e) {
                     return Helper.createErrorResponse(400, "Invalid Base64 encoded image data.");
+                } catch (IOException e) {
+                    return Helper.createErrorResponse(400, "Failed to process image data.");
                 }
             }
 

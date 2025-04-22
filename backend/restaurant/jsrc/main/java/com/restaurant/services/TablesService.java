@@ -114,7 +114,7 @@ public class TablesService {
 
             List<Item> availableTables = getAvailableTablesByLocationAndCapacity(locationId, guests);
             if(availableTables.isEmpty()) {
-                return createErrorResponse(400, "We are sorry! We couldn't find tables as per your criteria :(");
+                return createErrorResponse(400, "We are sorry! We couldn't find tables as per your criteria");
             }
             List<AvailableSlotsDTO> availableTimeSlots = getAvailableTimeSlots(availableTables, date, time, context);
 

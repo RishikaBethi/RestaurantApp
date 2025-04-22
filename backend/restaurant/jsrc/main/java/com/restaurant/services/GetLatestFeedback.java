@@ -65,8 +65,9 @@ public class GetLatestFeedback {
 
                 Item feedback = feedbackTable.getItem("feedbackId", feedbackId, "locationId", locationId);
                 context.getLogger().log(feedback.getString("serviceComment"));
-                Double serviceRating = feedback.getNumber("serviceRating").doubleValue();
-                Double cuisineRating = feedback.getNumber("cuisineRating").doubleValue();
+//
+                Double serviceRating = feedback.getNumber("serviceRating") != null ? feedback.getNumber("serviceRating").doubleValue() : null;
+                Double cuisineRating = feedback.getNumber("cuisineRating") != null ? feedback.getNumber("cuisineRating").doubleValue() : null;
 
                 RecentFeedbackDTO dto = new RecentFeedbackDTO(
                         feedback.getString("serviceComment"),

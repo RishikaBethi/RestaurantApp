@@ -54,13 +54,14 @@ public class PostAFeedbackService {
             String userId = (String) claims.get("sub");
             String email = (String) claims.get("email");
 
+            if (userId == null || userId.isEmpty()) {
+                return createErrorResponse(401, "Unauthorized: Missing or invalid token.");
+            }
+
             Item userDetails = usersTable.getItem("email",email);
             String userAvatarUrl = userDetails.getString("imageUrl");
             String userName = userDetails.getString("firstName")+" "+userDetails.getString("lastName");
 
-            if (userId == null || userId.isEmpty()) {
-                return createErrorResponse(401, "Unauthorized: Missing or invalid token.");
-            }
 
             String reservationId = requestBody.get("reservationId");
             ZoneId zoneId = ZoneId.of("Asia/Kolkata");

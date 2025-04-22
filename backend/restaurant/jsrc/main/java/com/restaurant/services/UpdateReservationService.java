@@ -65,7 +65,7 @@ public class UpdateReservationService {
 
                 if (locationId != null && tableNumber != null) {
                     Item tableItem = tablesTable.getItem(new GetItemSpec()
-                            .withPrimaryKey("locationId", locationId, "tableNumber", String.valueOf(tableNumber)));
+                            .withPrimaryKey("locationId", locationId, "tableNumber", tableNumber));
 
                     if (tableItem != null && tableItem.isPresent("capacity")) {
                         int capacity = tableItem.getInt("capacity");
