@@ -10,6 +10,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurant.dto.UpdateReservationByWaiterResponseDTO;
 import com.restaurant.utils.Helper;
 import org.json.JSONObject;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -89,6 +101,23 @@ public class UpdateReservationByWaiterService {
                 Item newTableItem = tablesTable.getItem("locationId", locationId, "tableNumber", newTableNumber);
                 if (newTableItem == null) {
                     return Helper.createErrorResponse(400, "The specified table number does not exist at this location.");
+                }
+
+                String date = requestBody.get("date");
+                String timeFrom = requestBody.get("timeFrom");
+                String timeTo = requestBody.get("timeTo");
+
+                // Time validation
+                try {
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+                    LocalDateTime reservationStart = LocalDateTime.parse(date + " " + timeFrom, formatter);
+                    ZonedDateTime reservationStartIST = reservationStart.atZone(ZoneId.of("Asia/Kolkata"));
+                    ZonedDateTime nowIST = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"));
+                    if (reservationStartIST.isBefore(nowIST)) {
+                        return Helper.createErrorResponse(400, "Reservation cannot be made for a past time.");
+                    }
+                } catch (Exception e) {
+                    return Helper.createErrorResponse(400, "Invalid date/time format. Use yyyy-MM-dd and HH:mm");
                 }
 
                 if (newGuestsStr != null) {

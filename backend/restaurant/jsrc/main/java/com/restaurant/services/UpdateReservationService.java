@@ -10,9 +10,23 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.restaurant.dto.ReservationResponseDTO;
 import static com.restaurant.utils.Helper.*;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.logging.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+
+import com.restaurant.utils.Helper;
 import org.json.JSONObject;
 
 public class UpdateReservationService {
@@ -101,6 +115,23 @@ public class UpdateReservationService {
             updateExpr.setLength(updateExpr.length() - 2); // remove trailing comma and space
             updateSpec.withUpdateExpression(updateExpr.toString()).withValueMap(values).withNameMap(names);
             reservationTable.updateItem(updateSpec);
+
+            String date = requestBody.get("date");
+            String timeFrom = requestBody.get("timeFrom");
+            String timeTo = requestBody.get("timeTo");
+
+            // Time validation
+            try {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+                LocalDateTime reservationStart = LocalDateTime.parse(date + " " + timeFrom, formatter);
+                ZonedDateTime reservationStartIST = reservationStart.atZone(ZoneId.of("Asia/Kolkata"));
+                ZonedDateTime nowIST = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"));
+                if (reservationStartIST.isBefore(nowIST)) {
+                    return Helper.createErrorResponse(400, "Reservation cannot be made for a past time.");
+                }
+            } catch (Exception e) {
+                return Helper.createErrorResponse(400, "Invalid date/time format. Use yyyy-MM-dd and HH:mm");
+            }
 
             // Fetch updated reservation
             Item updatedItem = reservationTable.getItem(new GetItemSpec().withPrimaryKey("reservationId", reservationId));

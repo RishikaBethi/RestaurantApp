@@ -150,8 +150,15 @@ public class BookingsByWaiterService {
                 if (tableItem == null) {
                     return Helper.createErrorResponse(400, "Specified table does not exist.");
                 }
+
+                int tableCapacity = tableItem.getInt("capacity");
+                if(guestsNumber > tableCapacity){
+                    return Helper.createErrorResponse(400, "guestsNumber exceeds the table's capacity of " + tableCapacity + ".");
+                }
             } catch (NumberFormatException e) {
                 return Helper.createErrorResponse(400, "Invalid table number format. Must be a number.");
+            }catch (Exception e) {
+                return Helper.createErrorResponse(400, "Error retrieving table capacity");
             }
 
             // Overlapping reservation check
