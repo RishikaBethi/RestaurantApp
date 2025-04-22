@@ -87,6 +87,7 @@ public class CancelReservationService {
             if (!duration.isNegative() && duration.toMinutes() <= 30) {
                 return createErrorResponse(409, "Reservation cannot be canceled within 30 minutes of the reservation time.");
             }
+            String orderId = reservationItem.getString("orderId");
 
             // If canceled by waiter — delete the reservation
             if (isAssignedWaiter) {
@@ -99,24 +100,9 @@ public class CancelReservationService {
 
                 return createApiResponse(200, Map.of("message", "Reservation deleted successfully by waiter."));
             }
-
-            // If canceled by waiter — delete the reservation
-            if (isAssignedWaiter) {
-                reservationTable.deleteItem("reservationId", reservationId);
-                logger.info("Reservation " + reservationId + " deleted by waiter: " + email);
-
-                if (orderId != null && reservationEmail != null) {
-                    cancelOrderState(orderId, reservationEmail);
-                }
-
-                return createApiResponse(200, Map.of("message", "Reservation deleted successfully by waiter."));
-            }
-
             // Cancel the reservation
             cancelReservationStatus(reservationId, "Cancelled");
 
-            // Cancel the associated order if it exists
-            String orderId = reservationItem.getString("orderId");
             if (orderId != null && reservationEmail != null) {
                 cancelOrderState(orderId, reservationEmail);
             }

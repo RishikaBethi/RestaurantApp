@@ -20,10 +20,12 @@ public class GetLatestFeedback {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private final Table feedbackTable;
     private final Table reservationTable;
+    private final Table waitersTable;
 
     public GetLatestFeedback(DynamoDB dynamoDB) {
         this.feedbackTable = dynamoDB.getTable(System.getenv("FEEDBACKS_TABLE"));
         this.reservationTable = dynamoDB.getTable(System.getenv("RESERVATIONS_TABLE"));
+        this.waitersTable = dynamoDB.getTable(System.getenv("WAITERS_TABLE"));
     }
 
     public APIGatewayProxyResponseEvent returnLatestFeedback(APIGatewayProxyRequestEvent request, Context context) {
@@ -48,9 +50,15 @@ public class GetLatestFeedback {
                 context.getLogger().log("Fetching data from DB");
                 Item getReservation = reservationTable.getItem("reservationId", reservationId);
 
+                String waiterId = getReservation.getString("waiterId");
+                context.getLogger().log("Waiter Id : " + waiterId);
+
+                String waiterName = waitersTable.getItem("waiterId", waiterId).getString("waiterName");
+                context.getLogger().log(waiterName+" ");
+
                 String feedbackId = getReservation.getString("feedbackId");
                 if(feedbackId==null) {
-                    return createApiResponse(200, new ArrayList<>());
+                    return createApiResponse(200, Map.of("waiterName", waiterName));
                 }
                 String locationId = getReservation.getString("locationId");
                 context.getLogger().log(feedbackId);
@@ -64,7 +72,8 @@ public class GetLatestFeedback {
                         feedback.getString("serviceComment"),
                         feedback.getString("cuisineComment"),
                         serviceRating,
-                        cuisineRating
+                        cuisineRating,
+                        waiterName
                 );
 
                 return createApiResponse(200, dto);

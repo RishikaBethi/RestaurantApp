@@ -9,12 +9,14 @@ public class RecentFeedbackDTO {
     private String cuisineComment;
     private Double serviceRating;
     private Double cuisineRating;
+    private String waiterName;
 
-    public RecentFeedbackDTO(String serviceComment, String cuisineComment, Double serviceRating, Double cuisineRating) {
+    public RecentFeedbackDTO(String serviceComment, String cuisineComment, Double serviceRating, Double cuisineRating, String waiterName) {
         this.serviceComment = serviceComment;
         this.cuisineComment = cuisineComment;
         this.serviceRating = serviceRating;
         this.cuisineRating = cuisineRating;
+        this.waiterName = waiterName;
     }
 
     public String getServiceComment() {
@@ -37,6 +39,14 @@ public class RecentFeedbackDTO {
         this.serviceRating = serviceRating;
     }
 
+    public String getWaiterName() {
+        return waiterName;
+    }
+
+    public void setWaiterName(String waiterName) {
+        this.waiterName = waiterName;
+    }
+
     public Double getCuisineRating() {
         return cuisineRating;
     }
@@ -55,6 +65,7 @@ public class RecentFeedbackDTO {
         json.put("serviceComment", serviceComment);
         json.put("cuisineRating", cuisineRating);
         json.put("cuisineComment", cuisineComment);
+        json.put("waiterName", waiterName);
         return json;
     }
 }

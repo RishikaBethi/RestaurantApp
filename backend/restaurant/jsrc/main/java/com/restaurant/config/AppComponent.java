@@ -1,5 +1,7 @@
 package com.restaurant.config;
 
+import com.restaurant.ReportHandler;
+import com.restaurant.ReportsSenderHandler;
 import com.restaurant.RestaurantHandler;
 import com.restaurant.services.*;
 import dagger.Component;
@@ -10,6 +12,8 @@ import javax.inject.Singleton;
 @Component(modules = {ServiceModule.class})
 public interface AppComponent {
     void inject(RestaurantHandler handler);
+    void inject(ReportHandler reportHandler);
+    void inject(ReportsSenderHandler reportsSenderHandler);
     SignUpService signUpService();
     SignInService signInService();
     LocationService locationService();

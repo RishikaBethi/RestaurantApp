@@ -130,8 +130,8 @@ public class TablesService {
         }
     }
 
-    //filter tables initially by capacity and locations sent
-    //return list of tables that satisfy the 2 criteria from the tables table
+    /*filter tables initially by capacity and locations sent
+    return list of tables that satisfy the 2 criteria from the tables table*/
     public List<Item> getAvailableTablesByLocationAndCapacity(String locationId, int guests) {
         Table table = dynamoDB.getTable(tableName);
         List<Item> tablesList = new ArrayList<>();

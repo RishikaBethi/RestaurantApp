@@ -227,6 +227,22 @@ public class LocationService {
     }
 
     public APIGatewayProxyResponseEvent getSpecialityDishes(APIGatewayProxyRequestEvent request) {
+        String path = request.getPath();
+        Map<String, String> queryParams = request.getQueryStringParameters();
+        String[] pathParts = path.split("/");
+        if (pathParts.length >= 3) {
+            String locationId = pathParts[pathParts.length - 2];
+            if (queryParams == null) {
+                queryParams = new HashMap<>();
+            }
+            queryParams.put("locationId", locationId);
+            request.setQueryStringParameters(queryParams);
+            logger.info("Extracted locationId: " + locationId);
+        }
+        else{
+            return createErrorResponse(400, "Invalid speciality-dishes path format");
+        }
+
         try {
             String locationId = Optional.ofNullable(request.getQueryStringParameters())
                     .map(params -> params.get("locationId"))
