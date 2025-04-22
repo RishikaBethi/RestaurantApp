@@ -77,7 +77,7 @@ public class BookingsByWaiterService {
             String locationId = waiterLocationId;
 
             // Remove locationId from required fields
-            List<String> requiredFields = List.of("tableNumber", "date", "guestsNumber", "timeFrom", "timeTo", "clientType");
+            List<String> requiredFields = new ArrayList<>(List.of("tableNumber", "date", "guestsNumber", "timeFrom", "timeTo", "clientType"));
             for (String field : requiredFields) {
                 if (!requestBody.containsKey(field) || requestBody.get(field).trim().isEmpty()) {
                     return Helper.createErrorResponse(400, "Missing required field: " + field);
