@@ -262,8 +262,8 @@ export default function BookTable() {
       <ReservationModal isOpen={isModalOpen} 
       onClose={() => {
         setIsModalOpen(false);
-        setSelectedTable(null); // Reset selected table
-        setSelectedSlot({ fromTime: "", toTime: "" });
+        //setSelectedTable(null); // Reset selected table
+        //setSelectedSlot({ fromTime: "", toTime: "" });
       }} 
       table={selectedTable} selectedDate={selectedDate}
       selectedSlot={selectedSlot}  // pass selected slot times

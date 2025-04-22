@@ -60,6 +60,7 @@ export default function ReservationModal({ isOpen, onClose, table, selectedDate,
       setFromTime("");
       setToTime("");
       setGuests(1);
+      setShowConfirmation(false);
     }
   }, [isOpen, selectedSlot, initialGuests]);   
 
