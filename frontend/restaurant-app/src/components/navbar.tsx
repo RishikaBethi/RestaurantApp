@@ -126,7 +126,7 @@ export default function Navbar({ isLoggedIn, setIsLoggedIn }: { isLoggedIn: bool
       {/* Mobile Dropdown */}
       {mobileMenuOpen && (
         <div className="absolute top-14 right-2 w-48 bg-white shadow rounded-md z-50 md:hidden">
-          {role === "WAITER" ? (
+          {role === "Waiter" ? (
             <>
               <Link
                 to="/waiter-reservations"

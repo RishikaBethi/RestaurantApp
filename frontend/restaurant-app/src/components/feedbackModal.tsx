@@ -5,7 +5,6 @@ import { Star } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
 import { BASE_API_URL } from "@/constants/constant";
-//import { BASE_API_URL } from "@/constants/constant";
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -22,8 +21,17 @@ export default function FeedbackModal({ isOpen, onClose,reservationId }: Feedbac
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [existingFeedback, setExistingFeedback] = useState<any>(null);
   const [waiterName,setWaiterName]=useState("");
+  const [waiterImage, setWaiterImage] = useState("");
+  const [culinaryTabOpened, setCulinaryTabOpened] = useState(false);
 
   const token=localStorage.getItem("token");
+
+  const getImageMimeType = (base64: string) => {
+    if (base64.startsWith("/9j")) return "image/jpeg";
+    if (base64.startsWith("iVBOR")) return "image/png";
+    if (base64.startsWith("R0lGOD")) return "image/gif";
+    return "image/png"; // fallback
+  };
 
   useEffect(() => {
     if (!reservationId || !isOpen) return;
@@ -44,6 +52,15 @@ export default function FeedbackModal({ isOpen, onClose,reservationId }: Feedbac
         setCuisineRating(data.cuisineRating || 0);
         setCuisineComment(data.cuisineComment || "");
         setWaiterName(data.waiterName || "");
+
+        if (data.waiterImageBase64) {
+          const mimeType = getImageMimeType(data.waiterImageBase64);
+          const imageSrc = `data:${mimeType};base64,${data.waiterImageBase64}`;
+          setWaiterImage(imageSrc);
+        } else {
+          setWaiterImage("");
+        }
+
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         console.log("No previous feedback or error fetching it.");
@@ -52,6 +69,7 @@ export default function FeedbackModal({ isOpen, onClose,reservationId }: Feedbac
         setServiceComment("");
         setCuisineRating(0);
         setCuisineComment("");
+        setWaiterImage("");
       }
     };
 
@@ -59,13 +77,17 @@ export default function FeedbackModal({ isOpen, onClose,reservationId }: Feedbac
   }, [reservationId, isOpen]);
 
   const handleSubmit = async () => {
-    const payload = {
+    const payload: Record<string, any> = { // eslint-disable-line @typescript-eslint/no-explicit-any
       reservationId,
       serviceRating: serviceRating.toString(),
-      cuisineRating: cuisineRating.toString(),
       serviceComment,
-      cuisineComment,
     };
+
+    // Add culinary feedback only if the tab was opened
+    if (culinaryTabOpened) {
+      payload.cuisineRating = cuisineRating.toString();
+      payload.cuisineComment = cuisineComment;
+    }
 
     try {
       const response=await axios.post(
@@ -108,21 +130,27 @@ export default function FeedbackModal({ isOpen, onClose,reservationId }: Feedbac
       setCuisineComment(value);
     }
   };
+  const handleTabChange = (tab: "service" | "culinary") => {
+    setActiveTab(tab);
+    if (tab === "culinary") {
+      setCulinaryTabOpened(true);
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-full max-w-md rounded-2xl p-6">
+      <DialogContent className="w-full max-w-md rounded-2xl p-4">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">Give Feedback</DialogTitle>
           <p className="text-sm text-gray-500">Please rate your experience below</p>
         </DialogHeader>
 
         {/* Tabs */}
-        <div className="flex gap-4 mt-4 mb-6 border-b border-gray-200">
+        <div className="flex gap-4 mt-1 mb-1 border-b border-gray-200">
           {["service", "culinary"].map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab as "service" | "culinary")}
+              onClick={() => handleTabChange(tab as "service" | "culinary")}
               className={`pb-2 flex-1 text-center font-medium transition-all ${
                 activeTab === tab ? "text-green-600 border-b-2 border-green-600" : "text-gray-400"
               }`}
@@ -137,11 +165,15 @@ export default function FeedbackModal({ isOpen, onClose,reservationId }: Feedbac
           {activeTab === "service" && (
             <div className="text-center">
               <p className="font-semibold">Waiter: {waiterName}</p>
+              <img
+              src={waiterImage || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"}
+              alt="Waiter Avatar"
+              className="w-16 h-16 rounded-full mx-auto mt-2 object-cover border-2 border-gray-200"/>
             </div>
           )}
 
           {/* Star Rating */}
-          <div className="flex gap-1 mt-2">
+          <div className="flex gap-1 mt-1">
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}

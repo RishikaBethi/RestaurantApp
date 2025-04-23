@@ -27,12 +27,12 @@ interface Reservation {
   date: string;
   timeSlot: string;
   guestsNumber: number;
-  status: "Reserved" | "In progress" | "Finished" | "Canceled";
+  status: "Reserved" | "In Progress" | "Finished" | "Canceled";
 }
 
 const statusColors: Record<string, string> = {
   Reserved: "bg-yellow-100 text-yellow-600",
-  "In progress": "bg-blue-100 text-blue-600",
+  "In Progress": "bg-blue-100 text-blue-600",
   Finished: "bg-green-100 text-green-600",
   Cancelled: "bg-red-100 text-red-600",
 };
@@ -158,7 +158,7 @@ export default function ReservationsPage() {
                   <Button className="bg-green-600 hover:bg-green-700" onClick={() => handleEditClick(res)}>Edit</Button>
                 </div>
               )}
-              {res.status === "In progress" && (
+              {res.status === "In Progress" && (
                 <Button className="bg-green-600 hover:bg-green-700 w-full" 
                 onClick={() => {
                   setShowFeedbackModal(true);
