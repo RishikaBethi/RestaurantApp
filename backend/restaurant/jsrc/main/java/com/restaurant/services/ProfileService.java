@@ -1,8 +1,7 @@
 package com.restaurant.services;
 
-import com.amazonaws.services.dynamodbv2.document.DynamoDB;
-import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.*;
+import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
@@ -25,9 +24,7 @@ import javax.inject.Inject;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class ProfileService {
@@ -35,6 +32,9 @@ public class ProfileService {
     private final CognitoIdentityProviderClient cognitoClient;
     private final DynamoDB dynamoDB;
     private final Table usersTable;
+    private final Table feedbacksTable;
+    private final Table reservationsTable;
+
     private final ObjectMapper objectMapper;
     private final String clientId;
 
@@ -44,6 +44,8 @@ public class ProfileService {
         this.cognitoClient = cognitoClient;
         this.dynamoDB = dynamoDB;
         this.usersTable = dynamoDB.getTable(System.getenv("USERS_TABLE"));
+        this.feedbacksTable = dynamoDB.getTable(System.getenv("FEEDBACKS_TABLE"));
+        this.reservationsTable = dynamoDB.getTable(System.getenv("RESERVATIONS_TABLE"));
         this.objectMapper = objectMapper;
         this.clientId = clientId;
         logger.info("Initialized with clientId: " + clientId);
@@ -135,11 +137,41 @@ public class ProfileService {
                 updateExpression.append(", imageUrl = :img");
                 valueMap.withString(":img", "");
             }
-
             usersTable.updateItem(new UpdateItemSpec()
                     .withPrimaryKey("email", email)
                     .withUpdateExpression(updateExpression.toString())
                     .withValueMap(valueMap));
+
+            Index emailIndex = reservationsTable.getIndex("email-index");
+            QuerySpec querySpec = new QuerySpec()
+                    .withKeyConditionExpression("email = :e")
+                    .withValueMap(new ValueMap().withString(":e", email));
+            ItemCollection<QueryOutcome> items = emailIndex.query(querySpec);
+            List<Map<String, String>> feedbackEntries = new ArrayList<>();
+            for (Item item : items) {
+                String feedbackId = item.getString("feedbackId");
+                String locationId = item.getString("locationId");
+                if (feedbackId != null && !feedbackId.isEmpty() && locationId != null && !locationId.isEmpty()) {
+                    Map<String, String> entry = new HashMap<>();
+                    entry.put("feedbackId", feedbackId);
+                    entry.put("locationId", locationId);
+                    feedbackEntries.add(entry);
+                }
+            }
+
+            String userName = firstName + " " + lastName;
+            String userAvatarUrl = (base64encodedImage != null && !base64encodedImage.isEmpty()) ? base64encodedImage : "";
+            for (Map<String, String> entry : feedbackEntries) {
+                String feedbackId = entry.get("feedbackId");
+                String locationId = entry.get("locationId");
+                ValueMap feedbackValueMap = new ValueMap()
+                        .withString(":un", userName)
+                        .withString(":ua", userAvatarUrl);
+                feedbacksTable.updateItem(new UpdateItemSpec()
+                        .withPrimaryKey("feedbackId", feedbackId, "locationId", locationId)
+                        .withUpdateExpression("SET userName = :un, userAvatarUrl = :ua")
+                        .withValueMap(feedbackValueMap));
+            }
 
             return Helper.createApiResponse(200, Map.of("message", "Profile has been successfully updated"));
         } catch (Exception e) {
