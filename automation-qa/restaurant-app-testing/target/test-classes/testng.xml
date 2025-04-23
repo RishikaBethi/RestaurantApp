@@ -1,0 +1,7 @@
+<suite name="Sush" parallel="tests" thread-count="5">
+    <test name="ma">
+        <classes>
+            <class name="runners.UIRunnerTest"/>
+        </classes>
+    </test>
+</suite>

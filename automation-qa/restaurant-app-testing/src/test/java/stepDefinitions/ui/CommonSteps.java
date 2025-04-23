@@ -46,4 +46,9 @@ public class CommonSteps {
     public void verifyTheErrorMessage(String message) {
         Assert.assertEquals(loginPage.getErrorMessage(), message);
     }
+
+    @Given("print the word {string}")
+    public void printTheWord(String arg0) {
+        System.out.println(arg0);
+    }
 }

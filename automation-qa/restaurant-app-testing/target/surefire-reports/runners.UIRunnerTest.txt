@@ -1,0 +1,37 @@
+-------------------------------------------------------------------------------
+Test set: runners.UIRunnerTest
+-------------------------------------------------------------------------------
+Tests run: 8, Failures: 3, Errors: 0, Skipped: 0, Time elapsed: 76.22 s <<< FAILURE! -- in runners.UIRunnerTest
+runners.UIRunnerTest.runScenario["Verify whether the account is blocked after 3 invalid attempts", "Verify the sign in of the user"](5) -- Time elapsed: 11.91 s <<< FAILURE!
+java.lang.AssertionError: expected [Incorrect email or password. Try again or create an account.] but found [Your account is temporarily locked due to multiple failed login attempts. Please try again later.]
+	at org.testng.Assert.fail(Assert.java:111)
+	at org.testng.Assert.failNotEquals(Assert.java:1578)
+	at org.testng.Assert.assertEqualsImpl(Assert.java:150)
+	at org.testng.Assert.assertEquals(Assert.java:132)
+	at org.testng.Assert.assertEquals(Assert.java:656)
+	at org.testng.Assert.assertEquals(Assert.java:666)
+	at stepDefinitions.ui.CommonSteps.verifyTheErrorMessage(CommonSteps.java:47)
+	at ✽.the page will display the error "Incorrect email or password. Try again or create an account." message(file:///C:/Users/gantagari_sushma/Desktop/projec/automation-qa/restaurant-app-testing/src/test/resources/features/ui/signIn.feature:40)
+
+runners.UIRunnerTest.runScenario["Verify whether the account is blocked after 3 invalid attempts", "Verify the sign in of the user"](6) -- Time elapsed: 8.251 s <<< FAILURE!
+java.lang.AssertionError: expected [Incorrect email or password. Try again or create an account.] but found [Your account is temporarily locked due to multiple failed login attempts. Please try again later.]
+	at org.testng.Assert.fail(Assert.java:111)
+	at org.testng.Assert.failNotEquals(Assert.java:1578)
+	at org.testng.Assert.assertEqualsImpl(Assert.java:150)
+	at org.testng.Assert.assertEquals(Assert.java:132)
+	at org.testng.Assert.assertEquals(Assert.java:656)
+	at org.testng.Assert.assertEquals(Assert.java:666)
+	at stepDefinitions.ui.CommonSteps.verifyTheErrorMessage(CommonSteps.java:47)
+	at ✽.the page will display the error "Incorrect email or password. Try again or create an account." message(file:///C:/Users/gantagari_sushma/Desktop/projec/automation-qa/restaurant-app-testing/src/test/resources/features/ui/signIn.feature:40)
+
+runners.UIRunnerTest.runScenario["Verify whether the account is blocked after 3 invalid attempts", "Verify the sign in of the user"](7) -- Time elapsed: 14.49 s <<< FAILURE!
+java.lang.AssertionError: expected [Incorrect email or password. Try again or create an account.] but found [Your account is temporarily locked due to multiple failed login attempts. Please try again later.]
+	at org.testng.Assert.fail(Assert.java:111)
+	at org.testng.Assert.failNotEquals(Assert.java:1578)
+	at org.testng.Assert.assertEqualsImpl(Assert.java:150)
+	at org.testng.Assert.assertEquals(Assert.java:132)
+	at org.testng.Assert.assertEquals(Assert.java:656)
+	at org.testng.Assert.assertEquals(Assert.java:666)
+	at stepDefinitions.ui.CommonSteps.verifyTheErrorMessage(CommonSteps.java:47)
+	at ✽.the page will display the error "Incorrect email or password. Try again or create an account." message(file:///C:/Users/gantagari_sushma/Desktop/projec/automation-qa/restaurant-app-testing/src/test/resources/features/ui/signIn.feature:40)
+
