@@ -80,9 +80,9 @@ public class GetReservationService {
 
                 // Handle status transitions
                 if (now.after(timeFrom) && now.before(timeTo)) {
-                    if (!"In progress".equals(currentStatus)) {
-                        updateReservationStatus(reservationId, "In progress", feedbackId);
-                        currentStatus = "In progress";
+                    if (!"In Progress".equals(currentStatus)) {
+                        updateReservationStatus(reservationId, "In Progress", feedbackId);
+                        currentStatus = "In Progress";
                     }
                 } else if (now.after(timeTo)) {
                     if (!"Finished".equals(currentStatus)) {
