@@ -6,7 +6,7 @@
       <class name="runners.UIRunnerTest">
         <methods>
           <include name="setUpClass"/>
-          <include name="runScenario" invocation-numbers="4 5 6"/>
+          <include name="runScenario" invocation-numbers="5 6"/>
           <include name="tearDownClass"/>
         </methods>
       </class> <!-- runners.UIRunnerTest -->

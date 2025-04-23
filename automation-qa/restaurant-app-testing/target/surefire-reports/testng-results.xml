@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testng-results ignored="0" total="8" passed="5" failed="3" skipped="0">
+<testng-results ignored="0" total="8" passed="6" failed="2" skipped="0">
   <reporter-output>
   </reporter-output>
-  <suite started-at="2025-04-23T13:14:04 IST" name="Surefire suite" finished-at="2025-04-23T13:15:19 IST" duration-ms="75536">
+  <suite started-at="2025-04-23T13:42:49 IST" name="Surefire suite" finished-at="2025-04-23T13:44:08 IST" duration-ms="78849">
     <groups>
       <group name="cucumber">
         <method signature="AbstractTestNGCucumberTests.runScenario(io.cucumber.testng.PickleWrapper,io.cucumber.testng.FeatureWrapper)[pri:0, instance:runners.UIRunnerTest@4a83a74a]" name="runScenario" class="io.cucumber.testng.AbstractTestNGCucumberTests"/>
       </group> <!-- cucumber -->
     </groups>
-    <test started-at="2025-04-23T13:14:04 IST" name="Surefire test" finished-at="2025-04-23T13:15:19 IST" duration-ms="75536">
+    <test started-at="2025-04-23T13:42:49 IST" name="Surefire test" finished-at="2025-04-23T13:44:08 IST" duration-ms="78849">
       <class name="runners.UIRunnerTest">
-        <test-method is-config="true" signature="setUpClass(org.testng.ITestContext)[pri:0, instance:runners.UIRunnerTest@4a83a74a]" started-at="2025-04-23T13:14:04 IST" name="setUpClass" finished-at="2025-04-23T13:14:04 IST" duration-ms="748" status="PASS">
+        <test-method is-config="true" signature="setUpClass(org.testng.ITestContext)[pri:0, instance:runners.UIRunnerTest@4a83a74a]" started-at="2025-04-23T13:42:49 IST" name="setUpClass" finished-at="2025-04-23T13:42:50 IST" duration-ms="651" status="PASS">
           <params>
             <param index="0">
               <value>
-                <![CDATA[org.testng.TestRunner@637c840d]]>
+                <![CDATA[org.testng.TestRunner@74f280bd]]>
               </value>
             </param>
           </params>
           <reporter-output>
           </reporter-output>
         </test-method> <!-- setUpClass -->
-        <test-method signature="runScenario(io.cucumber.testng.PickleWrapper,io.cucumber.testng.FeatureWrapper)[pri:0, instance:runners.UIRunnerTest@4a83a74a]" started-at="2025-04-23T13:14:04 IST" name="runScenario" description="Runs Cucumber Scenarios" data-provider="scenarios" finished-at="2025-04-23T13:14:14 IST" duration-ms="9681" status="PASS">
+        <test-method signature="runScenario(io.cucumber.testng.PickleWrapper,io.cucumber.testng.FeatureWrapper)[pri:0, instance:runners.UIRunnerTest@4a83a74a]" started-at="2025-04-23T13:42:50 IST" name="runScenario" description="Runs Cucumber Scenarios" data-provider="scenarios" finished-at="2025-04-23T13:43:06 IST" duration-ms="16214" status="PASS">
           <params>
             <param index="0">
               <value>
@@ -37,7 +37,7 @@
           <reporter-output>
           </reporter-output>
         </test-method> <!-- runScenario -->
-        <test-method signature="runScenario(io.cucumber.testng.PickleWrapper,io.cucumber.testng.FeatureWrapper)[pri:0, instance:runners.UIRunnerTest@4a83a74a]" started-at="2025-04-23T13:14:14 IST" name="runScenario" description="Runs Cucumber Scenarios" data-provider="scenarios" finished-at="2025-04-23T13:14:22 IST" duration-ms="8228" status="PASS">
+        <test-method signature="runScenario(io.cucumber.testng.PickleWrapper,io.cucumber.testng.FeatureWrapper)[pri:0, instance:runners.UIRunnerTest@4a83a74a]" started-at="2025-04-23T13:43:06 IST" name="runScenario" description="Runs Cucumber Scenarios" data-provider="scenarios" finished-at="2025-04-23T13:43:14 IST" duration-ms="8470" status="PASS">
           <params>
             <param index="0">
               <value>
@@ -53,7 +53,7 @@
           <reporter-output>
           </reporter-output>
         </test-method> <!-- runScenario -->
-        <test-method signature="runScenario(io.cucumber.testng.PickleWrapper,io.cucumber.testng.FeatureWrapper)[pri:0, instance:runners.UIRunnerTest@4a83a74a]" started-at="2025-04-23T13:14:22 IST" name="runScenario" description="Runs Cucumber Scenarios" data-provider="scenarios" finished-at="2025-04-23T13:14:29 IST" duration-ms="6775" status="PASS">
+        <test-method signature="runScenario(io.cucumber.testng.PickleWrapper,io.cucumber.testng.FeatureWrapper)[pri:0, instance:runners.UIRunnerTest@4a83a74a]" started-at="2025-04-23T13:43:14 IST" name="runScenario" description="Runs Cucumber Scenarios" data-provider="scenarios" finished-at="2025-04-23T13:43:21 IST" duration-ms="7001" status="PASS">
           <params>
             <param index="0">
               <value>
@@ -69,7 +69,7 @@
           <reporter-output>
           </reporter-output>
         </test-method> <!-- runScenario -->
-        <test-method signature="runScenario(io.cucumber.testng.PickleWrapper,io.cucumber.testng.FeatureWrapper)[pri:0, instance:runners.UIRunnerTest@4a83a74a]" started-at="2025-04-23T13:14:29 IST" name="runScenario" description="Runs Cucumber Scenarios" data-provider="scenarios" finished-at="2025-04-23T13:14:36 IST" duration-ms="7091" status="PASS">
+        <test-method signature="runScenario(io.cucumber.testng.PickleWrapper,io.cucumber.testng.FeatureWrapper)[pri:0, instance:runners.UIRunnerTest@4a83a74a]" started-at="2025-04-23T13:43:21 IST" name="runScenario" description="Runs Cucumber Scenarios" data-provider="scenarios" finished-at="2025-04-23T13:43:28 IST" duration-ms="7116" status="PASS">
           <params>
             <param index="0">
               <value>
@@ -85,7 +85,23 @@
           <reporter-output>
           </reporter-output>
         </test-method> <!-- runScenario -->
-        <test-method signature="runScenario(io.cucumber.testng.PickleWrapper,io.cucumber.testng.FeatureWrapper)[pri:0, instance:runners.UIRunnerTest@4a83a74a]" started-at="2025-04-23T13:14:36 IST" name="runScenario" description="Runs Cucumber Scenarios" data-provider="scenarios" finished-at="2025-04-23T13:14:48 IST" duration-ms="11906" status="FAIL">
+        <test-method signature="runScenario(io.cucumber.testng.PickleWrapper,io.cucumber.testng.FeatureWrapper)[pri:0, instance:runners.UIRunnerTest@4a83a74a]" started-at="2025-04-23T13:43:28 IST" name="runScenario" description="Runs Cucumber Scenarios" data-provider="scenarios" finished-at="2025-04-23T13:43:37 IST" duration-ms="9002" status="PASS">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA["Verify whether the account is blocked after 3 invalid attempts"]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA["Verify the sign in of the user"]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- runScenario -->
+        <test-method signature="runScenario(io.cucumber.testng.PickleWrapper,io.cucumber.testng.FeatureWrapper)[pri:0, instance:runners.UIRunnerTest@4a83a74a]" started-at="2025-04-23T13:43:37 IST" name="runScenario" description="Runs Cucumber Scenarios" data-provider="scenarios" finished-at="2025-04-23T13:43:50 IST" duration-ms="12753" status="FAIL">
           <params>
             <param index="0">
               <value>
@@ -118,7 +134,7 @@ at ✽.the page will display the error "Incorrect email or password. Try again o
           <reporter-output>
           </reporter-output>
         </test-method> <!-- runScenario -->
-        <test-method signature="runScenario(io.cucumber.testng.PickleWrapper,io.cucumber.testng.FeatureWrapper)[pri:0, instance:runners.UIRunnerTest@4a83a74a]" started-at="2025-04-23T13:14:48 IST" name="runScenario" description="Runs Cucumber Scenarios" data-provider="scenarios" finished-at="2025-04-23T13:14:56 IST" duration-ms="8247" status="FAIL">
+        <test-method signature="runScenario(io.cucumber.testng.PickleWrapper,io.cucumber.testng.FeatureWrapper)[pri:0, instance:runners.UIRunnerTest@4a83a74a]" started-at="2025-04-23T13:43:50 IST" name="runScenario" description="Runs Cucumber Scenarios" data-provider="scenarios" finished-at="2025-04-23T13:43:58 IST" duration-ms="7612" status="FAIL">
           <params>
             <param index="0">
               <value>
@@ -151,40 +167,7 @@ at ✽.the page will display the error "Incorrect email or password. Try again o
           <reporter-output>
           </reporter-output>
         </test-method> <!-- runScenario -->
-        <test-method signature="runScenario(io.cucumber.testng.PickleWrapper,io.cucumber.testng.FeatureWrapper)[pri:0, instance:runners.UIRunnerTest@4a83a74a]" started-at="2025-04-23T13:14:56 IST" name="runScenario" description="Runs Cucumber Scenarios" data-provider="scenarios" finished-at="2025-04-23T13:15:11 IST" duration-ms="14491" status="FAIL">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA["Verify whether the account is blocked after 3 invalid attempts"]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA["Verify the sign in of the user"]]>
-              </value>
-            </param>
-          </params>
-          <exception class="java.lang.AssertionError">
-            <message>
-              <![CDATA[expected [Incorrect email or password. Try again or create an account.] but found [Your account is temporarily locked due to multiple failed login attempts. Please try again later.]]]>
-            </message>
-            <full-stacktrace>
-              <![CDATA[java.lang.AssertionError: expected [Incorrect email or password. Try again or create an account.] but found [Your account is temporarily locked due to multiple failed login attempts. Please try again later.]
-at org.testng.Assert.fail(Assert.java:111)
-at org.testng.Assert.failNotEquals(Assert.java:1578)
-at org.testng.Assert.assertEqualsImpl(Assert.java:150)
-at org.testng.Assert.assertEquals(Assert.java:132)
-at org.testng.Assert.assertEquals(Assert.java:656)
-at org.testng.Assert.assertEquals(Assert.java:666)
-at stepDefinitions.ui.CommonSteps.verifyTheErrorMessage(CommonSteps.java:47)
-at ✽.the page will display the error "Incorrect email or password. Try again or create an account." message(file:///C:/Users/gantagari_sushma/Desktop/projec/automation-qa/restaurant-app-testing/src/test/resources/features/ui/signIn.feature:40)
-]]>
-            </full-stacktrace>
-          </exception> <!-- java.lang.AssertionError -->
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- runScenario -->
-        <test-method signature="runScenario(io.cucumber.testng.PickleWrapper,io.cucumber.testng.FeatureWrapper)[pri:0, instance:runners.UIRunnerTest@4a83a74a]" started-at="2025-04-23T13:15:11 IST" name="runScenario" description="Runs Cucumber Scenarios" data-provider="scenarios" finished-at="2025-04-23T13:15:19 IST" duration-ms="8205" status="PASS">
+        <test-method signature="runScenario(io.cucumber.testng.PickleWrapper,io.cucumber.testng.FeatureWrapper)[pri:0, instance:runners.UIRunnerTest@4a83a74a]" started-at="2025-04-23T13:43:58 IST" name="runScenario" description="Runs Cucumber Scenarios" data-provider="scenarios" finished-at="2025-04-23T13:44:08 IST" duration-ms="9824" status="PASS">
           <params>
             <param index="0">
               <value>
@@ -200,7 +183,7 @@ at ✽.the page will display the error "Incorrect email or password. Try again o
           <reporter-output>
           </reporter-output>
         </test-method> <!-- runScenario -->
-        <test-method is-config="true" signature="tearDownClass()[pri:0, instance:runners.UIRunnerTest@4a83a74a]" started-at="2025-04-23T13:15:19 IST" name="tearDownClass" finished-at="2025-04-23T13:15:19 IST" duration-ms="82" status="PASS">
+        <test-method is-config="true" signature="tearDownClass()[pri:0, instance:runners.UIRunnerTest@4a83a74a]" started-at="2025-04-23T13:44:08 IST" name="tearDownClass" finished-at="2025-04-23T13:44:08 IST" duration-ms="124" status="PASS">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- tearDownClass -->

@@ -25,7 +25,7 @@
       <span class="top-banner-title-font">Test results</span>
       <button id="button" class="button">Switch Retro Theme</button> <!-- button -->
       <br/>
-      <span class="top-banner-font-1">1 suite, 3 failed tests</span>
+      <span class="top-banner-font-1">1 suite, 2 failed tests</span>
     </div> <!-- top-banner-root -->
     <div class="navigator-root">
       <div class="navigator-suite-header">
@@ -92,7 +92,7 @@
               <div class="suite-section-content">
                 <ul>
                   <li>
-                    <span class="method-stats">8 methods, 3 failed,   5 passed</span>
+                    <span class="method-stats">8 methods, 2 failed,   6 passed</span>
                   </li>
                   <li>
                     <span class="method-list-title failed">Failed methods</span>
@@ -101,11 +101,6 @@
                       <a href="#" panel-name="suite-Surefire_suite" class="show-methods failed suite-Surefire_suite"> (show)</a> <!-- show-methods failed suite-Surefire_suite -->
                     </span>
                     <div class="method-list-content failed suite-Surefire_suite">
-                      <span>
-                        <img src="failed.png" width="3%"/>
-                        <a href="#" panel-name="suite-Surefire_suite" title="runners.UIRunnerTest" class="method navigator-link" hash-for-method="runScenario(&quot;Verify whether the account is blocked after 3 invalid attempts&quot;, &quot;Verify the sign in of the user&quot;)">runScenario("Verify whether the account is blocked after 3 invalid attempts", "Verify the sign in of the user")</a> <!-- method navigator-link -->
-                      </span>
-                      <br/>
                       <span>
                         <img src="failed.png" width="3%"/>
                         <a href="#" panel-name="suite-Surefire_suite" title="runners.UIRunnerTest" class="method navigator-link" hash-for-method="runScenario(&quot;Verify whether the account is blocked after 3 invalid attempts&quot;, &quot;Verify the sign in of the user&quot;)">runScenario("Verify whether the account is blocked after 3 invalid attempts", "Verify the sign in of the user")</a> <!-- method navigator-link -->
@@ -127,17 +122,22 @@
                     <div class="method-list-content passed suite-Surefire_suite">
                       <span>
                         <img src="passed.png" width="3%"/>
-                        <a href="#" panel-name="suite-Surefire_suite" title="runners.UIRunnerTest" class="method navigator-link" hash-for-method="runScenario(&quot;Verify unregistered user cannot sign in into the application&quot;, &quot;Verify the sign in of the user&quot;)">runScenario("Verify unregistered user cannot sign in into the application", "Verify the sign in of the user")</a> <!-- method navigator-link -->
-                      </span>
-                      <br/>
-                      <span>
-                        <img src="passed.png" width="3%"/>
                         <a href="#" panel-name="suite-Surefire_suite" title="runners.UIRunnerTest" class="method navigator-link" hash-for-method="runScenario(&quot;Verify missing credentials&quot;, &quot;Verify the sign in of the user&quot;)">runScenario("Verify missing credentials", "Verify the sign in of the user")</a> <!-- method navigator-link -->
                       </span>
                       <br/>
                       <span>
                         <img src="passed.png" width="3%"/>
                         <a href="#" panel-name="suite-Surefire_suite" title="runners.UIRunnerTest" class="method navigator-link" hash-for-method="runScenario(&quot;Verify successful login with valid data&quot;, &quot;Verify the sign in of the user&quot;)">runScenario("Verify successful login with valid data", "Verify the sign in of the user")</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-Surefire_suite" title="runners.UIRunnerTest" class="method navigator-link" hash-for-method="runScenario(&quot;Verify whether the account is blocked after 3 invalid attempts&quot;, &quot;Verify the sign in of the user&quot;)">runScenario("Verify whether the account is blocked after 3 invalid attempts", "Verify the sign in of the user")</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-Surefire_suite" title="runners.UIRunnerTest" class="method navigator-link" hash-for-method="runScenario(&quot;Verify unregistered user cannot sign in into the application&quot;, &quot;Verify the sign in of the user&quot;)">runScenario("Verify unregistered user cannot sign in into the application", "Verify the sign in of the user")</a> <!-- method navigator-link -->
                       </span>
                       <br/>
                       <span>
@@ -198,21 +198,6 @@
 (Runs Cucumber Scenarios)                  </em>
                 </div> <!-- method-content -->
               </div> <!-- method -->
-              <div class="method">
-                <div class="method-content">
-                  <a name="runScenario(&quot;Verify whether the account is blocked after 3 invalid attempts&quot;, &quot;Verify the sign in of the user&quot;)">
-                  </a> <!-- runScenario("Verify whether the account is blocked after 3 invalid attempts", "Verify the sign in of the user") -->
-                  <span class="method-name">runScenario</span>
-                  <span class="parameters">("Verify whether the account is blocked after 3 invalid attempts","Verify the sign in of the user")</span>
-                  <div class="stack-trace">java.lang.AssertionError: expected [Incorrect email or password. Try again or create an account.] but found [Your account is temporarily locked due to multiple failed login attempts. Please try again later.]
-	at stepDefinitions.ui.CommonSteps.verifyTheErrorMessage(CommonSteps.java:47)
-	at ✽.the page will display the error &quot;Incorrect email or password. Try again or create an account.&quot; message(file:///C:/Users/gantagari_sushma/Desktop/projec/automation-qa/restaurant-app-testing/src/test/resources/features/ui/signIn.feature:40)
-... Removed 6 stack frames
-</div> <!-- stack-trace -->
-                  <em>
-(Runs Cucumber Scenarios)                  </em>
-                </div> <!-- method-content -->
-              </div> <!-- method -->
             </div> <!-- main-panel-content rounded-window-bottom -->
           </div> <!-- suite-Surefire_suite-class-failed -->
           <div class="suite-Surefire_suite-class-passed">
@@ -221,16 +206,6 @@
               <span class="class-name">runners.UIRunnerTest</span>
             </div> <!-- main-panel-header rounded-window-top -->
             <div class="main-panel-content rounded-window-bottom">
-              <div class="method">
-                <div class="method-content">
-                  <a name="runScenario(&quot;Verify unregistered user cannot sign in into the application&quot;, &quot;Verify the sign in of the user&quot;)">
-                  </a> <!-- runScenario("Verify unregistered user cannot sign in into the application", "Verify the sign in of the user") -->
-                  <span class="method-name">runScenario</span>
-                  <span class="parameters">("Verify unregistered user cannot sign in into the application","Verify the sign in of the user")</span>
-                  <em>
-(Runs Cucumber Scenarios)                  </em>
-                </div> <!-- method-content -->
-              </div> <!-- method -->
               <div class="method">
                 <div class="method-content">
                   <a name="runScenario(&quot;Verify missing credentials&quot;, &quot;Verify the sign in of the user&quot;)">
@@ -247,6 +222,26 @@
                   </a> <!-- runScenario("Verify successful login with valid data", "Verify the sign in of the user") -->
                   <span class="method-name">runScenario</span>
                   <span class="parameters">("Verify successful login with valid data","Verify the sign in of the user")</span>
+                  <em>
+(Runs Cucumber Scenarios)                  </em>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="runScenario(&quot;Verify whether the account is blocked after 3 invalid attempts&quot;, &quot;Verify the sign in of the user&quot;)">
+                  </a> <!-- runScenario("Verify whether the account is blocked after 3 invalid attempts", "Verify the sign in of the user") -->
+                  <span class="method-name">runScenario</span>
+                  <span class="parameters">("Verify whether the account is blocked after 3 invalid attempts","Verify the sign in of the user")</span>
+                  <em>
+(Runs Cucumber Scenarios)                  </em>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="runScenario(&quot;Verify unregistered user cannot sign in into the application&quot;, &quot;Verify the sign in of the user&quot;)">
+                  </a> <!-- runScenario("Verify unregistered user cannot sign in into the application", "Verify the sign in of the user") -->
+                  <span class="method-name">runScenario</span>
+                  <span class="parameters">("Verify unregistered user cannot sign in into the application","Verify the sign in of the user")</span>
                   <em>
 (Runs Cucumber Scenarios)                  </em>
                 </div> <!-- method-content -->
@@ -336,35 +331,35 @@ data.addRows(8);
 data.setCell(0, 0, 0)
 data.setCell(0, 1, 'runScenario')
 data.setCell(0, 2, 'runners.UIRunnerTest')
-data.setCell(0, 3, 14491);
+data.setCell(0, 3, 16214);
 data.setCell(1, 0, 1)
 data.setCell(1, 1, 'runScenario')
 data.setCell(1, 2, 'runners.UIRunnerTest')
-data.setCell(1, 3, 11906);
+data.setCell(1, 3, 12753);
 data.setCell(2, 0, 2)
 data.setCell(2, 1, 'runScenario')
 data.setCell(2, 2, 'runners.UIRunnerTest')
-data.setCell(2, 3, 9681);
+data.setCell(2, 3, 9824);
 data.setCell(3, 0, 3)
 data.setCell(3, 1, 'runScenario')
 data.setCell(3, 2, 'runners.UIRunnerTest')
-data.setCell(3, 3, 8247);
+data.setCell(3, 3, 9002);
 data.setCell(4, 0, 4)
 data.setCell(4, 1, 'runScenario')
 data.setCell(4, 2, 'runners.UIRunnerTest')
-data.setCell(4, 3, 8228);
+data.setCell(4, 3, 8470);
 data.setCell(5, 0, 5)
 data.setCell(5, 1, 'runScenario')
 data.setCell(5, 2, 'runners.UIRunnerTest')
-data.setCell(5, 3, 8205);
+data.setCell(5, 3, 7612);
 data.setCell(6, 0, 6)
 data.setCell(6, 1, 'runScenario')
 data.setCell(6, 2, 'runners.UIRunnerTest')
-data.setCell(6, 3, 7091);
+data.setCell(6, 3, 7116);
 data.setCell(7, 0, 7)
 data.setCell(7, 1, 'runScenario')
 data.setCell(7, 2, 'runners.UIRunnerTest')
-data.setCell(7, 3, 6775);
+data.setCell(7, 3, 7001);
 window.suiteTableData['Surefire_suite']= { tableData: data, tableDiv: 'times-div-Surefire_suite'}
 return data;
 }
@@ -397,50 +392,48 @@ return data;
             <div class="chronological-class">
               <div class="chronological-class-name">runners.UIRunnerTest</div> <!-- chronological-class-name -->
               <div class="configuration-class before">
-                <span class="method-name">setUpClass(org.testng.TestRunner@637c840d)</span>
+                <span class="method-name">setUpClass(org.testng.TestRunner@74f280bd)</span>
                 <span class="method-start">0 ms</span>
               </div> <!-- configuration-class before -->
               <div class="test-method">
                 <span class="method-name">runScenario("Verify successful login with valid data", "Verify the sign in of the user")</span>
-                <span class="method-start">758 ms</span>
+                <span class="method-start">667 ms</span>
               </div> <!-- test-method -->
               <div class="test-method">
                 <span class="method-name">runScenario("Verify unregistered user cannot sign in into the application", "Verify the sign in of the user")</span>
-                <span class="method-start">10449 ms</span>
+                <span class="method-start">16891 ms</span>
               </div> <!-- test-method -->
               <div class="test-method">
                 <span class="method-name">runScenario("Verify missing credentials", "Verify the sign in of the user")</span>
-                <span class="method-start">18680 ms</span>
+                <span class="method-start">25363 ms</span>
               </div> <!-- test-method -->
               <div class="test-method">
                 <span class="method-name">runScenario("Verify missing credentials", "Verify the sign in of the user")</span>
-                <span class="method-start">25463 ms</span>
+                <span class="method-start">32364 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">runScenario("Verify whether the account is blocked after 3 invalid attempts", "Verify the sign in of the user")</span>
+                <span class="method-start">39480 ms</span>
               </div> <!-- test-method -->
               <div class="test-method">
                 <img src="failed.png">
                 </img>
                 <span class="method-name">runScenario("Verify whether the account is blocked after 3 invalid attempts", "Verify the sign in of the user")</span>
-                <span class="method-start">32557 ms</span>
+                <span class="method-start">48487 ms</span>
               </div> <!-- test-method -->
               <div class="test-method">
                 <img src="failed.png">
                 </img>
                 <span class="method-name">runScenario("Verify whether the account is blocked after 3 invalid attempts", "Verify the sign in of the user")</span>
-                <span class="method-start">44471 ms</span>
-              </div> <!-- test-method -->
-              <div class="test-method">
-                <img src="failed.png">
-                </img>
-                <span class="method-name">runScenario("Verify whether the account is blocked after 3 invalid attempts", "Verify the sign in of the user")</span>
-                <span class="method-start">52723 ms</span>
+                <span class="method-start">61249 ms</span>
               </div> <!-- test-method -->
               <div class="test-method">
                 <span class="method-name">runScenario("Verify whether the account is blocked after 3 invalid attempts", "Verify the sign in of the user")</span>
-                <span class="method-start">67214 ms</span>
+                <span class="method-start">68863 ms</span>
               </div> <!-- test-method -->
               <div class="configuration-class after">
                 <span class="method-name">tearDownClass</span>
-                <span class="method-start">75426 ms</span>
+                <span class="method-start">78694 ms</span>
               </div> <!-- configuration-class after -->
           </div> <!-- main-panel-content rounded-window-bottom -->
         </div> <!-- panel -->
