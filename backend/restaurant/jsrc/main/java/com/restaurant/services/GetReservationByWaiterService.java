@@ -45,7 +45,6 @@ public class GetReservationByWaiterService {
                 return createErrorResponse(401, "Unauthorized: Email not found in token.");
             }
 
-            // Get waiterId from waiters table using email
             Index emailIndexWaiter = waitersTable.getIndex("email-index");
             if (emailIndexWaiter == null) {
                 logger.severe("DynamoDB index 'email-index' does not exist in waiters table.");
@@ -62,7 +61,7 @@ public class GetReservationByWaiterService {
             for (Item item : waiterItems) {
                 waiterId = item.getString("waiterId");
                 waiterItem = item;
-                break; // Assuming email is unique, take the first match
+                break;
             }
 
             if (waiterId == null) {
@@ -70,24 +69,18 @@ public class GetReservationByWaiterService {
             }
 
             String waiterLocationId = waiterItem != null ? waiterItem.getString("locationId") : null;
-
             if (waiterLocationId == null) {
                 return createErrorResponse(500, "Waiter's assigned location not found.");
             }
 
-            ValueMap valueMap = new ValueMap()
-                    .withString(":waiterId", waiterId)
-                    .withString(":cancelledStatus", "Cancelled");
-
+            ValueMap valueMap = new ValueMap().withString(":waiterId", waiterId);
             Map<String, String> nameMap = new HashMap<>();
-            nameMap.put("#waiterId", "waiterId");
-            nameMap.put("#status", "status");
-
             List<String> filterExpressions = new ArrayList<>();
-            filterExpressions.add("#waiterId = :waiterId");
-            filterExpressions.add("#status <> :cancelledStatus");
 
-            // Get optional filter parameters
+            filterExpressions.add("#waiterId = :waiterId");
+            nameMap.put("#waiterId", "waiterId");
+
+            // Add filters from query parameters
             Map<String, String> queryParams = request.getQueryStringParameters() != null ? request.getQueryStringParameters() : new HashMap<>();
             String filterDate = queryParams.get("date");
             String filterTimeFrom = queryParams.get("timeFrom");
@@ -108,9 +101,7 @@ public class GetReservationByWaiterService {
                 try {
                     int tableNum = Integer.parseInt(filterTableNumber);
                     valueMap.withNumber(":tableNumber", tableNum);
-                    logger.info("Filtering tableNumber with numeric value: " + tableNum);
                 } catch (NumberFormatException e) {
-                    logger.warning("Invalid tableNumber format: " + filterTableNumber + ", treating as string");
                     valueMap.withString(":tableNumber", filterTableNumber);
                 }
                 nameMap.put("#tableNumber", "tableNumber");
@@ -124,9 +115,8 @@ public class GetReservationByWaiterService {
             ItemCollection<ScanOutcome> reservationItems = reservationTable.scan(scanSpec);
             logger.info("Scan returned " + reservationItems.getAccumulatedItemCount() + " items");
 
-            // Fetch all locations
+            // Get location address mapping
             APIGatewayProxyResponseEvent locationsResponse = locationsService.allAvailableLocations(request, null);
-            logger.info("Locations response: " + locationsResponse.toString());
             if (locationsResponse.getStatusCode() != 200) {
                 return createErrorResponse(500, "Error fetching locations: " + locationsResponse.getBody());
             }
@@ -136,19 +126,22 @@ public class GetReservationByWaiterService {
             for (int i = 0; i < locationsArray.length(); i++) {
                 JSONObject locationObj = locationsArray.getJSONObject(i);
                 String locationId = locationObj.getString("id");
-                String address = locationObj.getString("address");
-                locationIdToAddress.put(locationId, address != null ? address : "Unknown");
+                String address = locationObj.optString("address", "Unknown");
+                locationIdToAddress.put(locationId, address);
             }
 
             JSONArray reservationsArray = new JSONArray();
             for (Item reservation : reservationItems) {
-                Map<String, Object> res = reservation.asMap();
+                String status = reservation.getString("status");
+                if (status != null && (status.equalsIgnoreCase("Cancelled") || status.equalsIgnoreCase("finished"))) {
+                    continue;
+                }
+
                 String reservationEmail = reservation.getString("email");
                 String orderId = reservation.getString("orderId");
-                String locationId = reservation.get("locationId") != null ? reservation.getString("locationId") : "Unknown";
+                String locationId = reservation.getString("locationId") != null ? reservation.getString("locationId") : "Unknown";
                 String address = locationIdToAddress.getOrDefault(locationId, "Unknown");
 
-                // Get pre-order details
                 int dishCount = 0;
                 boolean isPreorder = false;
                 if (orderId != null && !orderId.equals("N/A")) {
@@ -160,7 +153,6 @@ public class GetReservationByWaiterService {
                     }
                 }
 
-                // Determine name
                 String name;
                 if (email.equals(reservationEmail)) {
                     String waiterName = waiterItem != null ? waiterItem.getString("waiterName") : "Unknown";
@@ -173,7 +165,6 @@ public class GetReservationByWaiterService {
                     name = "Customer " + firstName + " " + lastName;
                 }
 
-                // Build response object
                 JSONObject reservationObj = new JSONObject()
                         .put("address", address)
                         .put("reservationId", reservation.getString("reservationId"))

@@ -89,6 +89,9 @@ public class PostAFeedbackService {
                     if (serviceRating != null && !serviceRating.trim().isEmpty()) {
                         try {
                             serviceRatingDouble = Double.parseDouble(serviceRating);
+                            if(serviceRatingDouble<=0.0) {
+                                return createErrorResponse(400, "Service rating is mandatory");
+                            }
                         } catch (NumberFormatException e) {
                             return createErrorResponse(400, "Service rating must be a number");
                         }
@@ -110,6 +113,9 @@ public class PostAFeedbackService {
                         if (cuisineRating != null && !cuisineRating.trim().isEmpty()) {
                             try {
                                 cuisineRatingDouble = Double.parseDouble(cuisineRating);
+                                if(cuisineRatingDouble<=0.0) {
+                                    return createErrorResponse(400, "Cuisine rating is mandatory");
+                                }
                             } catch (NumberFormatException e) {
                                 return createErrorResponse(400, "Cuisine rating must be a number");
                             }

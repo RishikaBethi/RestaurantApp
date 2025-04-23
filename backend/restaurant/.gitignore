@@ -1,5 +1,4 @@
 .syndicate
 logs/
-.syndicate-config-challa/
-.syndicate-*
+.syndicate-config/
 .idea

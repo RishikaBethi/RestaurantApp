@@ -195,7 +195,6 @@ public class BookingsByWaiterService {
                     .withString("timeTo", timeTo)
                     .withString("status", "Reserved")
                     .withString("orderId", orderId)
-                    .withString("feedbackId", "")
             ));
 
             ordersTable.putItem(new PutItemSpec().withItem(new Item()
