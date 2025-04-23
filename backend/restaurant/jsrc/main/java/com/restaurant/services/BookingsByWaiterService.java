@@ -2,7 +2,11 @@ package com.restaurant.services;
 
 import com.amazonaws.services.dynamodbv2.document.*;
 import com.amazonaws.services.dynamodbv2.document.spec.PutItemSpec;
+import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
+import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
+import com.amazonaws.services.sqs.AmazonSQS;
+import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.restaurant.dto.ReservationByWaiterResponseDTO;
@@ -23,6 +27,7 @@ public class BookingsByWaiterService {
     private static final Logger logger = Logger.getLogger(BookingsByWaiterService.class.getName());
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
+    private final DynamoDB dynamoDB;
     private final Table reservationsTable;
     private final Table ordersTable;
     private final Table tablesTable;
@@ -32,6 +37,7 @@ public class BookingsByWaiterService {
     private final Table feedbacksTable;
 
     public BookingsByWaiterService(DynamoDB dynamoDB) {
+        this.dynamoDB = dynamoDB;
         this.reservationsTable = dynamoDB.getTable(System.getenv("RESERVATIONS_TABLE"));
         this.ordersTable = dynamoDB.getTable(System.getenv("ORDERS_TABLE"));
         this.tablesTable = dynamoDB.getTable(System.getenv("TABLES_TABLE"));
@@ -212,12 +218,28 @@ public class BookingsByWaiterService {
             ZonedDateTime toTimeIST = LocalDateTime.parse(date + " " + timeTo, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")).atZone(ZoneId.of("Asia/Kolkata"));
 
             String status;
+            String orderState = null;
             if (nowIST.isBefore(fromTimeIST)) {
                 status = "reserved";
             } else if (nowIST.isAfter(toTimeIST)) {
                 status = "finished";
+                orderState = "finished";
             } else {
                 status = "in-progress";
+                orderState = "in-progress";
+            }
+
+            if (orderState != null && orderItem != null) {
+                UpdateItemSpec updateSpec = new UpdateItemSpec()
+                        .withPrimaryKey("orderId", orderId, "email", userEmail)
+                        .withUpdateExpression("set #s = :status")
+                        .withNameMap(new NameMap().with("#s", "status"))
+                        .withValueMap(new ValueMap().withString(":status", orderState));
+                ordersTable.updateItem(updateSpec);
+
+                if ("finished".equalsIgnoreCase(orderState)) {
+                    publishOrderFinishedEvent(orderId, userEmail, waiterId, locationId, timeSlot);
+                }
             }
 
             String userInfo;
@@ -279,6 +301,44 @@ public class BookingsByWaiterService {
         } catch (Exception e) {
             logger.severe("JSON parsing error: " + e.getMessage());
             return Map.of();
+        }
+    }
+
+    private void publishOrderFinishedEvent(String orderId, String userEmail, String waiterId, String locationId, String timeSlot) {
+        try {
+            Item orderItem = ordersTable.getItem("orderId", orderId, "email", userEmail);
+            if (orderItem == null || !"finished".equalsIgnoreCase(orderItem.getString("status"))) return;
+
+            Map<String, Object> dishItems = orderItem.getMap("dishItems");
+            if (dishItems == null || dishItems.isEmpty()) return;
+
+            double revenue = 0.0;
+            for (Map.Entry<String, Object> entry : dishItems.entrySet()) {
+                String dishId = entry.getKey();
+                int quantity = (int) entry.getValue();
+                Item dish = dynamoDB.getTable(System.getenv("DISHES_TABLE")).getItem("dishId", dishId);
+                if (dish != null) {
+                    String priceStr = dish.getString("dishPrice");
+                    priceStr = priceStr.replaceAll("[^\\d.]", "");
+                    double price = Double.parseDouble(priceStr);
+                    revenue += quantity * price;
+                }
+            }
+
+            Map<String, Object> eventPayload = Map.of(
+                    "eventType", "OrderFinished",
+                    "waiterId", waiterId,
+                    "locationId", locationId,
+                    "revenue", revenue,
+                    "timeSlot", timeSlot
+            );
+
+            String message = objectMapper.writeValueAsString(eventPayload);
+            AmazonSQS sqs = AmazonSQSClientBuilder.defaultClient();
+            String queueUrl = System.getenv("SQS_QUEUE");
+            sqs.sendMessage(queueUrl, message);
+        } catch (Exception e) {
+            logger.severe("Failed to publish OrderFinished event: " + e.getMessage());
         }
     }
 }

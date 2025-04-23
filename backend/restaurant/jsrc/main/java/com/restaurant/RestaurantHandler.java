@@ -46,6 +46,7 @@ import static com.restaurant.utils.Helper.*;
 		@EnvironmentVariable(key = "COGNITO_CLIENT_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_CLIENT_ID),
 		@EnvironmentVariable(key = "REGION", value = "${region}"),
         @EnvironmentVariable(key = "ORDERS_TABLE", value = "${orders_table}"),
+        @EnvironmentVariable(key = "SQS_QUEUE", value = "${sqs}")
 })
 public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 

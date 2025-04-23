@@ -178,6 +178,11 @@
             <version>2.42</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-sqs</artifactId>
+            <version>1.12.782</version>
+        </dependency>
 
     </dependencies>
 
