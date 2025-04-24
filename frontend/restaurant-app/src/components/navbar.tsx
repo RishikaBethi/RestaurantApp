@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate,useLocation } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import image from "../assets/image.png";
  
 export default function Navbar({ isLoggedIn, setIsLoggedIn }: { isLoggedIn: boolean; setIsLoggedIn: (value: boolean) => void }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [avatarDropdownOpen, setAvatarDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -34,14 +35,24 @@ export default function Navbar({ isLoggedIn, setIsLoggedIn }: { isLoggedIn: bool
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  const isMainPageActive =
+    location.pathname === "/" ||
+    location.pathname.startsWith("/restaurant") ||
+    location.pathname.startsWith("/menu");
  
   // Render menu items based on role
   const renderLinks = () => {
+    const linkClasses = (isActive: boolean) =>
+      `text-lg ${
+        isActive ? "text-green-600 border-b-2 border-green-600" : "text-gray-600 hover:text-gray-500"
+      }`;
+
     if (role === "Waiter" && isLoggedIn) {
       return (
         <>
-          <Link to="/waiter-reservations" className="text-gray-600 hover:text-green-600 text-lg">Reservations</Link>
-          <Link to="/menu" className="text-gray-600 hover:text-green-600 text-lg">Menu</Link>
+          <Link to="/waiter-reservations" className={linkClasses(location.pathname === "/waiter-reservations")}>Reservations</Link>
+          <Link to="/menu" className={linkClasses(location.pathname === "/menu")}>Menu</Link>
         </>
       );
     }
@@ -49,10 +60,10 @@ export default function Navbar({ isLoggedIn, setIsLoggedIn }: { isLoggedIn: bool
     // Public links or logged-in customer
     return (
       <>
-        <Link to="/" className="text-gray-600 hover:text-green-600 text-lg">Main Page</Link>
-        <Link to="/book-table" className="text-gray-600 hover:text-green-600 text-lg">Book a Table</Link>
+        <Link to="/" className={linkClasses(isMainPageActive)}>Main Page</Link>
+        <Link to="/book-table" className={linkClasses(location.pathname === "/book-table")}>Book a Table</Link>
         {isLoggedIn && (
-          <Link to="/reservations" className="text-gray-600 hover:text-green-600 text-lg">Reservations</Link>
+          <Link to="/reservations" className={linkClasses(location.pathname === "/reservations")}>Reservations</Link>
         )}
       </>
     );
