@@ -6,6 +6,7 @@ context\ShareContext.class
 stepDefinitions\api\CommonSteps.class
 stepDefinitions\api\StepAPI.class
 helpers\specBuilders\RequestBuilder.class
+stepDefinitions\common\CommonStepsAPI.class
 stepDefinitions\api\SignInSteps.class
 runners\Runner.class
 stepDefinitions\api\SignUpSteps.class
