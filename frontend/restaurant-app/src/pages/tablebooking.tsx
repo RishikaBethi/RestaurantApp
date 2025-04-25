@@ -171,7 +171,14 @@ export default function BookTable() {
             <FaCalendarAlt className="text-gray-500"/>
             <input type="date" className="w-full outline-none"
             value={selectedDate}
-            onChange={(e)=>setSelectedDate(e.target.value)} />
+            onChange={(e) => {
+              const value = e.target.value;
+              // Restrict year to 4 digits
+              const [year, month, day] = value.split("-");
+              if (year.length > 4 || !month || !day) return; // Ignore invalid dates
+              setSelectedDate(value);
+            }}
+            />
           </div>
 
           <div className="flex items-center border rounded-lg p-2 flex-1 gap-2 bg-white">
@@ -197,7 +204,11 @@ export default function BookTable() {
               type="number"
               value={guests}
               min="1"
-              onChange={(e) => setGuests(Number(e.target.value))}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value.length > 2) return; // Allow only up to 2 digits
+                setGuests(Number(value));
+              }}
               className="w-12 text-center outline-none"
             />
           </div>
