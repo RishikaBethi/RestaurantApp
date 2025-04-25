@@ -42,11 +42,14 @@ import static com.restaurant.utils.Helper.*;
         @EnvironmentVariable(key = "RESERVATIONS_TABLE", value = "${reservations_table}"),
         @EnvironmentVariable(key = "TABLES_TABLE", value = "${tables_table}"),
         @EnvironmentVariable(key = "REPORTS_TABLE", value = "${reports_table}"),
+        @EnvironmentVariable(key = "WAITER_DAILY_STATS_TABLE", value = "${waiter_daily_stats_table}"),
+        @EnvironmentVariable(key = "LOCATION_DAILY_STATS_TABLE", value = "${location_daily_stats_table}"),
         @EnvironmentVariable(key = "COGNITO_USER_POOL_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_USER_POOL_ID),
 		@EnvironmentVariable(key = "COGNITO_CLIENT_ID", value = "${user_pool}", valueTransformer = ValueTransformer.USER_POOL_NAME_TO_CLIENT_ID),
 		@EnvironmentVariable(key = "REGION", value = "${region}"),
         @EnvironmentVariable(key = "ORDERS_TABLE", value = "${orders_table}"),
-        @EnvironmentVariable(key = "SQS_QUEUE", value = "${sqs}")
+        @EnvironmentVariable(key = "SQS_QUEUE", value = "${sqs}"),
+        @EnvironmentVariable(key = "S3_BUCKET", value = "${reports_bucket}")
 })
 public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
@@ -88,6 +91,9 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
 
     @Inject
     GetReportsService getReportsService;
+
+    @Inject
+    GenerateReportsService generateReportsService;
 
     @Inject
     PostAFeedbackService postAFeedback;
@@ -232,8 +238,12 @@ public class RestaurantHandler implements RequestHandler<APIGatewayProxyRequestE
                 return getReservationByWaiterService.handleGetReservationsByWaiter(request);
             }
 
-            if ("/reports".equals(path) && "GET".equalsIgnoreCase(httpMethod)) {
+            if (path.equals("/reports") && httpMethod.equalsIgnoreCase("GET")) {
                 return getReportsService.handleGetReports(request);
+            }
+
+            if (path.equals("/reports") && httpMethod.equalsIgnoreCase("POST")) {
+                return generateReportsService.generateReports(request);
             }
 
             if (path.equals("/users/profile") && httpMethod.equalsIgnoreCase("GET")) {

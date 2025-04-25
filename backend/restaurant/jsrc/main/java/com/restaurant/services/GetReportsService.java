@@ -8,6 +8,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import com.restaurant.dto.ReportResponseDTO;
 import org.json.JSONArray;
 
+import javax.inject.Inject;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -18,6 +19,7 @@ public class GetReportsService {
     private final Table reportsTable;
     private final DynamoDB dynamoDB;
 
+    @Inject
     public GetReportsService(DynamoDB dynamoDB) {
         this.dynamoDB = dynamoDB;
         this.reportsTable = dynamoDB.getTable(System.getenv("REPORTS_TABLE"));

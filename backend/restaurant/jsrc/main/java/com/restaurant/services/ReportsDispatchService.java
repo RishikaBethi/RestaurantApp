@@ -62,43 +62,35 @@ public class ReportsDispatchService {
 
     public void generateAndSendReports() {
         try {
-            // Set the time zone to IST (Indian Standard Time)
             ZoneId istZone = ZoneId.of("Asia/Kolkata");
 
-            // Get the current date and the date 7 days ago in IST
             ZonedDateTime today = ZonedDateTime.now(istZone);
             ZonedDateTime weekAgo = today.minusDays(6);
             ZonedDateTime previousStart = today.minusDays(13);
             ZonedDateTime previousEnd = today.minusDays(7);
 
-            // Extract the local date from the ZonedDateTime
             LocalDate todayLocal = today.toLocalDate();
             LocalDate weekAgoLocal = weekAgo.toLocalDate();
             LocalDate previousStartLocal = previousStart.toLocalDate();
             LocalDate previousEndLocal = previousEnd.toLocalDate();
 
-            // Fetch data for the reports
             List<Item> waiterStats = scanTable(waiterStatsTable, weekAgoLocal, todayLocal);
             List<Item> previousWaiterStats = scanTable(waiterStatsTable, previousStartLocal, previousEndLocal);
             List<Item> locationStats = scanTable(locationStatsTable, weekAgoLocal, todayLocal);
             List<Item> previousLocationStats = scanTable(locationStatsTable, previousStartLocal, previousEndLocal);
 
-            // Generate CSV for both waiter and location reports
             String waiterReportCSV = generateWaiterCSV(waiterStats, previousWaiterStats, weekAgoLocal, todayLocal);
             String locationReportCSV = generateLocationCSV(locationStats, previousLocationStats, weekAgoLocal, todayLocal);
 
             String waiterFileName = "waiter_report_" + todayLocal + ".csv";
             String locationFileName = "location_report_" + todayLocal + ".csv";
 
-            // Upload reports to S3
             String waiterReportKey = uploadReportToS3(waiterReportCSV, waiterFileName);
             String locationReportKey = uploadReportToS3(locationReportCSV, locationFileName);
 
-            // Store the report metadata in DynamoDB
             storeReportMetadata("N/A", "Waiter Weekly Report", "Weekly performance of waiters", waiterReportKey, "N/A", "Staff", weekAgoLocal, todayLocal);
             storeReportMetadata("N/A", "Location Weekly Report", "Weekly performance by location", locationReportKey, "N/A", "Location", weekAgoLocal, todayLocal);
 
-            // Send email with report links
             logger.info("Sending email with report links.");
             sendEmailWithReports(Arrays.asList(waiterFileName, locationFileName));
             logger.info("Weekly reports generated and dispatched successfully.");
@@ -107,7 +99,7 @@ public class ReportsDispatchService {
         }
     }
 
-    private List<Item> scanTable(Table table, LocalDate from, LocalDate to) {
+    public List<Item> scanTable(Table table, LocalDate from, LocalDate to) {
         List<Item> results = new ArrayList<>();
         ItemCollection<ScanOutcome> items = table.scan();
         for (Item item : items) {
@@ -119,7 +111,7 @@ public class ReportsDispatchService {
         return results;
     }
 
-    private String generateWaiterCSV(List<Item> currentItems, List<Item> previousItems, LocalDate reportStart, LocalDate reportEnd) {
+    public String generateWaiterCSV(List<Item> currentItems, List<Item> previousItems, LocalDate reportStart, LocalDate reportEnd) {
         StringBuilder sb = new StringBuilder(
                 "Location,Waiter,Waiter's e-mail,Report period start,Report period end,Waiter working hours," +
                         "Waiter Orders processed,Delta of Waiter Orders processed to previous period in %," +
@@ -203,7 +195,7 @@ public class ReportsDispatchService {
     }
 
 
-    private String generateLocationCSV(List<Item> items, List<Item> previousItems, LocalDate reportStart, LocalDate reportEnd) {
+    public String generateLocationCSV(List<Item> items, List<Item> previousItems, LocalDate reportStart, LocalDate reportEnd) {
         StringBuilder sb = new StringBuilder(
                 "Location,Report period start,Report period end,Orders processed within location," +
                         "Delta of orders processed within location to previous period (in %)," +
@@ -291,7 +283,7 @@ public class ReportsDispatchService {
         return sb.toString();
     }
 
-    private String uploadReportToS3(String csvContent, String fileName) {
+    public String uploadReportToS3(String csvContent, String fileName) {
         byte[] contentAsBytes = csvContent.getBytes(StandardCharsets.UTF_8);
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(contentAsBytes.length);
@@ -307,7 +299,7 @@ public class ReportsDispatchService {
         return String.format("https://%s.s3.ap-southeast-2.amazonaws.com/%s", S3_BUCKET, fileName);
     }
 
-    private void storeReportMetadata(String waiterId, String reportName, String reportDescription, String downloadLink, String locationId, String reportType, LocalDate startPeriod, LocalDate endPeriod) {
+    public void storeReportMetadata(String waiterId, String reportName, String reportDescription, String downloadLink, String locationId, String reportType, LocalDate startPeriod, LocalDate endPeriod) {
 
         Item item = new Item()
                 .withPrimaryKey("reportId", UUID.randomUUID().toString())

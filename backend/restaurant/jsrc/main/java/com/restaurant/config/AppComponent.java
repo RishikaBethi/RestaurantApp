@@ -27,10 +27,11 @@ public interface AppComponent {
     WaiterService waiterService();
     BookingService bookingService();
     GetReportsService getReportsService();
+    GenerateReportsService generateReportsService();
 
     @Component.Builder
     interface Builder {
-        Builder serviceModule(ServiceModule module); // Allow passing ServiceModule
+        Builder serviceModule(ServiceModule module);
         AppComponent build();
     }
 }

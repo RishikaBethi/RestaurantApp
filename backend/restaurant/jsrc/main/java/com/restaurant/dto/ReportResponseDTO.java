@@ -32,7 +32,7 @@ public class ReportResponseDTO {
         json.put("id", id);
         json.put("description", description);
         json.put("downloadLink", downloadLink);
-        json.put("location", location);
+        json.put("locationId", location);
         json.put("waiterId", waiterId);
         json.put("name", name);
         json.put("fromDate", fromDate);
