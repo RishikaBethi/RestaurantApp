@@ -1,8 +1,6 @@
 package stepDefinitions.ui;
 
 import io.cucumber.java.en.Then;
-import models.Login;
-import org.openqa.selenium.bidi.log.Log;
 import org.testng.Assert;
 import pages.LoginPage;
 

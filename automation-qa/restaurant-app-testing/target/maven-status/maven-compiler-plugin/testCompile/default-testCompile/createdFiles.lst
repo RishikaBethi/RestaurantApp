@@ -1,8 +1,0 @@
-hooks\UIHooks.class
-listeners\Listener.class
-stepDefinitions\ui\SignInSteps.class
-runners\Runner.class
-stepDefinitions\ui\CommonSteps.class
-runners\UIRunnerTest.class
-stepDefinitions\api\StepAPI.class
-stepDefinitions\ui\StepUi.class
