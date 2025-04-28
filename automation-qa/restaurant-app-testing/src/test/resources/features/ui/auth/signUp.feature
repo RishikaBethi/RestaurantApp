@@ -3,13 +3,13 @@ Feature: Verify the registration of the user
   Background:
     Given the user enters into the application
     And the user enters into the sign in page
-    And the user clicks on create an account link
+    And the user clicks on "create an account link" button
 
   Scenario Outline: Verify the valid registration of the user
     When the user enters the following data:
       | firstName   | lastName   | email   | password   | confirmPassword   |
       | <firstName> | <lastName> | <email> | <password> | <confirmPassword> |
-    And the user clicks on create an account button
+    And the user clicks on "create an account" button
     Then the user will be redirected to the "<signIn>" page
 
     Examples:
@@ -21,7 +21,7 @@ Feature: Verify the registration of the user
     When the user enters the following data:
       | firstName   | lastName   | email   | password   | confirmPassword   |
       | <firstName> | <lastName> | <email> | <password> | <confirmPassword> |
-    And the user clicks on create an account button
+    And the user clicks on "create an account" button
     Then the page will display the registration error "<error>" message
 
     Examples:
@@ -44,7 +44,7 @@ Feature: Verify the registration of the user
     When the user enters the following data:
       | firstName   | lastName   | email   | password   | confirmPassword   |
       | <firstName> | <lastName> | <email> | <password> | <confirmPassword> |
-    And the user clicks on create an account button
+    And the user clicks on "create an account" button
     Then the page will display the password error "<error>" message
 
     Examples:

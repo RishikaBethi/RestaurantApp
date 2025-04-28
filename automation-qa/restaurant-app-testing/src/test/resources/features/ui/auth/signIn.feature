@@ -6,7 +6,7 @@ Feature: Verify the sign in of the user
 
   Scenario Outline: Verify successful login with valid data
     When the user enters the "<email>" and "<password>"
-    And the user clicks on sign in button
+    And the user clicks on "sign in" button
     Then the user will be redirected to the "<main>" page
 
     Examples:
@@ -16,7 +16,7 @@ Feature: Verify the sign in of the user
 
   Scenario Outline: Verify unregistered user cannot sign in into the application
     When the user enters the "<email>" and "<password>"
-    And the user clicks on sign in button
+    And the user clicks on "sign in" button
     Then the page will display the error "<error>" message
 
     Examples:
@@ -25,7 +25,7 @@ Feature: Verify the sign in of the user
 
   Scenario Outline: Verify missing credentials
     When the user enters the "<email>" and "<password>"
-    And the user clicks on sign in button
+    And the user clicks on "sign in" button
     Then the page will display the missing fields error "<error>" message
 
     Examples:
@@ -36,7 +36,7 @@ Feature: Verify the sign in of the user
 
   Scenario Outline: Verify whether the account is blocked after 3 invalid attempts
     When the user enters the "<email>" and "<password>"
-    And the user clicks on sign in button
+    And the user clicks on "sign in" button
     Then the page will display the error "<error>" message
 
     Examples:

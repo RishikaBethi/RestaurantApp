@@ -38,10 +38,6 @@ public class SignUpSteps {
         signUpPage.enterTheDetails(apiUtils.addSpaces(firstName),apiUtils.addSpaces(lastName),email,password,confirmPassword);
     }
 
-    @And("the user clicks on create an account button")
-    public void clickOnCreateAccountButton(){
-        signUpPage.clickCreateAccountButton();
-    }
 
     @Then("the page will display the registration error {string} message")
     public void verifyErrorMessage(String error)
