@@ -17,10 +17,10 @@ Feature: Verify the sign in of the user
   Scenario Outline: Verify unregistered user cannot sign in into the application
     When the user enters the "<email>" and "<password>"
     And the user clicks on "sign in" button
-    Then the page will display the error "<error>" message
+    Then the page will display the error "<login error>" message
 
     Examples:
-      | email              | password  | error                                                        |
+      | email              | password  | login error                                                        |
       | sindhu@example.com | susha@W21 | Incorrect email or password. Try again or create an account. |
 
   Scenario Outline: Verify missing credentials

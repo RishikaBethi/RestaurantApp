@@ -1,5 +1,6 @@
 package stepDefinitions.common;
 
+import context.ShareContextUI;
 import io.cucumber.java.en.*;
 import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
@@ -7,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import pages.LocationPages;
 import pages.LoginPage;
+import pages.ReservationsPage;
 import pages.SignUpPage;
 import stepDefinitions.ui.LocationSteps;
 import utils.ConfigReader;
@@ -19,6 +21,13 @@ public class CommonStepsUI {
     private LoginPage loginPage;
     private SignUpPage signUpPage;
     private LocationPages locationPages;
+    private ReservationsPage reservationsPage;
+    private ShareContextUI shareContextUI;
+
+    public CommonStepsUI(ShareContextUI shareContextUI)
+    {
+        this.shareContextUI = shareContextUI;
+    }
 
     @Given("the user enters into the application")
     public void enterTheBaseUrl() {
@@ -27,6 +36,7 @@ public class CommonStepsUI {
         loginPage = new LoginPage();
         signUpPage = new SignUpPage();
         locationPages = new LocationPages();
+        reservationsPage = new ReservationsPage();
     }
 
     @And("the user enters into the sign in page")
@@ -40,11 +50,12 @@ public class CommonStepsUI {
     }
 
     @And("the user clicks on {string} button")
-    public void clicksOnSignInPage(String button) {
+    public void clicksOnASpecificButton(String button) {
         switch (button)
         {
             case "sign in":
                 loginPage.clickOnSignInButton();
+                shareContextUI.setCurrentPage("sign in");
                 break;
             case "create an account link":
                 signUpPage.clickCreateAccountLink();
@@ -54,6 +65,14 @@ public class CommonStepsUI {
                 break;
             case "Cuisine Ratings":
                 locationPages.clickOnCuisineRatings();
+                shareContextUI.setCurrentPage("main page");
+                break;
+            case "Book a Table":
+                reservationsPage.clickOnBookATable();
+                shareContextUI.setCurrentPage("Book a Table");
+                break;
+            case "Find a Table":
+                reservationsPage.clickOnFindATable();
                 break;
             default:
                 throw new customExceptions.NoButtonFoundException("No such button found");
@@ -67,7 +86,15 @@ public class CommonStepsUI {
 
     @Then("the page will display the error {string} message")
     public void verifyTheErrorMessage(String message) {
-        Assert.assertEquals(loginPage.getErrorMessage(), message);
+        String currentPage = shareContextUI.getCurrentPage();
+        switch (currentPage)
+        {
+            case "sign in":
+                Assert.assertEquals(loginPage.getErrorMessage(),message);
+                break;
+            case "Book a Table":
+                Assert.assertEquals(reservationsPage.getErrorMessage(),message);
+        }
     }
 
 }

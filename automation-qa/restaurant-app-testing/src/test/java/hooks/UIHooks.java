@@ -9,11 +9,11 @@ public class UIHooks {
 
     @Before
     public void setUp() {
-        DriverManager.createNewDriver("Chrome"); // Always create a new driver
+        DriverManager.createNewDriver("Chrome");
     }
 
     @After
     public void tearDown() {
-        DriverManager.quitDriver(); // Quit after every scenario
+        DriverManager.quitDriver();
     }
 }
