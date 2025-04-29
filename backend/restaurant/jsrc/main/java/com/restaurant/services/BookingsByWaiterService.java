@@ -238,6 +238,7 @@ public class BookingsByWaiterService {
                 ordersTable.updateItem(updateSpec);
 
                 if ("finished".equalsIgnoreCase(orderState)) {
+                    logger.info("Publishing Order event");
                     publishOrderFinishedEvent(orderId, userEmail, waiterId, locationId, timeSlot);
                 }
             }

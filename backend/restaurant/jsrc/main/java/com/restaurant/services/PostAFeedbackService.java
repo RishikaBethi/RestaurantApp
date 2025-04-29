@@ -12,6 +12,8 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.std.StdKeySerializers;
+import com.amazonaws.services.sqs.AmazonSQS;
+import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -183,6 +185,9 @@ public class PostAFeedbackService {
 
             feedbackTable.putItem(new PutItemSpec().withItem(item));
 
+            logger.info("Publishing Feedback event");
+            publishFeedbackGivenEvent(reservationId, locationId, serviceRating, cuisineRating);
+
             logger.info("Adding items to reservations table");
 
             reservationTable.updateItem(new UpdateItemSpec()
@@ -195,6 +200,34 @@ public class PostAFeedbackService {
         catch(AmazonDynamoDBException e) {
             logger.severe("Failed to update reservation with feedbackId: " + e.getMessage());
             throw new RuntimeException("Error updating reservation", e);
+        }
+    }
+
+    private void publishFeedbackGivenEvent(String reservationId, String locationId, Number serviceFeedback, Number cuisineFeedback) {
+        try {
+            Item reservation = reservationTable.getItem("reservationId", reservationId);
+
+            if (reservation == null || !reservation.hasAttribute("waiterId")) {
+                throw new RuntimeException("Reservation not found or missing waiterId for reservationId: " + reservationId);
+            }
+
+            String waiterId = reservation.getString("waiterId");
+
+            Map<String, Object> eventPayload = Map.of(
+                    "eventType", "FeedbackGiven",
+                    "waiterId", waiterId,
+                    "locationId", locationId,
+                    "serviceFeedback", serviceFeedback,
+                    "cuisineFeedback", cuisineFeedback
+            );
+
+            String message = objectMapper.writeValueAsString(eventPayload);
+            AmazonSQS sqs = AmazonSQSClientBuilder.defaultClient();
+            String queueUrl = System.getenv("SQS_QUEUE");
+            sqs.sendMessage(queueUrl, message);
+
+        } catch (Exception e) {
+            logger.severe("Failed to publish FeedbackGiven event: " + e.getMessage());
         }
     }
 }
