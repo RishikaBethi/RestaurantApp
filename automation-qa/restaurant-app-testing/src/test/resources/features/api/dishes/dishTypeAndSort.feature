@@ -2,12 +2,7 @@ Feature: Get dishes by specifying type and sort
 
   Background:
     Given the base_uri of the application
-    Given user sends a sign in request with the following data
-      | email                 | password     |
-      | rishithag@example.com | Password123! |
-    When the user sends the post request to "/auth/sign-in" with the request payload
-    Then the status code should be 201
-    And the token is stored
+    And the user is authenticated
 
   Scenario Outline: Display dishes based on criteria
     When the user sends the authorized get request to "dishes?<dishType>&<sort>" request payload

@@ -7,6 +7,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.restassured.response.Response;
+import models.SignIn;
 import utils.ConfigReader;
 
 
@@ -38,6 +39,24 @@ public class CommonStepsAPI {
                 .then()
                 .extract().response();
         shareContext.setResponse(response);
+    }
+
+    @Given("the user is authenticated")
+    public void authenticateTheUser(){
+        SignIn signIn = new SignIn.SignInBuilder()
+                .setEmail("sushmag@example.com")
+                .setPassword("Password123!")
+                .build();
+        shareContext.setUser(signIn);
+        Response response = given()
+                .spec(RequestBuilder.sendPostRequestSpec(shareContext))
+                .when()
+                .post("auth/sign-in")
+                .then()
+                .statusCode(201)
+                .extract()
+                .response();
+        shareContext.setCustomerToken(response.jsonPath().getString("accessToken"));
     }
 
     @When("the user sends the authorized post request to {string} with the request payload")
@@ -107,6 +126,21 @@ public class CommonStepsAPI {
         shareContext.setResponse(response);
     }
 
+
+    @When("the user sends the authorized put request to {string}")
+    public void sendAuthorizedPostRequest(String endpoint)
+    {
+        Response response = given()
+                .spec(RequestBuilder.sendAuthorizedPutRequest(shareContext))
+                .when()
+                .post(endpoint)
+                .then()
+                .extract()
+                .response();
+
+        shareContext.setResponse(response);
+
+    }
 
     @Then("the status code should be {int}")
     public void validateStatusCode(int statusCode)

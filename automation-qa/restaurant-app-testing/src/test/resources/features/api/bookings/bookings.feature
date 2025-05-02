@@ -3,12 +3,7 @@ Feature: Get Available Tables for a Valid Request
   Background:
 
     Given the base_uri of the application
-    Given user sends a sign in request with the following data
-      | email               | password     |
-      | sushmag@example.com | Password123! |
-    When the user sends the post request to "/auth/sign-in" with the request payload
-    Then the status code should be 201
-    And the token is stored
+    And the user is authenticated
 
   Scenario Outline: Verify return of list of available tables based on valid filters
     When the user sends the authorized get request to "/bookings/tables?locationId=<locationId>&date=<date>&time=<time>&guests=<guests>" request payload

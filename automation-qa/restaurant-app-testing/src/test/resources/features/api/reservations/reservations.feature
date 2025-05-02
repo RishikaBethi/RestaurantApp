@@ -2,12 +2,7 @@ Feature: Enable reservation for authorized users
 
   Background:
     Given the base_uri of the application
-    Given user sends a sign in request with the following data
-      | email               | password     |
-      | sushmag@example.com | Password123! |
-    When the user sends the post request to "/auth/sign-in" with the request payload
-    Then the status code should be 201
-    And the token is stored
+    Given the user is authenticated
 
   Scenario: Verify display of reservations for an authorized user
     When the user sends the authorized get request to "/reservations" request payload
