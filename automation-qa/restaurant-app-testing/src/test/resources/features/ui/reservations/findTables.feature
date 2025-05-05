@@ -51,3 +51,11 @@ Feature: Find the available reservations for required time slots
       | LOC001   | 07-04-2026 | 10:30    | 0      | Please enter a valid number of guests (minimum 1).         |
       | LOC001   | 07-04-2026 | 10:30    | 23     | We are sorry! We couldn't find tables as per your criteria |
 
+  Scenario Outline: Verify that the timeslots are visible
+    When the user selects the "<location>" "<date>" "<timeSlot>" "<guests>" details
+    And the user clicks on "Find a Table" button
+    Then the user should be able to see the available timeslots
+
+    Examples:
+      | location | date       | timeSlot | guests |
+      | LOC003   | 21-05-2026 | 10:30    | 1      |

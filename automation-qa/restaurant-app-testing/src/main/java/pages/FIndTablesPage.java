@@ -1,6 +1,5 @@
 package pages;
 
-import io.cucumber.java.sl.In;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -13,13 +12,15 @@ import utils.DriverManager;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-public class ReservationsPage {
+public class FIndTablesPage {
 
     private WebDriver driver;
     private WebDriverWait wait;
 
-    @FindBy(xpath = "//a[.='Book a Table']")
+    //@FindBy(xpath = "//a[.='Book a Table']")
+    @FindBy(partialLinkText = "Book a Table")
     private WebElement bookATable;
 
     @FindBy(xpath = "//button[.='Find a Table']")
@@ -43,7 +44,25 @@ public class ReservationsPage {
     @FindBy(xpath = "//li/div/div")
     private WebElement errorMessage;
 
-    public ReservationsPage(){
+    @FindBy(xpath = "//button[contains(@class, 'border')]")
+    private List<WebElement> timeSlotButtons;
+
+    @FindBy(xpath = "//button[text()='+']")
+    private WebElement incrementButton;
+
+    @FindBy(xpath = "//span[@class='font-medium text-gray-700']")
+    private WebElement reservationFormGuests;
+
+    @FindBy(xpath = "//span[@class='font-semibold text-green-600']")
+    private WebElement guestsCount;
+
+    @FindBy(xpath = "//h2[text()='Reservation Confirmed!']")
+    private WebElement reservationConfirmationMessage;
+
+    @FindBy(xpath = "//button[text()='Make a Reservation']")
+    private WebElement makeAReservation;
+
+    public FIndTablesPage(){
         driver = DriverManager.getDriver();
         wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         PageFactory.initElements(driver,this);
@@ -81,9 +100,36 @@ public class ReservationsPage {
         guests.sendKeys(InputGuests);
     }
 
+    public boolean visibilityOfTimeSlots() {
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        return !timeSlotButtons.isEmpty();
+    }
+
     public String getErrorMessage(){
         wait.until(ExpectedConditions.visibilityOf(errorMessage));
         return errorMessage.getText();
     }
 
+    public void clickOnTimeSlot(){
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        timeSlotButtons.get(0).click();
+    }
+
+    public void increment(){
+        wait.until(ExpectedConditions.visibilityOf(reservationFormGuests));
+        incrementButton.click();
+        incrementButton.click();
+    }
+
+    public String getGuestsCount(){
+        return guestsCount.getText();
+    }
+
+    public String getReservationConfirmationMessage(){
+        return reservationConfirmationMessage.getText();
+    }
+
+    public void clickOnMakeAReservation(){
+        makeAReservation.click();
+    }
 }

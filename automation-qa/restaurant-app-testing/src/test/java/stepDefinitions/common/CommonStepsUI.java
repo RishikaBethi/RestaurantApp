@@ -6,11 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
-import pages.LocationPages;
-import pages.LoginPage;
-import pages.ReservationsPage;
-import pages.SignUpPage;
-import stepDefinitions.ui.LocationSteps;
+import pages.*;
 import utils.ConfigReader;
 import utils.DriverManager;
 
@@ -21,7 +17,11 @@ public class CommonStepsUI {
     private LoginPage loginPage;
     private SignUpPage signUpPage;
     private LocationPages locationPages;
-    private ReservationsPage reservationsPage;
+    private FIndTablesPage FIndTablesPage;
+    private HomePage homePage;
+    private ViewReservationsPage viewReservationsPage;
+    private FeedbacksPage feedbacksPage;
+    private ProfilePage profilePage;
     private ShareContextUI shareContextUI;
 
     public CommonStepsUI(ShareContextUI shareContextUI)
@@ -36,7 +36,11 @@ public class CommonStepsUI {
         loginPage = new LoginPage();
         signUpPage = new SignUpPage();
         locationPages = new LocationPages();
-        reservationsPage = new ReservationsPage();
+        FIndTablesPage = new FIndTablesPage();
+        homePage = new HomePage();
+        viewReservationsPage = new ViewReservationsPage();
+        feedbacksPage = new FeedbacksPage();
+        profilePage = new ProfilePage();
     }
 
     @And("the user enters into the sign in page")
@@ -51,30 +55,52 @@ public class CommonStepsUI {
 
     @And("the user clicks on {string} button")
     public void clicksOnASpecificButton(String button) {
-        switch (button)
-        {
-            case "sign in":
+        switch (button) {
+            case "sign in" -> {
                 loginPage.clickOnSignInButton();
                 shareContextUI.setCurrentPage("sign in");
-                break;
-            case "create an account link":
+            }
+
+            case "create an account link"->{
                 signUpPage.clickCreateAccountLink();
-                break;
-            case "create an account":
+            }
+
+            case "create an account" -> {
                 signUpPage.clickCreateAccountButton();
-                break;
-            case "Cuisine Ratings":
+            }
+
+            case "Cuisine Ratings" -> {
                 locationPages.clickOnCuisineRatings();
                 shareContextUI.setCurrentPage("main page");
-                break;
-            case "Book a Table":
-                reservationsPage.clickOnBookATable();
+            }
+
+            case "Book a Table" -> {
+                FIndTablesPage.clickOnBookATable();
                 shareContextUI.setCurrentPage("Book a Table");
-                break;
-            case "Find a Table":
-                reservationsPage.clickOnFindATable();
-                break;
-            default:
+            }
+
+            case "Find a Table" ->
+                FIndTablesPage.clickOnFindATable();
+
+            case "Make a Reservation" ->
+                FIndTablesPage.clickOnMakeAReservation();
+
+            case "Reservations" ->
+                homePage.openReservations();
+
+            case "Update Feedback" ->
+                viewReservationsPage.clickUpdateFeedback();
+
+            case "Culinary Experience" ->
+                feedbacksPage.clickCulinaryExperience();
+
+            case "Save Changes" ->
+                profilePage.clickSaveChanges();
+
+            case "Change Password" ->
+                profilePage.clickChangePassword();
+
+            default->
                 throw new customExceptions.NoButtonFoundException("No such button found");
         }
     }
@@ -93,7 +119,7 @@ public class CommonStepsUI {
                 Assert.assertEquals(loginPage.getErrorMessage(),message);
                 break;
             case "Book a Table":
-                Assert.assertEquals(reservationsPage.getErrorMessage(),message);
+                Assert.assertEquals(FIndTablesPage.getErrorMessage(),message);
         }
     }
 
