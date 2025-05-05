@@ -6,7 +6,7 @@ import io.cucumber.testng.CucumberOptions;
 import org.testng.annotations.DataProvider;
 
 @CucumberOptions(
-        features = "src/test/resources/features/ui/auth",
+        features = "src/test/resources/features/ui",
         glue = {"stepDefinitions/ui","stepDefinitions/common", "hooks"},
         plugin = {
                 "pretty",
@@ -19,9 +19,10 @@ import org.testng.annotations.DataProvider;
 )
 public class UIRunnerTest extends AbstractTestNGCucumberTests {
 
+        @Override
         @DataProvider(parallel = true)
-        public Object[][] run(){
-                return super.scenarios();
+        public Object[][] scenarios() {
+                return super.scenarios(); // this enables parallel execution of scenario outline rows
         }
 
 }
