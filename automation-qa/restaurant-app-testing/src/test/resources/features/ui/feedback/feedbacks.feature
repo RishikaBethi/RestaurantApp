@@ -12,7 +12,7 @@ Feature: Verify Feedbacks functionality
     And the user gives 4 stars
     And adds a comment
     And the user clicks on "Culinary Experience" button
-    And the user gives 5 stars
+    And the user gives 4 stars
     And adds a comment
     And the user clicks the Update Feedback button
     Then the page will display the feedback created message

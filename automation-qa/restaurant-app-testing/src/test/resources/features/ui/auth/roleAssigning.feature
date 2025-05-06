@@ -12,6 +12,6 @@ Feature: Verify the role assignment for customer and waiter
 
     Examples:
       | email               | password     | role                      |
-      | sushmag@example.com | Password123! | Sushma G (Customer)       |
+      | sushmag@example.com | Password123! | Sushma Reddy (Customer)   |
       | sushma@waiter.com   | Password123! | Sushma Gantagari (Waiter) |
 

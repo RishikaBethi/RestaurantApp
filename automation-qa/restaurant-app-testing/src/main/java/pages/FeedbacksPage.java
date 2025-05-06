@@ -17,7 +17,7 @@ public class FeedbacksPage {
     private WebDriver driver;
     private WebDriverWait wait;
 
-    @FindBy(xpath = "//*[@class='lucide lucide-star w-6 h-6 cursor-pointer transition text-yellow-500 fill-yellow-500']")
+    @FindBy(xpath = "//*[contains(@class,'lucide-star')]")
     private List<WebElement> stars;
 
     @FindBy(xpath = "//textarea[contains(@class,'w-full b')]")
@@ -32,9 +32,6 @@ public class FeedbacksPage {
     @FindBy(xpath = "//button[contains(@class, 'full mt-4')]")
     private WebElement updateFeedbackButton;
 
-    @FindBy(xpath = "//*[@class='lucide lucide-star w-6 h-6 cursor-pointer transition text-gray-300']")
-    private WebElement fiveStars;
-
     public FeedbacksPage(){
         driver = DriverManager.getDriver();
         wait = new WebDriverWait(driver, Duration.ofSeconds(10));
@@ -42,7 +39,7 @@ public class FeedbacksPage {
     }
 
     public void giveFourStars(){
-        wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath("//*[@class='lucide lucide-star w-6 h-6 cursor-pointer transition text-yellow-500 fill-yellow-500']")));
+        wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath("//*[contains(@class,'lucide-star')]")));
         stars.get(3).click();
     }
 
@@ -50,7 +47,7 @@ public class FeedbacksPage {
         commentBox.sendKeys("Good...");
     }
 
-    public void clickCulinaryExperience(){
+    public void clickCulinaryExperience() {
         culinaryExperience.click();
     }
 
@@ -64,7 +61,7 @@ public class FeedbacksPage {
     }
 
     public void giveFiveStars(){
-        fiveStars.click();
+        stars.get(4).click();
     }
 
     public void clearComment(){
