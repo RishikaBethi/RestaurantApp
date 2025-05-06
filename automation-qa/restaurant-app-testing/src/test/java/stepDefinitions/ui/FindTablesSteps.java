@@ -45,9 +45,9 @@ public class FindTablesSteps {
         Assert.assertEquals("3", FIndTablesPage.getGuestsCount());
     }
 
-    @Then("the reservation confirmation message is shown")
-    public void successfulRegistrationMessage(){
-        Assert.assertEquals(FIndTablesPage.getReservationConfirmationMessage(), "Reservation Confirmed!");
+    @Then("the {string} message is shown")
+    public void successfulRegistrationMessage(String message){
+        Assert.assertEquals(FIndTablesPage.getReservationConfirmationMessage(), message);
     }
 
     @And("the user clicks on a timeslot")

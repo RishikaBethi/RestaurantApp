@@ -10,7 +10,7 @@ Feature: Find the available reservations for required time slots
     Then the user should be able to see the available tables
 
   Scenario Outline: Verify the availability of tables for valid location date and time
-    When the user selects the "<location>" "<date>" "<timeSlot>" "<guests>" details
+    When the user selects the "<location>" git "<date>" "<timeSlot>" "<guests>" details
     And the user clicks on "Find a Table" button
     Then the user should be able to see the available tables
 

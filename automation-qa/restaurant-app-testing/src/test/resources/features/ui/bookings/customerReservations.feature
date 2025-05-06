@@ -31,8 +31,8 @@ Feature: Handle Customer reservations
     And the user clicks on a timeslot
     And the user increments the guests
     And the user clicks on "Make a Reservation" button
-    Then the reservation confirmation message is shown
+    Then the "Reservation Confirmed!" message is shown
 
     Examples:
       | location | date       | timeSlot | guests |
-      | LOC003   | 21-05-2026 | 10:30    | 1      |
+      | LOC003   | 22-05-2030 | 10:30    | 1      |
