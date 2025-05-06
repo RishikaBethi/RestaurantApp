@@ -16,6 +16,16 @@ Feature: Handle user profile updating
       | firstName | lastName |
       | Rishitha  | G        |
 
+  Scenario Outline: Update profile with valid data and image
+    When the user enter "<firstName>" and "<lastName>"
+    And the user uploads the image "C:\Users\gantagari_sushma\Downloads\Shin Chan With Backpack Image Crayon Shin Chan And - Shin Chan, HD Png Download , Transparent Png Image - PNGitem.jpg"
+    And the user clicks on "Save Changes" button
+    Then the page will display the successfully updated message
+
+    Examples:
+      | firstName | lastName |
+      | Rishitha  | G        |
+
   Scenario Outline: Update profile with exceeding lengths in fields
     When the user enter "<firstName>" and "<lastName>"
     Then the user should see a message that the fields exceed maximum limit

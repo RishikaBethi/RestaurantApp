@@ -48,6 +48,9 @@ public class ProfilePage {
     @FindBy(xpath = "//li[contains(@class,'text-red-600')]")
     private WebElement errorMessage;
 
+    @FindBy(xpath = "//input[@type='file']")
+    private WebElement image;
+
     public ProfilePage(){
         driver = DriverManager.getDriver();
         wait = new WebDriverWait(driver, Duration.ofSeconds(10));
@@ -91,5 +94,10 @@ public class ProfilePage {
     public String getErrorMessage(){
         wait.until(ExpectedConditions.visibilityOf(errorMessage));
         return errorMessage.getText();
+    }
+
+    public void uploadImage(String imagePath)
+    {
+        image.sendKeys(imagePath);
     }
 }

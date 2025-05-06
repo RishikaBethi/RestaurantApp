@@ -23,6 +23,8 @@ public class CommonStepsUI {
     private FeedbacksPage feedbacksPage;
     private ProfilePage profilePage;
     private ShareContextUI shareContextUI;
+    private WaiterReservationsPage waiterReservationsPage;
+    private DishesPage dishesPage;
 
     public CommonStepsUI(ShareContextUI shareContextUI)
     {
@@ -41,7 +43,10 @@ public class CommonStepsUI {
         viewReservationsPage = new ViewReservationsPage();
         feedbacksPage = new FeedbacksPage();
         profilePage = new ProfilePage();
+        waiterReservationsPage = new WaiterReservationsPage();
+        dishesPage = new DishesPage();
     }
+
 
     @And("the user enters into the sign in page")
     public void enterIntoTheSignInPage() {
@@ -54,20 +59,18 @@ public class CommonStepsUI {
     }
 
     @And("the user clicks on {string} button")
-    public void clicksOnASpecificButton(String button) {
+    public void clicksOnASpecificButton(String button) throws InterruptedException {
         switch (button) {
             case "sign in" -> {
                 loginPage.clickOnSignInButton();
                 shareContextUI.setCurrentPage("sign in");
             }
 
-            case "create an account link"->{
+            case "create an account link"->
                 signUpPage.clickCreateAccountLink();
-            }
 
-            case "create an account" -> {
+            case "create an account" ->
                 signUpPage.clickCreateAccountButton();
-            }
 
             case "Cuisine Ratings" -> {
                 locationPages.clickOnCuisineRatings();
@@ -100,13 +103,36 @@ public class CommonStepsUI {
             case "Change Password" ->
                 profilePage.clickChangePassword();
 
+            case "WaiterReservations" ->
+                waiterReservationsPage.waiterClickOnReservations();
+
+            case "waiterReservationsSearch" ->
+                waiterReservationsPage.waiterClickOnSearchReservations();
+
+            case "CreateNewReservation" ->
+                waiterReservationsPage.clickOnCreateNewReservation();
+
+            case "Visitor" ->
+                waiterReservationsPage.clickOnVisitor();
+
+            case "Customer" ->
+                waiterReservationsPage.clickOnCustomer();
+
+            case "Make a waiter Reservation" ->
+                waiterReservationsPage.clickOnMakeAReservation();
+
+            case "View Menu" ->{
+                dishesPage.clickOnViewMenu();
+            }
+
             default->
                 throw new customExceptions.NoButtonFoundException("No such button found");
         }
     }
 
     @Then("the user will be redirected to the {string} page")
-    public void verifyRedirectionToMainPage(String page) {
+    public void verifyRedirectionToMainPage(String page) throws InterruptedException {
+        Thread.sleep(2000);
         Assert.assertEquals(driver.getCurrentUrl(), page);
     }
 

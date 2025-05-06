@@ -32,6 +32,12 @@ public class ProfileUpdateSteps {
         homePage.openMyProfile();
     }
 
+    @And("the user uploads the image {string}")
+    public void uploadImage(String path)
+    {
+        profilePage.uploadImage(path);
+    }
+
     @Then("the page will display the successfully updated message")
     public void displaySuccessfulMessage(){
         Assert.assertTrue(profilePage.getSuccessfulMessage().contains("successfully updated"));
