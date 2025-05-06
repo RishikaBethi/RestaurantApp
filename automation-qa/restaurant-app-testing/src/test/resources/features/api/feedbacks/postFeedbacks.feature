@@ -37,11 +37,21 @@ Feature: Verify the feedbacks of the user
     Examples:
       | cuisineComment | cuisineRating | reservationId                        | serviceComment | serviceRating | error                                                                              |
       | Good food      |               | 91fb59a8-0532-413c-8197-1f3f0a5fcbec | good           |               | Service rating is required when service comment is provided                        |
-      | Bad food       | 3             | 23456-uyfdscv-fgyh-geds              |                |               | Reservation not found                                                              |
       | Good           | 3             | 15b306d8-521d-471e-ad28-78b905af24cc | bad            | 2             | Feedback can be provided only once your reservation is in progress or has finished |
       | Good           | 4             | 15b306d8-521d-471e-ad28-78b905af24cc | Good           | 4             | Feedback can be provided only once your reservation is in progress or has finished |
 
 
+  Scenario Outline: Verify the failed feedbacks for non existent reservations
+    Given the user sends a feedback request with the following data:
+      | cuisineComment   | cuisineRating   | reservationId   | serviceComment   | serviceRating   |
+      | <cuisineComment> | <cuisineRating> | <reservationId> | <serviceComment> | <serviceRating> |
+    When the user sends the authorized post request to "/feedbacks" with the request payload
+    Then the status code should be 404
+    And the response should contain failed error "<error>" message
+
+    Examples:
+      | cuisineComment | cuisineRating | reservationId        | serviceComment | serviceRating | error                 |
+      | Good food      | 4             | 9agfhndsfghnbvsdfbec | good           | 3             | Reservation not found |
 
 
 

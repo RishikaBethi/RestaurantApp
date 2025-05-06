@@ -60,16 +60,16 @@ Feature: Display the locations for authorized and unauthorized users
   Scenario Outline: Verify the filteration of feedbacks
     When the user sends the get request to "/locations/<locationId>/feedbacks?<filter>" request payload
     Then the status code should be 200
-    And the response should validate the "ValidateFeedbacks" schema
+    And the response should validate the "<ValidateFeedbacks>" schema
 
     Examples:
-      | locationId | filter                                 |
-      | LOC001     | type=CUISINE_EXPERIENCE                |
-      | LOC001     | type=SERVICE                           |
-      | LOC001     | type=SERVICE&type=CUISINE_EXPERIENCE   |
-      | LOC001     | type=CUISINE_EXPERIENCE&sort=date,desc |
-      | LOC001     | type=SERVICE&page=1&size=5             |
-      | LOC001     | type=SERVICE&?sort=date_asc            |
+      | locationId | filter                                 | ValidateFeedbacks                  |
+      | LOC001     | type=CUISINE_EXPERIENCE                | ValidateCuisineFeedbacks           |
+      | LOC001     | type=SERVICE                           | ValidateServiceFeedbacks           |
+      | LOC001     | type=SERVICE&type=CUISINE_EXPERIENCE   | ValidateCuisineAndServiceFeedbacks |
+      | LOC001     | type=CUISINE_EXPERIENCE&sort=date_desc | ValidateCuisineWithDate            |
+      | LOC001     | type=SERVICE&page=1&size=5             | ValidateFeedbackPagination         |
+      | LOC001     | type=SERVICE&sort=date_asc             | ValidateServiceFeedbackWithDate    |
 
 
   Scenario Outline: Verify the filteration of feedbacks for authorized users
@@ -88,7 +88,7 @@ Feature: Display the locations for authorized and unauthorized users
 
   Scenario Outline: Verify the filteration of feedbacks for invalid location id
     When the user sends the authorized get request to "/locations/<locationId>/feedbacks?<filter>" request payload
-    Then the status code should be 404
+    Then the status code should be 400
     And the response should contain failed error "Invalid location ID" message
 
     Examples:

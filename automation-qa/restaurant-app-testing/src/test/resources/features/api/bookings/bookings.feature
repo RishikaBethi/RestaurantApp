@@ -52,7 +52,7 @@ Feature: Get Available Tables for a Valid Request
     Examples:
       | locationId | tableNumber | date       | guestsNumber | timeFrom | timeTo | status | message                                |
       |            | 2           | 2025-08-02 | 3            | 10:00    | 11:30  | 400    | "Missing required field: locationId"   |
-      | LOC001     | ""          | 2025-08-02 | 8            | 12:00    | 1:30   | 400    | "Missing required field: tableNumber"  |
+      | LOC001     |             | 2025-08-02 | 8            | 12:00    | 1:30   | 400    | "Missing required field: tableNumber"  |
       | LOC001     | 2           |            | 4            | 10:00    | 11:30  | 400    | "Missing required field: date"         |
       | LOC001     | 2           | 2025-08-02 |              | 10:00    | 12:30  | 400    | "Missing required field: guestsNumber" |
       | LOC001     | 3           | 2025-08-02 | 5            |          | 12:00  | 400    | "Missing required field: timeFrom"     |
