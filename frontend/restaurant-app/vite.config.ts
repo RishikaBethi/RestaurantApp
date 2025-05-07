@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig, UserConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import path from "path"
 import tailwindcss from "@tailwindcss/vite"
@@ -11,4 +11,11 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-})
+  
+  test: {
+    globals: true, // Enables globals like `expect`, `vi`
+    environment: 'jsdom', // Makes sure jsdom is used for the tests
+    setupFiles: './src/setupTests.ts', // Points to setup file
+    include: ['src/**/*.test.tsx', 'src/**/*.test.ts'],
+  },
+} as UserConfig)

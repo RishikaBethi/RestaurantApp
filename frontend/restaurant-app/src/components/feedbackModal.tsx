@@ -38,9 +38,8 @@ export default function FeedbackModal({ isOpen, onClose,reservationId }: Feedbac
 
     const fetchFeedback = async () => {
       try {
-        const { data } = await axios.post(
-          `${BASE_API_URL}/getPreviousFeedback`,
-          { reservationId },
+        const { data } = await axios.get(
+          `${BASE_API_URL}/getPreviousFeedback/${reservationId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`, 

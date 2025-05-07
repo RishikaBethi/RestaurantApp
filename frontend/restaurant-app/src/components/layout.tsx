@@ -10,7 +10,7 @@ export default function Layout({ isLoggedIn, setIsLoggedIn }: LayoutProps) {
   return (
     <>
       <Navbar isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
-      <main>
+      <main data-testid="layout">
         <Outlet /> {/* This will render the nested child components */}
       </main>
     </>

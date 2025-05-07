@@ -112,6 +112,11 @@ export default function BookTable() {
 
   const handleFindTable = async () => {
     setSearchClicked(true);
+    if (guests < 1) { // Adjust the maximum guest limit as needed
+      toast.error("Please enter a valid number of guests (minimum 1).");
+      setFilteredTables([]); // Clear previously displayed tables
+      return;
+    }
     try {
       setLoadingFilteredTables(true);
       const response = await axios.get(`${BASE_API_URL}/bookings/tables`, {
@@ -122,9 +127,16 @@ export default function BookTable() {
           guests,
         },
       });
-      setFilteredTables(response.data);
+      if (response.data.length === 0) {
+        // Show error if no tables are found
+        toast.error("No tables available for the selected number of guests.");
+        setFilteredTables([]); // Clear previously displayed tables
+      } else {
+        setFilteredTables(response.data); // Update with valid tables
+      }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
+      setFilteredTables([]);
       const errorMessage = err?.response?.data?.error || "Failed to find tables.";
       toast.error(errorMessage);
     }finally {

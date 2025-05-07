@@ -14,10 +14,13 @@ export default function Navbar({ isLoggedIn, setIsLoggedIn }: { isLoggedIn: bool
   const user = JSON.parse(localStorage.getItem("user") || '""');
   const email = localStorage.getItem("email");
   const role = localStorage.getItem("role") || "";
-  const initials = user
-    .split(" ")
-    .map((word: string) => word.charAt(0))
-    .join("");
+  const initials = 
+  typeof user === "string"
+  ? user
+      .split(" ")
+      .map((word: string) => word.charAt(0))
+      .join("")
+  : "";
  
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -127,6 +130,7 @@ export default function Navbar({ isLoggedIn, setIsLoggedIn }: { isLoggedIn: bool
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className="text-gray-600 focus:outline-none"
+          aria-label="Toggle mobile menu"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -136,7 +140,7 @@ export default function Navbar({ isLoggedIn, setIsLoggedIn }: { isLoggedIn: bool
  
       {/* Mobile Dropdown */}
       {mobileMenuOpen && (
-        <div className="absolute top-14 right-2 w-48 bg-white shadow rounded-md z-50 md:hidden">
+        <div className="absolute top-14 right-2 w-48 bg-white shadow rounded-md z-50 md:hidden" data-testid="mobile-menu">
           {role === "Waiter" ? (
             <>
               <Link

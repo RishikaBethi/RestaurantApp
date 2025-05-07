@@ -27,6 +27,7 @@ export default function ConfirmationModal({ isOpen, onClose, bookingData, onRese
   const handleCancel = async () => {
     try {
       await cancelReservation(bookingData.id);
+      toast.success("Reservation cancelled!");
       onReservationCancel?.(); // Optional callback to update parent state
       onClose();
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -308,11 +308,12 @@ const MyProfile: React.FC = () => {
               ) : (
                 <div className="space-y-4">
                   <div>
-                    <Label className="p-2">Old Password</Label>
+                    <Label htmlFor="old-password" className="p-2">Old Password</Label>
                     <div className="relative">
                     <Input
   type={oldVisible ? "text" : "password"}
   value={oldPassword}
+  id="old-password"
   onChange={(e) => setOldPassword(e.target.value)}
   className="pr-10 w-full"
 />
@@ -327,11 +328,12 @@ const MyProfile: React.FC = () => {
                   </div>
  
                   <div>
-                    <Label className="p-2">New Password</Label>
+                    <Label htmlFor="new-password" className="p-2">New Password</Label>
                     <div className="relative">
                     <Input
   type={passwordVisible ? "text" : "password"}
   value={newPassword}
+  id="new-password"
   onChange={(e) => setNewPassword(e.target.value)}
   className="pr-10 w-full"
 />
@@ -368,11 +370,12 @@ const MyProfile: React.FC = () => {
                   </div>
  
                   <div>
-                    <Label className="p-2">Confirm New Password</Label>
+                    <Label htmlFor="confirm-new-password" className="p-2">Confirm New Password</Label>
                     <div className="relative">
                     <Input
   type={confirmVisible ? "text" : "password"}
   value={confirmPassword}
+  id="confirm-new-password"
   onChange={(e) => setConfirmPassword(e.target.value)}
   className="pr-10 w-full"
 />
@@ -385,9 +388,15 @@ const MyProfile: React.FC = () => {
                         {confirmVisible ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
                     </div>
-                    <p className="text-sm text-green-600 mt-1">
-                      Confirm password must match new password
-                    </p>
+                    <p
+    className={`text-sm mt-1 ${
+      confirmPassword && confirmPassword === newPassword
+        ? "text-green-600"
+        : "text-red-600"
+    }`}
+  >
+    Confirm password must match new password
+  </p>
                   </div>
  
                   <Button

@@ -283,6 +283,7 @@ const WaiterReservations = () => {
             variant="outline"
             className="p-3 border-green-600 border-2 text-green-600 hover:bg-green-50"
             onClick={handleSearch}
+            aria-label="search"
           >
             <Search size={18} />
           </Button>
@@ -338,10 +339,12 @@ const WaiterReservations = () => {
               type="date"
               value={postponeDate}
               onChange={(e) => setPostponeDate(e.target.value)}
+              aria-label="Select date"
             />
-            Time Slot
+            <label htmlFor="time-slot">Time Slot</label>
             <select
               value={postponeSlot}
+              id="time-slot"
               onChange={(e) => setPostponeSlot(e.target.value)}
               className="border border-gray-300 rounded-md p-2 text-sm"
             >
@@ -351,9 +354,10 @@ const WaiterReservations = () => {
                 </option>
               ))}
             </select>
-            Table
+            <label htmlFor="table">Table</label>
             <select
               value={postponeTable}
+              id="table"
               onChange={(e) => setPostponeTable(e.target.value)}
               className="border border-gray-300 rounded-md p-2 text-sm"
             >

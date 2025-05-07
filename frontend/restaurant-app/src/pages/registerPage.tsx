@@ -55,7 +55,7 @@ const RegisterPage: React.FC = () => {
     // Validate input
     switch (id) {
       case "firstName":
-  if (!/^[A-Za-z][A-Za-z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]{1,50}$/.test(value)) {
+  if (!/^[A-Za-z][A-Za-z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]{0,50}$/.test(value)) {
     setErrors((prev) => ({
       ...prev,
       firstName: "First name must start with a letter and be up to 50 characters.Only letters,special characters and numbers are allowed.",
@@ -138,7 +138,7 @@ const RegisterPage: React.FC = () => {
         password: formData.password,
         confirmPassword: formData.confirmPassword,
       });
-      const successMessage = response?.data?.message || "Registration successful!";
+      const successMessage = response?.data?.message || "User registered successfully";
       toast.success(successMessage); 
       navigate("/login");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -230,6 +230,7 @@ const RegisterPage: React.FC = () => {
                   type="button"
                   className="absolute inset-y-0 right-3 flex items-center"
                   onClick={toggleShowPassword}
+                  aria-label="toggle visibility"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>

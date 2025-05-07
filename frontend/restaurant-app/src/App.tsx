@@ -12,8 +12,13 @@ import BookTable from "./pages/tablebooking";
 import ReservationDashboard from './pages/waiterReservationPage';
 import Menu from './components/viewMenu';
 
-function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+type AppProps = {
+  initialIsLoggedIn?: boolean;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function App({ initialIsLoggedIn = false }: AppProps) {
+  const [isLoggedIn, setIsLoggedIn] = useState(initialIsLoggedIn);
 
   return (
     <BrowserRouter>

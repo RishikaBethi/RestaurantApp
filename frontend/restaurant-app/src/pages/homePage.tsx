@@ -51,6 +51,7 @@ export default function Home() {
       })
       .catch((error) => {
         console.error("Error fetching dishes:", error);
+        setError("Failed to load dishes!");
       })
       .finally(() => {
         setLoading(false); 
@@ -80,7 +81,7 @@ export default function Home() {
         <h3 className="text-xl font-semibold">Most Popular Dishes</h3>
         {loading ? <ShimmerDishes /> : error ? <p className="text-red-500">{error}</p> : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-           {Array.isArray(popularDishes) ? (
+           {Array.isArray(popularDishes) && popularDishes.length > 0 ? (
   popularDishes.map((dish, index) => (
     <PopularDishCard key={index} {...dish} />
   ))

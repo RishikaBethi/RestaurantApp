@@ -1,1 +1,1 @@
-export const BASE_API_URL="https://oxod3ip4sf.execute-api.ap-southeast-2.amazonaws.com/dev";
+export const BASE_API_URL="https://restaurantapi-run8team7-sb-dev.development.krci-dev.cloudmentor.academy";
