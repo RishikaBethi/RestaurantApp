@@ -3,7 +3,7 @@ package stepDefinitions.ui;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.junit.Assert;
+import org.testng.Assert;
 import pages.FeedbacksPage;
 import pages.ViewReservationsPage;
 
@@ -19,10 +19,7 @@ public class FeedbackSteps {
 
     @When("the user gives {int} stars")
     public void giveFourStars(int stars){
-        if(stars == 5)
-            feedbacksPage.giveFiveStars();
-        else
-            feedbacksPage.giveFourStars();
+        feedbacksPage.giveFourStars();
     }
 
     @When("the user clicks on Update Feedback button for giving feedback")

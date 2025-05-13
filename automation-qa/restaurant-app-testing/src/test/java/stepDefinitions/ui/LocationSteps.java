@@ -17,15 +17,12 @@ public class LocationSteps {
 
     @When("the user scrolls to the {string} view")
     public void userScrollsIntoViews(String view) {
-        switch (view)
-        {
-            case "locations":
+        switch (view) {
+            case "locations" ->
                 locationPages.scrollIntoLocationsView();
-                break;
-            case "Customer Reviews":
+            case "Customer Reviews" ->
                 locationPages.scrollIntoCustomerReviewsView();
-                break;
-            default:
+            default ->
                 throw new customExceptions.NoViewFoundException("No view found");
         }
     }
@@ -53,21 +50,18 @@ public class LocationSteps {
     }
 
     @And("the user clicks on {string} in dropDown")
-    public void selectTheRequirementFromDropDown(String requirement)
-    {
+    public void selectTheRequirementFromDropDown(String requirement) {
         locationPages.filterTheRatingByGivenRequirement(requirement);
     }
 
     @And("the ratings should be displayed in the {string} order")
     public void verifyTheSelectedOrderOfRatings(String order){
         switch (order){
-            case "Top rated first":
+            case "Top rated first" ->
                 Assert.assertEquals(locationPages.getTheOrderOfRatingsSelectedFromDropDown(),locationPages.sortTheRatingsInSpecifiedOrder("descending"));
-                break;
-            case "Low rated first":
+            case "Low rated first" ->
                 Assert.assertEquals(locationPages.getTheOrderOfRatingsSelectedFromDropDown(),locationPages.sortTheRatingsInSpecifiedOrder("ascending"));
-                break;
-            default:
+            default ->
                 System.out.println("No order specified");
         }
     }

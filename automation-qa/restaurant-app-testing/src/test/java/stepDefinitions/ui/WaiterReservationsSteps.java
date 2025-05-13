@@ -3,12 +3,9 @@ package stepDefinitions.ui;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.testng.Assert;
 import pages.WaiterReservationsPage;
 import utils.DriverManager;
-
-import java.sql.Driver;
 
 public class WaiterReservationsSteps {
 
@@ -19,8 +16,6 @@ public class WaiterReservationsSteps {
         driver = DriverManager.getDriver();
         waiterReservationsPage = new WaiterReservationsPage();
     }
-
-
 
     @And("the waiter selects the date {string}")
     public void waiterSendsTheDate(String date)

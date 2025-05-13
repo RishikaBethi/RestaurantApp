@@ -2,13 +2,11 @@ package stepDefinitions.ui;
 
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
-import io.cucumber.java.sl.In;
 import org.junit.Assert;
 import pages.DishesPage;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
 
 public class DishesSteps {
 
@@ -20,18 +18,14 @@ public class DishesSteps {
 
     @Then("the user should be able to see the available {string} dishes")
     public void verifyTheAvailabilityOfStaticMenu(String type){
-
-        switch (type)
-        {
-            case "static"->
+        switch (type) {
+            case "static" ->
                     Assert.assertTrue(dishesPage.getNumberOfStaticDishesOnMainPage()>0);
             case "dynamic" ->
                 Assert.assertTrue(dishesPage.getNumberOfDynamicDishes()>0);
-
             default ->
                 throw new customExceptions.NoButtonFoundException("No dishes found");
         }
-
     }
 
     @Then("the page will display the {string} dishes message")
@@ -46,19 +40,16 @@ public class DishesSteps {
     }
 
     @Then("verify whether the price is sorted {string} order")
-    public void verifyTheSorting(String order)
-    {
-        switch (order)
-        {
-            case "Price Low to High" ->{
+    public void verifyTheSorting(String order) {
+        switch (order) {
+            case "Price Low to High" -> {
                 List<Integer> actualPrices = dishesPage.getPricesOfDishes();
                 List<Integer> expectedPrices = dishesPage.getPricesOfDishes();
                 Collections.sort(actualPrices);
                 Assert.assertEquals(actualPrices,expectedPrices);
             }
 
-            case "Price High to Low" ->
-            {
+            case "Price High to Low" -> {
                 List<Integer> actualPrices = dishesPage.getPricesOfDishes();
                 List<Integer> expectedPrices = dishesPage.getPricesOfDishes();
                 Collections.sort(actualPrices,Collections.reverseOrder());
@@ -66,5 +57,4 @@ public class DishesSteps {
             }
         }
     }
-
 }
