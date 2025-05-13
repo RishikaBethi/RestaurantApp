@@ -1,25 +1,16 @@
 package pages;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import utils.DriverManager;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class FIndTablesPage {
+public class FIndTablesPage extends BasePage{
 
-    private WebDriver driver;
-    private WebDriverWait wait;
-
-    //@FindBy(xpath = "//a[.='Book a Table']")
     @FindBy(partialLinkText = "Book a Table")
     private WebElement bookATable;
 
@@ -63,9 +54,7 @@ public class FIndTablesPage {
     private WebElement makeAReservation;
 
     public FIndTablesPage(){
-        driver = DriverManager.getDriver();
-        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        PageFactory.initElements(driver,this);
+        super();
     }
 
     public void clickOnBookATable(){

@@ -2,22 +2,13 @@ package pages;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import utils.DriverManager;
 
-import java.time.Duration;
 import java.util.List;
-import java.util.Locale;
 
-public class WaiterReservationsPage {
-
-    private WebDriver driver;
-    private WebDriverWait wait;
+public class WaiterReservationsPage extends BasePage{
 
     @FindBy(xpath = "//a[.='Reservations']")
     private WebElement reservationsButton;
@@ -61,11 +52,8 @@ public class WaiterReservationsPage {
     @FindBy(xpath = "//input[@placeholder='e.g. customer@example.com']")
     private WebElement customerEmail;
 
-    public WaiterReservationsPage()
-    {
-        driver = DriverManager.getDriver();
-        PageFactory.initElements(driver,this);
-        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+    public WaiterReservationsPage() {
+        super();
     }
 
     public void waiterClickOnReservations(){
@@ -113,8 +101,7 @@ public class WaiterReservationsPage {
         timeOption.click();
     }
 
-    public void enterTheTableNumber(String tableInput)
-    {
+    public void enterTheTableNumber(String tableInput) {
         wait.until(ExpectedConditions.elementToBeClickable(table)).click();
 
         WebElement tableOption = wait.until(ExpectedConditions.visibilityOfElementLocated(
@@ -126,7 +113,6 @@ public class WaiterReservationsPage {
     public void clickOnMakeAReservation() {
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("arguments[0].click();", makeAReservation);
-        //makeAReservation.click();
     }
 
     public String getConfirmationMessage() throws InterruptedException {

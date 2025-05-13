@@ -1,14 +1,9 @@
 package pages;
 
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.PageFactory;
-import utils.DriverManager;
 
-public class HomePage {
-
-    private WebDriver driver;
+public class HomePage extends BasePage{
 
     @FindBy(linkText = "Reservations")
     private WebElement reservations;
@@ -20,8 +15,7 @@ public class HomePage {
     private WebElement myProfile;
 
     public HomePage(){
-        driver = DriverManager.getDriver();
-        PageFactory.initElements(driver, this);
+        super();
     }
 
     public void openReservations(){

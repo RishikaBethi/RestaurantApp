@@ -1,26 +1,16 @@
 package pages;
 
-import io.cucumber.java.eo.Se;
-import org.checkerframework.checker.signature.qual.FullyQualifiedName;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import utils.DriverManager;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DishesPage {
-
-    private WebDriver driver;
-    private WebDriverWait wait;
+public class DishesPage extends BasePage {
 
     @FindBy(xpath = "//div[contains(@class,'md:grid-cols-4')]")
     private List<WebElement> staticMenu;
@@ -37,11 +27,8 @@ public class DishesPage {
     @FindBy(id = "sort")
     private WebElement sort;
 
-    public DishesPage()
-    {
-        driver = DriverManager.getDriver();
-        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        PageFactory.initElements(driver,this);
+    public DishesPage() {
+        super();
     }
 
     public int getNumberOfStaticDishesOnMainPage(){

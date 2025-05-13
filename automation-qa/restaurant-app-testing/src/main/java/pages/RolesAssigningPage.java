@@ -1,19 +1,10 @@
 package pages;
 
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import utils.DriverManager;
 
-import java.time.Duration;
-
-public class RolesAssigningPage {
-
-    private WebDriver driver;
-    private WebDriverWait wait;
+public class RolesAssigningPage extends BasePage{
 
     @FindBy(xpath = "//span[@data-slot='avatar-fallback']")
     private WebElement userLogo;
@@ -22,9 +13,7 @@ public class RolesAssigningPage {
     private WebElement role;
 
     public RolesAssigningPage(){
-        driver = DriverManager.getDriver();
-        PageFactory.initElements(driver,this);
-        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        super();
     }
 
     public void clickOnUserLogo(){

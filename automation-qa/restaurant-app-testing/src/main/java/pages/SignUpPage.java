@@ -1,20 +1,11 @@
 package pages;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import utils.DriverManager;
 
-import java.time.Duration;
-
-public class SignUpPage {
-
-    private WebDriver driver;
-    private WebDriverWait webDriverWait;
+public class SignUpPage extends BasePage{
 
     @FindBy(xpath = "//a[.='Create an Account']")
     private WebElement createAccountLink;
@@ -44,18 +35,15 @@ public class SignUpPage {
     private WebElement passwordErrorMessage;
 
     public SignUpPage(){
-        driver = DriverManager.getDriver();
-        webDriverWait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        PageFactory.initElements(driver,this);
+        super();
     }
 
     public void clickCreateAccountLink(){
-        webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[.='Create an Account']")));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[.='Create an Account']")));
         createAccountLink.click();
     }
 
-    public void enterTheDetails(String firstNameData, String lastNameData, String emailData, String passwordData, String confirmPasswordData)
-    {
+    public void enterTheDetails(String firstNameData, String lastNameData, String emailData, String passwordData, String confirmPasswordData) {
         firstName.sendKeys(firstNameData);
         lastName.sendKeys(lastNameData);
         email.sendKeys(emailData);
