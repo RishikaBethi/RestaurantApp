@@ -5,6 +5,15 @@ Feature: Get Available Tables for a Valid Request
     Given the base_uri of the application
     And the user is authenticated
 
+    @smoke
+  Scenario Outline: Verify return of list of available tables based on valid filters
+    When the user sends the authorized get request to "/bookings/tables?locationId=<locationId>&date=<date>&time=<time>&guests=<guests>" request payload
+    Then the status code should be 200
+    Examples:
+      | locationId | date       | time  | guests |
+      | LOC001     | 2025-08-02 | 15:00 | 4      |
+
+      @regression
   Scenario Outline: Verify return of list of available tables based on valid filters
     When the user sends the authorized get request to "/bookings/tables?locationId=<locationId>&date=<date>&time=<time>&guests=<guests>" request payload
     Then the status code should be 200
@@ -14,6 +23,7 @@ Feature: Get Available Tables for a Valid Request
       | locationId | date       | time  | guests |
       | LOC001     | 2025-08-02 | 15:00 | 4      |
 
+  @regression
   Scenario Outline: Verify response for invalid filters
     When the user sends the authorized get request to "/bookings/tables?locationId=<locationId>&date=<date>&time=<time>&guests=<guests>" request payload
     Then the status code should be 400
@@ -26,7 +36,7 @@ Feature: Get Available Tables for a Valid Request
       | LOC001     | 2025-08-02 | 45:00 | 4      | "Invalid time format. Use HH:MM"                    |
       | LOC001     | 2025-08-02 | 12:00 | four   | "Invalid guest capacity format. Must be an integer" |
 
-
+  @regression
   Scenario Outline: Verify booking by clients
 
     Given a user sends booking request with following data
@@ -41,6 +51,7 @@ Feature: Get Available Tables for a Valid Request
       | LOC001     | 9999        | 2025-08-02 | 4            | 10:00    | 11:30  | 400    |
       | LOC001     | 1           | 2023-02-06 | 6            | 12:00    | 1:30   | 400    |
 
+  @regression
   Scenario Outline: Verify failed booking by clients for missing fields
     Given a user sends booking request with following data
       | locationId   | tableNumber   | date   | guestsNumber   | timeFrom   | timeTo   |

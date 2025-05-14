@@ -3,18 +3,26 @@ Feature: Update the user profile
   Background:
     Given the base_uri of the application
 
+    @smoke
+  Scenario: Get the details of the authorized user
+    Given the user is authenticated
+    And the user sends the authorized get request to "/users/profile" request payload
+    Then the status code should be the 200
+
+  @regression
   Scenario: Get the details of the authorized user
     Given the user is authenticated
     And the user sends the authorized get request to "/users/profile" request payload
     Then the status code should be the 200
     And the response should validate the "ValidateUserProfiles" schema
 
-
+  @regression
   Scenario: Verify the error for the get request for the unauthorized users
     Given the user sends the get request to "/users/profile" request payload
     Then the status code should be the 401
     And the response should contain failed error "Unauthorized: Email not found in token." message
 
+  @regression
   Scenario Outline: Trying to update the profile by authorized user
     Given the user is authenticated
     And the user sends the profile update request with following data:

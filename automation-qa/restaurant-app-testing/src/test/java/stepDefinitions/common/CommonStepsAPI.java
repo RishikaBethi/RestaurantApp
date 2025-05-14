@@ -9,8 +9,10 @@ import io.cucumber.java.en.When;
 import io.restassured.response.Response;
 import models.SignIn;
 import utils.ConfigReader;
+import utils.api.Constants;
 
 
+import java.lang.reflect.Field;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
@@ -32,6 +34,14 @@ public class CommonStepsAPI {
 
     @When("the user sends the post request to {string} with the request payload")
     public void sendPOSTRequest(String endpoint){
+        /*String endpoint;
+
+        try {
+            Field field = Constants.class.getDeclaredField(constantFieldName);
+            endpoint = (String) field.get(null); // get static field value
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new IllegalArgumentException("Invalid endpoint constant: " + constantFieldName, e);
+        }*/
         Response response = given()
                 .spec(RequestBuilder.sendPostRequestSpec(shareContext))
                 .when()
@@ -79,13 +89,19 @@ public class CommonStepsAPI {
     @When("the user sends the authorized get request to {string} request payload")
     public void sendAuthorizedGetRequest(String endpoint)
     {
+        /*String endpoint;
+
+        try {
+            Field field = Constants.class.getDeclaredField(constantFieldName);
+            endpoint = (String) field.get(null); // get static field value
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new IllegalArgumentException("Invalid endpoint constant: " + constantFieldName, e);
+        }*/
         Response response = given()
                 .spec(RequestBuilder.sendAuthorizedCustomerGetRequest(shareContext))
-                .log().all()
                 .when()
                 .get(endpoint)
                 .then()
-                .log().all()
                 .extract().response();
         shareContext.setResponse(response);
     }

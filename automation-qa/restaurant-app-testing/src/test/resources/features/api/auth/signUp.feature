@@ -3,7 +3,21 @@ Feature: Signing up into the application
   Background:
     Given the base_uri of the application
 
+
+  @smoke
   Scenario Outline: Sign Up user with valid credentials
+    Given user sends a signup request with the following data
+      | firstName   | lastName   | email   | password   |
+      | <firstName> | <lastName> | <email> | <password> |
+    When the user sends the post request to "auth/sign-up" with the request payload
+    Then the status code should be 201
+
+    Examples:
+      | firstName | lastName  | email                       | password     |
+      | Sushma    | Gantagari | sushmagantagari@example.com | Password123! |
+
+  @regression
+  Scenario Outline: Sign Up user with valid credentials and validate response
     Given user sends a signup request with the following data
       | firstName   | lastName   | email   | password   |
       | <firstName> | <lastName> | <email> | <password> |
@@ -12,10 +26,11 @@ Feature: Signing up into the application
     And the response should contain success "User registered successfully" message
 
     Examples:
-      | firstName | lastName | email                   | password |
-      | Sushma    | Ganta    | sushmaganta@example.com | Y!kjqKdX |
+      | firstName | lastName  | email                       | password     |
+      | Sushma    | Gantagari | sushmagantagari@example.com | Password123! |
 
 
+  @regression
   Scenario Outline: Sign Up passing the already registered email
     Given user sends a signup request with the following data
       | firstName   | lastName   | email   | password   |
@@ -28,7 +43,7 @@ Feature: Signing up into the application
       | firstName | lastName | email               | password   |
       | Sindhu    | Reddy    | sushmag@example.com | Sindhu@123 |
 
-
+  @regression
   Scenario Outline: Verify Sign Up with missing and empty fields
     Given user sends a signup request with the following data
       | firstName   | lastName   | email   | password   |
@@ -48,6 +63,7 @@ Feature: Signing up into the application
       | Sushma    | Gantagari | @empty             | Sushma@123 | Invalid email format                                                                          |
       | Sushma    | Gantagari | sushma@example.com | @empty     | Password must be 8-16 characters, include uppercase, lowercase, number, and special character |
 
+  @regression
   Scenario Outline: validate the invalid email format
     Given user sends a signup request with the following data
       | firstName   | lastName   | email   | password   |
@@ -60,7 +76,7 @@ Feature: Signing up into the application
       | firstName | lastName  | email     | password  |
       | sushma    | Gantaharo | ...@..com | Hello@123 |
 
-
+  @regression
   Scenario Outline: Sign Up with invalid password formats
     Given user sends a signup request with the following data
       | firstName   | lastName   | email   | password   |
@@ -79,7 +95,7 @@ Feature: Signing up into the application
       | Sushma    | Gantagari | sushma@exampe.com | Sushma@asd            | Password must be 8-16 characters, include uppercase, lowercase, number, and special character |
       | Sushma    | Gantagari | sushma@exampe.com | Sushma@34565423456123 | Password must be 8-16 characters, include uppercase, lowercase, number, and special character |
 
-
+  @regression
   Scenario Outline: SignUp the user with exceeding character limits
     Given user sends a signup request with the following data
       | firstName   | lastName   | email   | password   |

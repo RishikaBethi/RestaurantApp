@@ -9,6 +9,19 @@ Feature: Verify the feedbacks of the user
     Then the status code should be 201
     And the token is stored
 
+  @smoke
+  Scenario Outline: Verify the successful feedback posted with valid details
+    Given the user sends a feedback request with the following data:
+      | cuisineComment   | cuisineRating   | reservationId   | serviceComment   | serviceRating   |
+      | <cuisineComment> | <cuisineRating> | <reservationId> | <serviceComment> | <serviceRating> |
+    When the user sends the authorized post request to "/feedbacks" with the request payload
+    Then the status code should be 201
+
+    Examples:
+      | cuisineComment | cuisineRating | reservationId                        | serviceComment | serviceRating |
+      | Good food      | 4             | 91fb59a8-0532-413c-8197-1f3f0a5fcbec | good           | 4             |
+
+  @regression
   Scenario Outline: Verify the successful feedback posted with valid details
     Given the user sends a feedback request with the following data:
       | cuisineComment   | cuisineRating   | reservationId   | serviceComment   | serviceRating   |
@@ -25,7 +38,7 @@ Feature: Verify the feedbacks of the user
       |                | 4             | 91fb59a8-0532-413c-8197-1f3f0a5fcbec |                |               |
       |                |               | 91fb59a8-0532-413c-8197-1f3f0a5fcbec |                | 4             |
 
-
+  @regression
   Scenario Outline: Verify the failed feedbacks with invalid details
     Given the user sends a feedback request with the following data:
       | cuisineComment   | cuisineRating   | reservationId   | serviceComment   | serviceRating   |
@@ -35,12 +48,12 @@ Feature: Verify the feedbacks of the user
     And the response should contain failed error "<error>" message
 
     Examples:
-      | cuisineComment | cuisineRating | reservationId                        | serviceComment | serviceRating | error                                                                              |
-      | Good food      |               | 91fb59a8-0532-413c-8197-1f3f0a5fcbec | good           |               | Service rating is required when service comment is provided                        |
-      | Good           | 3             | 15b306d8-521d-471e-ad28-78b905af24cc | bad            | 2             | Feedback can be provided only once your reservation is in progress or has finished |
-      | Good           | 4             | 15b306d8-521d-471e-ad28-78b905af24cc | Good           | 4             | Feedback can be provided only once your reservation is in progress or has finished |
+      | cuisineComment | cuisineRating | reservationId                        | serviceComment | serviceRating | error                                                                           |
+      | Good food      |               | 91fb59a8-0532-413c-8197-1f3f0a5fcbec | good           |               | Service rating is required when service comment is provided                     |
+      | Good           | 3             | 15b306d8-521d-471e-ad28-78b905af24cc | bad            | 2             | Service feedback saved, but cuisine feedback cannot be provided before ordering |
+      | Good           | 4             | 15b306d8-521d-471e-ad28-78b905af24cc | Good           | 4             | Service feedback saved, but cuisine feedback cannot be provided before ordering |
 
-
+  @regression
   Scenario Outline: Verify the failed feedbacks for non existent reservations
     Given the user sends a feedback request with the following data:
       | cuisineComment   | cuisineRating   | reservationId   | serviceComment   | serviceRating   |

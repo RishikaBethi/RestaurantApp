@@ -4,6 +4,15 @@ Feature: Get dishes by specifying type and sort
     Given the base_uri of the application
     And the user is authenticated
 
+    @smoke
+  Scenario Outline: Display dishes based on criteria
+    When the user sends the authorized get request to "dishes?<dishType>&<sort>" request payload
+    Then the status code should be 200
+    Examples:
+      | dishType              | sort                 |
+      | dishType=DESSERTS     | sort=price-asc       |
+
+      @regression
   Scenario Outline: Display dishes based on criteria
     When the user sends the authorized get request to "dishes?<dishType>&<sort>" request payload
     Then the status code should be 200
@@ -26,6 +35,7 @@ Feature: Get dishes by specifying type and sort
       | @empty                | sort=price-asc       |
       | dishType=DESSERTS     |                      |
 
+  @regression
   Scenario Outline: Display error message when invalid filter types are applied
     When the user sends the authorized get request to "/dishes?dishType=<dishType>&sortBy=<sort>" request payload
     Then the status code should be 400
@@ -36,7 +46,7 @@ Feature: Get dishes by specifying type and sort
       | abc      | price-asc | "Invalid dishType: abc. Must be MAIN COURSES, DESSERTS, or APPETIZERS"                        |
       | DESSERTS | abc       | "Invalid sortBy format: abc. Use format field-direction (e.g., price-asc or popularity-desc)" |
 
-
+  @regression
   Scenario Outline: Display dishes by id
     When the user sends the authorized get request to "/dishes/<id>" request payload
     Then the status code should be <status>
