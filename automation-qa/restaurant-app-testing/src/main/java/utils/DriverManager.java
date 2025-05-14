@@ -8,9 +8,9 @@ public class DriverManager {
 
     private DriverManager() {}
 
-    public static void createNewDriver(String browser) {
+    public static void createNewDriver() {
         quitDriver(); // Ensure old one is gone
-        threadLocal.set(BrowserFactory.createDriver(browser));
+        threadLocal.set(BrowserFactory.createDriver());
     }
 
     public static WebDriver getDriver() {

@@ -59,7 +59,7 @@ public class CommonStepsUI {
     }
 
     @And("the user clicks on {string} button")
-    public void clicksOnASpecificButton(String button) throws InterruptedException {
+    public void clicksOnASpecificButton(String button) {
         switch (button) {
             case "sign in" -> {
                 loginPage.clickOnSignInButton();
@@ -121,9 +121,8 @@ public class CommonStepsUI {
             case "Make a waiter Reservation" ->
                 waiterReservationsPage.clickOnMakeAReservation();
 
-            case "View Menu" ->{
+            case "View Menu" ->
                 dishesPage.clickOnViewMenu();
-            }
 
             default->
                 throw new customExceptions.NoButtonFoundException("No such button found");
@@ -139,12 +138,10 @@ public class CommonStepsUI {
     @Then("the page will display the error {string} message")
     public void verifyTheErrorMessage(String message) {
         String currentPage = shareContextUI.getCurrentPage();
-        switch (currentPage)
-        {
-            case "sign in":
+        switch (currentPage) {
+            case "sign in" ->
                 Assert.assertEquals(loginPage.getErrorMessage(),message);
-                break;
-            case "Book a Table":
+            case "Book a Table" ->
                 Assert.assertEquals(FIndTablesPage.getErrorMessage(),message);
         }
     }
