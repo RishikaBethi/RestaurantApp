@@ -25,25 +25,25 @@ public class RequestBuilder {
                 .build();
     }
 
-    public static RequestSpecification sendAuthorizedCustomerGetRequest(ShareContext shareContext)
+    public static RequestSpecification sendGetRequest(ShareContext shareContext,String customerToken)
     {
         return new RequestSpecBuilder()
                 .setBaseUri(shareContext.getBaseUri())
                 .setContentType("application/json")
-                .setAuth(oauth2(shareContext.getCustomerToken()))
+                .setAuth(oauth2(customerToken))
                 .build();
     }
 
-    public static RequestSpecification sendGETRequest(ShareContext shareContext)
+    public static RequestSpecification sendGetRequest(ShareContext shareContext)
     {
         return new RequestSpecBuilder()
                 .setBaseUri(shareContext.getBaseUri())
                 .build();
     }
 
-    public static RequestSpecification sendAuthorizedDeleteRequest(ShareContext shareContext){
+    public static RequestSpecification sendDeleteRequest(ShareContext shareContext,String customerToken){
         return new RequestSpecBuilder()
-                .setAuth(oauth2(shareContext.getCustomerToken()))
+                .setAuth(oauth2(customerToken))
                 .setBaseUri(shareContext.getBaseUri())
                 .build();
     }
@@ -55,21 +55,21 @@ public class RequestBuilder {
                 .build();
     }
 
-    public static RequestSpecification sendAuthorizedPostRequest(ShareContext shareContext){
+    public static RequestSpecification sendPostRequest(ShareContext shareContext,String customerToken){
         return new RequestSpecBuilder()
                 .setBaseUri(shareContext.getBaseUri())
                 .setContentType("application/json")
-                .setAuth(oauth2(shareContext.getCustomerToken()))
+                .setAuth(oauth2(customerToken))
                 .setBody(shareContext.getUser())
                 .build();
     }
 
-    public static RequestSpecification sendAuthorizedWaiterPostRequest(ShareContext shareContext)
+    public static RequestSpecification sendAuthorizedPostRequest(ShareContext shareContext,String waiterToken)
     {
         return new RequestSpecBuilder()
                 .setBaseUri(shareContext.getBaseUri())
                 .setContentType("application/json")
-                .setAuth(oauth2(shareContext.getWaiterToken()))
+                .setAuth(oauth2(waiterToken))
                 .setBody(shareContext.getUser())
                 .build();
     }

@@ -42,7 +42,7 @@ public class WaiterBookingsSteps {
     @When("the waiter sends authorized post request to {string} request payload")
     public void sendWaiterPostRequest(String endpoint){
         Response response = given()
-                .spec(RequestBuilder.sendAuthorizedWaiterPostRequest(shareContext))
+                .spec(RequestBuilder.sendAuthorizedPostRequest(shareContext,shareContext.getWaiterToken()))
                 .when()
                 .post(endpoint)
                 .then()

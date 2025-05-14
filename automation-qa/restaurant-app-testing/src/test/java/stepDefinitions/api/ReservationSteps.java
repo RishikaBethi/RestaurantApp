@@ -17,7 +17,7 @@ public class ReservationSteps {
     @When("the user sends authorized get request to {string} request payload")
     public void getReq(String endpoint){
         Response response = given()
-                .spec(RequestBuilder.sendAuthorizedCustomerGetRequest(shareContext))
+                .spec(RequestBuilder.sendGetRequest(shareContext,shareContext.getCustomerToken()))
                 .when()
                 .get(endpoint)
                 .then()

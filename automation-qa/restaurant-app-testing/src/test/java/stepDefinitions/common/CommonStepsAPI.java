@@ -34,14 +34,6 @@ public class CommonStepsAPI {
 
     @When("the user sends the post request to {string} with the request payload")
     public void sendPOSTRequest(String endpoint){
-        /*String endpoint;
-
-        try {
-            Field field = Constants.class.getDeclaredField(constantFieldName);
-            endpoint = (String) field.get(null); // get static field value
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new IllegalArgumentException("Invalid endpoint constant: " + constantFieldName, e);
-        }*/
         Response response = given()
                 .spec(RequestBuilder.sendPostRequestSpec(shareContext))
                 .when()
@@ -72,13 +64,8 @@ public class CommonStepsAPI {
     @When("the user sends the authorized post request to {string} with the request payload")
     public void sendAuthenticatedPOSTRequest(String endpoint){
 
-        System.out.println("Access Token: " + shareContext.getCustomerToken());
-        System.out.println("Base URI: " + shareContext.getBaseUri());
-        System.out.println("Request Payload: " + shareContext.getUser());
-
-
         Response response = given()
-                .spec(RequestBuilder.sendAuthorizedPostRequest(shareContext))
+                .spec(RequestBuilder.sendPostRequest(shareContext,shareContext.getCustomerToken()))
                 .when()
                 .post(endpoint)
                 .then()
@@ -89,16 +76,9 @@ public class CommonStepsAPI {
     @When("the user sends the authorized get request to {string} request payload")
     public void sendAuthorizedGetRequest(String endpoint)
     {
-        /*String endpoint;
 
-        try {
-            Field field = Constants.class.getDeclaredField(constantFieldName);
-            endpoint = (String) field.get(null); // get static field value
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new IllegalArgumentException("Invalid endpoint constant: " + constantFieldName, e);
-        }*/
         Response response = given()
-                .spec(RequestBuilder.sendAuthorizedCustomerGetRequest(shareContext))
+                .spec(RequestBuilder.sendGetRequest(shareContext,shareContext.getCustomerToken()))
                 .when()
                 .get(endpoint)
                 .then()
@@ -110,7 +90,7 @@ public class CommonStepsAPI {
     public void sendGetRequest(String endpoint)
     {
         Response response = given()
-                .spec(RequestBuilder.sendGETRequest(shareContext))
+                .spec(RequestBuilder.sendGetRequest(shareContext))
                 .when()
                 .get(endpoint)
                 .then()
@@ -122,7 +102,7 @@ public class CommonStepsAPI {
     @When("the user sends the authorized delete request to {string} request payload")
     public void sendAuthorizedDeleteRequest(String endpoint){
         Response response = given()
-                .spec(RequestBuilder.sendAuthorizedDeleteRequest(shareContext))
+                .spec(RequestBuilder.sendDeleteRequest(shareContext,shareContext.getCustomerToken()))
                 .when()
                 .delete(endpoint)
                 .then()

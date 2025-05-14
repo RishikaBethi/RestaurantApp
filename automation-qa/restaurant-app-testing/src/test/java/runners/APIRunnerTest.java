@@ -23,6 +23,6 @@ public class APIRunnerTest extends AbstractTestNGCucumberTests {
         @Override
         @DataProvider(parallel = true)
         public Object[][] scenarios() {
-                return super.scenarios(); // this enables parallel execution of scenario outline rows
+                return super.scenarios();
         }
 }
