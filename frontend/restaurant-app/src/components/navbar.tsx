@@ -51,6 +51,14 @@ export default function Navbar({ isLoggedIn, setIsLoggedIn }: { isLoggedIn: bool
         isActive ? "text-green-600 border-b-2 border-green-600" : "text-gray-600 hover:text-gray-500"
       }`;
 
+    if (role === "Admin" && isLoggedIn) {
+      return (
+        <Link to="/reports" className={linkClasses(location.pathname === "/reports")}>
+        Reports
+        </Link>
+      );
+    }
+
     if (role === "Waiter" && isLoggedIn) {
       return (
         <>
@@ -75,7 +83,7 @@ export default function Navbar({ isLoggedIn, setIsLoggedIn }: { isLoggedIn: bool
  
   return (
     <nav className="flex items-center bg-white shadow p-2 relative">
-      <Link to={role === "Waiter" ? "/waiter-reservations" : "/"}>
+      <Link to={role === "Admin" ? "/reports" : role === "Waiter" ? "/waiter-reservations" : "/"}>
         <img src={image} alt="Green & Tasty" className="h-10 w-auto" />
       </Link>
  
@@ -141,7 +149,15 @@ export default function Navbar({ isLoggedIn, setIsLoggedIn }: { isLoggedIn: bool
       {/* Mobile Dropdown */}
       {mobileMenuOpen && (
         <div className="absolute top-14 right-2 w-48 bg-white shadow rounded-md z-50 md:hidden" data-testid="mobile-menu">
-          {role === "Waiter" ? (
+          {role === "Admin" ? (
+            <Link
+              to="/reports"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+            >
+              Reports
+            </Link>
+          ) : role === "Waiter" ? (
             <>
               <Link
                 to="/waiter-reservations"
@@ -221,5 +237,3 @@ export default function Navbar({ isLoggedIn, setIsLoggedIn }: { isLoggedIn: bool
     </nav>
   );
 }
- 
- 

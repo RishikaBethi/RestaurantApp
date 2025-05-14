@@ -69,7 +69,9 @@ export default function Login({ setIsLoggedIn }: { setIsLoggedIn: (value: boolea
 
       if (role === "Waiter") {
         navigate("/waiter-reservations", { replace: true });
-      } else {
+      } else if (role === "Admin") {
+        navigate("/reports", { replace: true });
+      }else {
         navigate("/", { replace: true }); // default fallback
       }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

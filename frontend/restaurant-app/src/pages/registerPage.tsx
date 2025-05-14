@@ -78,16 +78,17 @@ const RegisterPage: React.FC = () => {
           if (
             !/^[A-Za-z0-9][A-Za-z0-9._-]*[A-Za-z0-9]@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(value) || // Basic email structure
             value.includes("..") || // Prevent consecutive dots
-            /(^|@|\.)_|\.(?!\w+$)/.test(value) || // Invalid characters or sequences
-            value.startsWith(".") // Cannot start with a dot
+            /(^|@)-|(-@)|(^|@)\.|(\.@)/.test(value) || // Invalid sequences like '-@', '@-', or '.@'
+            value.startsWith(".") || // Cannot start with a dot
+            value.endsWith(".") // Cannot end with a dot
           ) {
             setErrors((prev) => ({
               ...prev,
-              email: "Invalid email address. Ensure the username is alphanumeric, may contain '-' or '_', and the domain is valid.",
+              email: "Invalid email address. Ensure the username may contain dots (.), but not consecutive or at invalid positions, and the domain is valid.",
             }));
           } else {
             setErrors((prev) => ({ ...prev, email: "" }));
-          }
+          }          
           break;        
       case "password": {
         const passwordErrors: string[] = [];

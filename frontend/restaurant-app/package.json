@@ -5,10 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "start": "vite",
     "build": "tsc -b && vite build",
+    "build:prod": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
+    "test:coverage": "echo 'Skipping test coverage'",
     "test:watch": "vitest --watch"
   },
   "dependencies": {

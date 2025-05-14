@@ -49,6 +49,13 @@ describe("Navbar Component", () => {
     expect(screen.queryByText("Main Page")).not.toBeInTheDocument();
   });
 
+  it("renders appropriate links for a Admin", () => {
+    renderNavbar(true, "Admin");
+
+    expect(screen.getByText("Reports")).toBeInTheDocument();
+    expect(screen.queryByText("Main Page")).not.toBeInTheDocument();
+  });
+
   it("toggles avatar dropdown when clicked", () => {
     renderNavbar(true);
 

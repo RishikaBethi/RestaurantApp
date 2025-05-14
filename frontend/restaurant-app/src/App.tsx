@@ -11,6 +11,7 @@ import ReservationsPage from "./pages/reservations";
 import BookTable from "./pages/tablebooking";
 import ReservationDashboard from './pages/waiterReservationPage';
 import Menu from './components/viewMenu';
+import ReportsPage from "./pages/adminReports";
 
 type AppProps = {
   initialIsLoggedIn?: boolean;
@@ -34,6 +35,7 @@ function App({ initialIsLoggedIn = false }: AppProps) {
           <Route path="/book-table" element={<BookTable />} />
           <Route path="/waiter-reservations" element={<ReservationDashboard/>}/>
           <Route path="/menu" element={<Menu/>}/>
+          <Route path="/reports" element={<ReportsPage/>}/>
         </Route>
       </Routes>
     </BrowserRouter>

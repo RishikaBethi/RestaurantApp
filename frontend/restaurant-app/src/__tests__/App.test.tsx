@@ -24,6 +24,7 @@ vi.mock("@/pages/reservations", () => ({ default: () => <div>Reservations Page</
 vi.mock("@/pages/tablebooking", () => ({ default: () => <div>Book Table Page</div> }));
 vi.mock("@/pages/waiterReservationPage", () => ({ default: () => <div>Waiter Reservations Page</div> }));
 vi.mock("@/components/viewMenu", () => ({ default: () => <div>Menu Page</div> }));
+vi.mock("@/pages/adminReports", () => ({ default: () => <div>Admin Reports</div> }));
 
 describe("App routing", () => {
   beforeEach(() => {
@@ -89,6 +90,12 @@ describe("App routing", () => {
 
   it("renders Menu page", () => {
     renderWithRoute("/menu",true);
+    expect(screen.getByTestId("layout")).toBeInTheDocument();
+    expect(screen.queryByText("Login")).not.toBeInTheDocument();
+  });
+
+  it("renders Reports page", () => {
+    renderWithRoute("/reports",true);
     expect(screen.getByTestId("layout")).toBeInTheDocument();
     expect(screen.queryByText("Login")).not.toBeInTheDocument();
   });
