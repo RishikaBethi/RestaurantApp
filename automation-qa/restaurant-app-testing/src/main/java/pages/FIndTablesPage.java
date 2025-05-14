@@ -62,8 +62,8 @@ public class FIndTablesPage extends BasePage{
     }
 
     public void clickOnFindATable(){
-        wait.until(ExpectedConditions.visibilityOf(findATable));
-        findATable.click();
+        waitForElementToBeVisible(findATable);
+        click(findATable);
     }
 
     public void selectTimeFromDropDown(String time){
@@ -76,17 +76,17 @@ public class FIndTablesPage extends BasePage{
         return availableTables.size();
     }
 
-    public void sendDetailsToBookATable(String location,String InputDate,String InputTime,String InputGuests)
+    public void sendDetailsToBookATable(String location,String inputDate,String inputTime,String inputGuests)
     {
-        wait.until(ExpectedConditions.visibilityOf(locations));
+        waitForElementToBeVisible(locations);
         wait.until(ExpectedConditions.presenceOfNestedElementLocatedBy(locations, By.xpath(".//option[@value='" + location + "']")));
         Select locations_dd = new Select(locations);
         locations_dd.selectByValue(location);
         date.clear();
-        date.sendKeys(InputDate);
-        selectTimeFromDropDown(InputTime);
+        enterTextInField(date, inputDate);
+        selectTimeFromDropDown(inputTime);
         guests.clear();
-        guests.sendKeys(InputGuests);
+        enterTextInField(guests, inputGuests);
     }
 
     public boolean visibilityOfTimeSlots() {
@@ -95,30 +95,30 @@ public class FIndTablesPage extends BasePage{
     }
 
     public String getErrorMessage(){
-        wait.until(ExpectedConditions.visibilityOf(errorMessage));
-        return errorMessage.getText();
+        waitForElementToBeVisible(errorMessage);
+        return getTextOfElement(errorMessage);
     }
 
     public void clickOnTimeSlot(){
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-        timeSlotButtons.get(0).click();
+        click(timeSlotButtons.get(0));
     }
 
     public void increment(){
-        wait.until(ExpectedConditions.visibilityOf(reservationFormGuests));
-        incrementButton.click();
-        incrementButton.click();
+        waitForElementToBeVisible(reservationFormGuests);
+        click(incrementButton);
+        click(incrementButton);
     }
 
     public String getGuestsCount(){
-        return guestsCount.getText();
+        return getTextOfElement(guestsCount);
     }
 
     public String getReservationConfirmationMessage(){
-        return reservationConfirmationMessage.getText();
+        return getTextOfElement(reservationConfirmationMessage);
     }
 
     public void clickOnMakeAReservation(){
-        makeAReservation.click();
+        click(makeAReservation);
     }
 }

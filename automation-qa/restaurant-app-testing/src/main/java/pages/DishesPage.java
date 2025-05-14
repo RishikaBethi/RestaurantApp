@@ -4,7 +4,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 
 import java.util.ArrayList;
@@ -36,12 +35,12 @@ public class DishesPage extends BasePage {
     }
 
     public void clickOnViewMenu(){
-        viewMenu.click();
+        click(viewMenu);
     }
 
     public String getDisplayMessage(){
-        wait.until(ExpectedConditions.visibilityOf(displayMessage));
-        return displayMessage.getText();
+        waitForElementToBeVisible(displayMessage);
+        return getTextOfElement(displayMessage);
     }
 
     public int getNumberOfDynamicDishes(){
@@ -62,7 +61,7 @@ public class DishesPage extends BasePage {
         for (WebElement element : dynamicMenu) {
             try {
                 WebElement childElement = element.findElement(By.xpath(".//span[contains(text(), '$')]"));
-                wait.until(ExpectedConditions.visibilityOf(childElement));
+                waitForElementToBeVisible(childElement);
                 String price = childElement.getText().replace("$", "").trim();
                 prices.add(Integer.parseInt(price));
             } catch (Exception e) {

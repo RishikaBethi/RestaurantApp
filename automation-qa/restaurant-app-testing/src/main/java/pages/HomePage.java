@@ -19,11 +19,11 @@ public class HomePage extends BasePage{
     }
 
     public void openReservations(){
-        reservations.click();
+        click(reservations);
     }
 
     public void openMyProfile(){
-        userIcon.click();
-        myProfile.click();
+        click(userIcon);
+        click(myProfile);
     }
 }

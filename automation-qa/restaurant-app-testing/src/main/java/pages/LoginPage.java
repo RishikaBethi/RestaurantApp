@@ -4,14 +4,11 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import utils.ConfigReader;
 
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 public class LoginPage extends BasePage {
-
-    private WebDriverWait wait;
 
     @FindBy(xpath = "//button[.='Sign In']")
     private WebElement signIn;
@@ -37,18 +34,18 @@ public class LoginPage extends BasePage {
     }
 
     public void enterTheSignInPage(){
-        signIn.click();
-        wait.until(visibilityOfElementLocated(By.xpath("//input[@type='email']")));
+        click(signIn);
+        waitForElementToBeVisible(email);
     }
 
     public void enterValidCredentials(String emailText,String passwordText)
     {
-        email.sendKeys(emailText);
-        password.sendKeys(passwordText);
+        enterTextInField(email, emailText);
+        enterTextInField(password, passwordText);
     }
 
     public void clickOnSignInButton(){
-        submitButton.click();
+        click(submitButton);
         wait.until(ExpectedConditions.or(
                 ExpectedConditions.urlToBe(ConfigReader.getProperty("base_url")),
                 ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@data-title]")),
@@ -62,10 +59,10 @@ public class LoginPage extends BasePage {
 
     public String getErrorMessage(){
         wait.until(visibilityOfElementLocated(By.xpath("//div[@data-title]")));
-        return errorMessage.getText();
+        return getTextOfElement(errorMessage);
     }
 
     public String getMissingEmailText(){
-        return missingFields.getText();
+        return getTextOfElement(missingFields);
     }
 }

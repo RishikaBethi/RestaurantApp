@@ -1,9 +1,7 @@
 package pages;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class SignUpPage extends BasePage{
 
@@ -39,27 +37,27 @@ public class SignUpPage extends BasePage{
     }
 
     public void clickCreateAccountLink(){
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[.='Create an Account']")));
-        createAccountLink.click();
+        waitForElementToBeVisible(createAccountLink);
+        click(createAccountLink);
     }
 
     public void enterTheDetails(String firstNameData, String lastNameData, String emailData, String passwordData, String confirmPasswordData) {
-        firstName.sendKeys(firstNameData);
-        lastName.sendKeys(lastNameData);
-        email.sendKeys(emailData);
-        password.sendKeys(passwordData);
-        confirmPassword.sendKeys(confirmPasswordData);
+        enterTextInField(firstName, firstNameData);
+        enterTextInField(lastName, lastNameData);
+        enterTextInField(email, emailData);
+        enterTextInField(password, passwordData);
+        enterTextInField(confirmPassword, confirmPasswordData);
     }
 
     public String getErrorMessage(){
-        return errorMessage.getText();
+        return getTextOfElement(errorMessage);
     }
 
     public void clickCreateAccountButton(){
-        createAccountButton.click();
+        click(createAccountButton);
     }
 
     public String getPasswordErrorMessage(){
-        return passwordErrorMessage.getText();
+        return getTextOfElement(passwordErrorMessage);
     }
 }

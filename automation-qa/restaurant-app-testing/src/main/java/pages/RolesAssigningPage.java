@@ -2,7 +2,6 @@ package pages;
 
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class RolesAssigningPage extends BasePage{
 
@@ -17,12 +16,12 @@ public class RolesAssigningPage extends BasePage{
     }
 
     public void clickOnUserLogo(){
-        wait.until(ExpectedConditions.visibilityOf(userLogo));
-        userLogo.click();
+        waitForElementToBeVisible(userLogo);
+        click(userLogo);
     }
 
     public String getRole(){
-        wait.until(ExpectedConditions.visibilityOf(role));
-        return role.getText();
+        waitForElementToBeVisible(role);
+        return getTextOfElement(role);
     }
 }

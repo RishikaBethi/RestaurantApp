@@ -51,22 +51,22 @@ public class ProfilePage extends BasePage{
     }
 
     public String getSuccessfulMessage(){
-        wait.until(ExpectedConditions.visibilityOf(successfulMessage));
-        return successfulMessage.getText();
+        waitForElementToBeVisible(successfulMessage);
+        return getTextOfElement(successfulMessage);
     }
 
     public void enterData(String firstName, String lastName){
-        firstNameField.sendKeys(firstName);
-        lastNameField.sendKeys(lastName);
+        enterTextInField(firstNameField, firstName);
+        enterTextInField(lastNameField, lastName);
     }
 
     public boolean isCharactersExceededMessageVisible(){
-        wait.until(ExpectedConditions.visibilityOf(charactersExceededMessage));
+        waitForElementToBeVisible(charactersExceededMessage);
         return charactersExceededMessage.isDisplayed();
     }
 
     public void clickChangePassword(){
-        changePassword.click();
+        click(changePassword);
     }
 
     public void enterPasswords(String oldPassword, String newPassword, String confirmPassword){
@@ -76,17 +76,16 @@ public class ProfilePage extends BasePage{
     }
 
     public String incorrectOldPasswordMessage(){
-        wait.until(ExpectedConditions.visibilityOf(incorrectOldPasswordMessage));
-        return incorrectOldPasswordMessage.getText();
+        waitForElementToBeVisible(incorrectOldPasswordMessage);
+        return getTextOfElement(incorrectOldPasswordMessage);
     }
 
     public String getErrorMessage(){
-        wait.until(ExpectedConditions.visibilityOf(errorMessage));
-        return errorMessage.getText();
+        waitForElementToBeVisible(errorMessage);
+        return getTextOfElement(errorMessage);
     }
 
-    public void uploadImage(String imagePath)
-    {
-        image.sendKeys(imagePath);
+    public void uploadImage(String imagePath) {
+        enterTextInField(image, imagePath);
     }
 }

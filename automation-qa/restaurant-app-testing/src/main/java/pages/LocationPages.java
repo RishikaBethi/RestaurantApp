@@ -4,7 +4,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 
 import java.util.ArrayList;
@@ -36,8 +35,7 @@ public class LocationPages extends BasePage {
     @FindBy(xpath = "//button[.='Cuisine Experience']")
     private WebElement cuisineRatings;
 
-    public LocationPages()
-    {
+    public LocationPages() {
         super();
         js = (JavascriptExecutor) driver;
     }
@@ -47,26 +45,26 @@ public class LocationPages extends BasePage {
     }
 
     public String getLocationsNameBeforeClick(){
-        wait.until(ExpectedConditions.visibilityOf(locations));
-        return locations.getText();
+        waitForElementToBeVisible(locations);
+        return getTextOfElement(locations);
     }
 
     public void clickOnALocation(){
-        locations.click();
+        click(locations);
     }
 
     public String getLocationsNameAfterClick(){
-        wait.until(ExpectedConditions.visibilityOf(locationsNameAfterClick));
-        return locationsNameAfterClick.getText();
+        waitForElementToBeVisible(locationsNameAfterClick);
+        return getTextOfElement(locationsNameAfterClick);
     }
 
     public void scrollIntoCustomerReviewsView(){
-        wait.until(ExpectedConditions.visibilityOf(customerReviews));
+        waitForElementToBeVisible(customerReviews);
         js.executeScript("arguments[0].scrollIntoView()",customerReviews);
     }
 
     public String getRatings(){
-        return ratings.getText();
+        return getTextOfElement(ratings);
     }
 
     public int getNumberOfRatings(){
@@ -74,7 +72,7 @@ public class LocationPages extends BasePage {
     }
 
     public void clickOnCuisineRatings(){
-        cuisineRatings.click();
+        click(cuisineRatings);
     }
 
     public void filterTheRatingByGivenRequirement(String requirement) {
@@ -108,6 +106,5 @@ public class LocationPages extends BasePage {
         }
         return actualServiceRatings;
     }
-
 }
 

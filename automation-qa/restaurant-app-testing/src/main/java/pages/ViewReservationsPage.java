@@ -18,11 +18,11 @@ public class ViewReservationsPage extends BasePage{
 
     public void clickUpdateFeedback(){
         wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath("//button[text()='Update Feedback']")));
-        updateFeedbackButtons.get(3).click();
+        click(updateFeedbackButtons.get(3));
     }
 
     public void clickUpdateFeedbackOfNewReservation(){
         wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath("//button[text()='Update Feedback']")));
-        updateFeedbackButtons.get(0).click();
+        click(updateFeedbackButtons.get(0));
     }
 }

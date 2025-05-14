@@ -61,13 +61,13 @@ public class WaiterReservationsPage extends BasePage{
     }
 
     public void waiterClickOnSearchReservations(){
-        wait.until(ExpectedConditions.visibilityOf(waiterReservationsSearch));
-        waiterReservationsSearch.click();
+        waitForElementToBeVisible(waiterReservationsSearch);
+        click(waiterReservationsSearch);
     }
 
     public void sendDate(String dateInput){
-        wait.until(ExpectedConditions.visibilityOf(date));
-        date.sendKeys(dateInput);
+        waitForElementToBeVisible(date);
+        enterTextInField(date, dateInput);
     }
 
     public int getFilteredReservations(){
@@ -75,20 +75,20 @@ public class WaiterReservationsPage extends BasePage{
     }
 
     public void clickOnCreateNewReservation(){
-        wait.until(ExpectedConditions.visibilityOf(createNewReservation));
-        createNewReservation.click();
+        waitForElementToBeVisible(createNewReservation);
+        click(createNewReservation);
     }
 
     public void clickOnVisitor(){
-        visitor.click();
+        click(visitor);
     }
 
     public void clickOnCustomer(){
-        customer.click();
+        click(customer);
     }
 
     public void enterTheGuests(){
-        guests.click();
+        click(guests);
     }
 
     public void enterTheTimeFrom(String time){
@@ -98,7 +98,7 @@ public class WaiterReservationsPage extends BasePage{
         WebElement timeOption = wait.until(ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(String.format("//div[@role='option' or @data-slot='item']//div[text()='%s']", time))
         ));
-        timeOption.click();
+        click(timeOption);
     }
 
     public void enterTheTableNumber(String tableInput) {
@@ -107,7 +107,7 @@ public class WaiterReservationsPage extends BasePage{
         WebElement tableOption = wait.until(ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(String.format("//div[@role='option' or @data-slot='item']//div[text()='%s']", tableInput))
         ));
-        tableOption.click();
+        click(tableOption);
     }
 
     public void clickOnMakeAReservation() {
@@ -117,16 +117,15 @@ public class WaiterReservationsPage extends BasePage{
 
     public String getConfirmationMessage() throws InterruptedException {
         Thread.sleep(2000);
-        return confirmationMessage.getText();
+        return getTextOfElement(confirmationMessage);
     }
 
     public void sendDateInsideCreateReservation(String dateInput){
         dateInsideCreateReservation.clear();
-        dateInsideCreateReservation.sendKeys(dateInput);
+        enterTextInField(dateInsideCreateReservation, dateInput);
     }
 
-    public void sendCustomerEmail(String email)
-    {
-        customerEmail.sendKeys(email);
+    public void sendCustomerEmail(String email) {
+        enterTextInField(customerEmail, email);
     }
 }

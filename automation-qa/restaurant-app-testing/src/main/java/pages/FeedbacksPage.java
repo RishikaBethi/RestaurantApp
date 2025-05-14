@@ -30,11 +30,11 @@ public class FeedbacksPage extends BasePage{
 
     public void giveFourStars(){
         wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath("//*[contains(@class,'lucide-star')]")));
-        stars.get(3).click();
+        click(stars.get(3));
     }
 
     public void addComment(){
-        commentBox.sendKeys("Good...");
+        enterTextInField(commentBox, "Good...");
     }
 
     public void clickCulinaryExperience() {
@@ -42,16 +42,16 @@ public class FeedbacksPage extends BasePage{
     }
 
     public String getFeedbackSuccessMessage(){
-        wait.until(ExpectedConditions.visibilityOf(feedbackSuccessfulMessage));
-        return feedbackSuccessfulMessage.getText();
+        waitForElementToBeVisible(feedbackSuccessfulMessage);
+        return getTextOfElement(feedbackSuccessfulMessage);
     }
 
     public void clickFeedbackButton(){
-        updateFeedbackButton.click();
+        click(updateFeedbackButton);
     }
 
     public void giveFiveStars(){
-        stars.get(4).click();
+        click(stars.get(4));
     }
 
     public void clearComment(){
