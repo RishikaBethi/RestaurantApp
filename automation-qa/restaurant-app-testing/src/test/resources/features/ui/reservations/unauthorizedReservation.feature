@@ -3,6 +3,7 @@ Feature: Handle Customer reservations
     Given the user enters into the application
     And the user clicks on "Book a Table" button
 
+  @regression
   Scenario Outline: Verify the user cannot reserve a table without logging in
     When the user selects the "<location>" "<date>" "<timeSlot>" "<guests>" details
     And the user clicks on "Find a Table" button

@@ -7,6 +7,7 @@ Feature: Handle user profile updating
     And the user clicks on "sign in" button
     And the user clicks on profile
 
+  @smoke
   Scenario Outline: Update profile with valid data
     When the user enter "<firstName>" and "<lastName>"
     And the user clicks on "Save Changes" button
@@ -16,6 +17,7 @@ Feature: Handle user profile updating
       | firstName | lastName |
       | Rishitha  | G        |
 
+  @regression
   Scenario Outline: Update profile with valid data and image
     When the user enter "<firstName>" and "<lastName>"
     And the user uploads the image "C:\Users\gantagari_sushma\Downloads\Shin Chan With Backpack Image Crayon Shin Chan And - Shin Chan, HD Png Download , Transparent Png Image - PNGitem.jpg"
@@ -26,6 +28,7 @@ Feature: Handle user profile updating
       | firstName | lastName |
       | Rishitha  | G        |
 
+  @regression
   Scenario Outline: Update profile with exceeding lengths in fields
     When the user enter "<firstName>" and "<lastName>"
     Then the user should see a message that the fields exceed maximum limit
@@ -34,6 +37,7 @@ Feature: Handle user profile updating
     | firstName                                            | lastName |
     | qwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnm | G        |
 
+  @regression
   Scenario Outline: Unsuccessful password update
     When the user clicks on "Change Password" button
     And the user enters "<oldPassword>", "<newPassword>" and "<confirmPassword>"
@@ -44,6 +48,7 @@ Feature: Handle user profile updating
       | oldPassword | newPassword  | confirmPassword |
       | abc         | Rishitha123! | Rishitha123!    |
 
+  @regression
   Scenario Outline: Missing password character criteria
     When the user clicks on "Change Password" button
     And the user enters "<oldPassword>", "<newPassword>" and "<confirmPassword>"

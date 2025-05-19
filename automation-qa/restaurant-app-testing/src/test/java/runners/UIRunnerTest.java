@@ -8,6 +8,7 @@ import org.testng.annotations.DataProvider;
 @CucumberOptions(
         features = "src/test/resources/features/ui",
         glue = {"stepDefinitions/ui","stepDefinitions/common", "hooks"},
+        tags = "@smoke or @regression",
         plugin = {
                 "pretty",
                 "html:target/cucumber-reports/cucumber-html-report.html",

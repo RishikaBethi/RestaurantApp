@@ -6,6 +6,7 @@ Feature: Handle Customer reservations
     And the user clicks on "sign in" button
     And the user clicks on "Book a Table" button
 
+  @smoke
   Scenario Outline: Verify that timeslots are visible
     When the user selects the "<location>" "<date>" "<timeSlot>" "<guests>" details
     And the user clicks on "Find a Table" button
@@ -15,6 +16,7 @@ Feature: Handle Customer reservations
       | location | date       | timeSlot | guests |
       | LOC003   | 21-05-2026 | 10:30    | 1      |
 
+  @regression
   Scenario Outline: Verify that the users can select the guests count
     When the user selects the "<location>" "<date>" "<timeSlot>" "<guests>" details
     And the user clicks on "Find a Table" button
@@ -25,6 +27,7 @@ Feature: Handle Customer reservations
       | location | date       | timeSlot | guests |
       | LOC003   | 21-05-2026 | 10:30    | 1      |
 
+  @regression
   Scenario Outline: Verify that message is shown after successful registration
     When the user selects the "<location>" "<date>" "<timeSlot>" "<guests>" details
     And the user clicks on "Find a Table" button

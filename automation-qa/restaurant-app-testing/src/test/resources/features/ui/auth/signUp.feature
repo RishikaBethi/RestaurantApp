@@ -5,6 +5,7 @@ Feature: Verify the registration of the user
     And the user enters into the sign in page
     And the user clicks on "create an account link" button
 
+  @smoke
   Scenario Outline: Verify the valid registration of the user
     When the user enters the following data:
       | firstName   | lastName   | email   | password   | confirmPassword   |
@@ -16,7 +17,7 @@ Feature: Verify the registration of the user
       | firstName | lastName | email               | password     | confirmPassword | signIn                                                                      |
       | Sushma    | G12      | sushmaaag@gmail.com | Password123! | Password123!    | http://team-7-frontend-bucket.s3-website-ap-southeast-2.amazonaws.com/login |
 
-
+  @regression
   Scenario Outline: Verify the registration by entering invalid details
     When the user enters the following data:
       | firstName   | lastName   | email   | password   | confirmPassword   |
@@ -39,7 +40,7 @@ Feature: Verify the registration of the user
       | Johnson   | Doe      | john@@gmail.com | Password123! | Password123!    | Invalid email address. Ensure the username is alphanumeric, may contain '-' or '_', and the domain is valid.            |
       | Johnson   | Doe      | john@gmail.com  | Password123! | password123!    | Confirm password must match new password                                                                                |
 
-
+  @regression
   Scenario Outline: Verify the registration by entering invalid passwords
     When the user enters the following data:
       | firstName   | lastName   | email   | password   | confirmPassword   |

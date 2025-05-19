@@ -4,11 +4,13 @@ Feature: Find the available reservations for required time slots
     Given the user enters into the application
     And the user clicks on "Book a Table" button
 
+  @smoke
   Scenario: Verify the availability of tables for default time and location
     When the user selects the "19:15" timeslot
     And the user clicks on "Find a Table" button
     Then the user should be able to see the available tables
 
+  @regression
   Scenario Outline: Verify the availability of tables for valid location date and time
     When the user selects the "<location>" "<date>" "<timeSlot>" "<guests>" details
     And the user clicks on "Find a Table" button
@@ -38,6 +40,7 @@ Feature: Find the available reservations for required time slots
       | LOC002   | 21-05-2025 | 19:15    | 8      |
       | LOC002   | 21-05-2025 | 21:00    | 10     |
 
+  @regression
   Scenario Outline: Verify the error message if invalid details are sent
     When the user selects the "<location>" "<date>" "<timeSlot>" "<guests>" details
     And the user clicks on "Find a Table" button
@@ -51,6 +54,7 @@ Feature: Find the available reservations for required time slots
       | LOC001   | 07-04-2026 | 10:30    | 0      | Please enter a valid number of guests (minimum 1).         |
       | LOC001   | 07-04-2026 | 10:30    | 23     | We are sorry! We couldn't find tables as per your criteria |
 
+  @regression
   Scenario Outline: Verify that the timeslots are visible
     When the user selects the "<location>" "<date>" "<timeSlot>" "<guests>" details
     And the user clicks on "Find a Table" button

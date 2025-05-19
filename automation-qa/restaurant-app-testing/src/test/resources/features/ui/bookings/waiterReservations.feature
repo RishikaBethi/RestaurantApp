@@ -7,6 +7,7 @@ Feature: Verify the reservations by the waiter
     And the user clicks on "sign in" button
     Then the user will be redirected to the "http://team-7-frontend-bucket.s3-website-ap-southeast-2.amazonaws.com/waiter-reservations" page
 
+  @smoke
   Scenario: Verify the proper filtering of reservations by the waiter
     When the user clicks on "WaiterReservations" button
     And the waiter selects the date "20-03-2026"
@@ -14,6 +15,7 @@ Feature: Verify the reservations by the waiter
     Then the waiter should able to see reservations
 
 
+  @regression
   Scenario: Valid Reservation by waiter for visitor
     When the user clicks on "WaiterReservations" button
     And the user clicks on "CreateNewReservation" button
@@ -26,6 +28,7 @@ Feature: Verify the reservations by the waiter
     Then the page will display the confirmation "Reservation made successfully!" message
 
 
+  @regression
   Scenario: Valid Reservation by waiter for existing customer
     When the user clicks on "WaiterReservations" button
     And the user clicks on "CreateNewReservation" button

@@ -3,6 +3,7 @@ Feature: Verify the role assignment for customer and waiter
   Background:
     Given the user enters into the application
 
+  @smoke
   Scenario Outline: Verify the role of the customer and waiter
     Given the user enters into the sign in page
     When the user enters the "<email>" and "<password>"
