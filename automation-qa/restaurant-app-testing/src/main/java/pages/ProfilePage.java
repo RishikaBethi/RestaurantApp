@@ -42,6 +42,9 @@ public class ProfilePage extends BasePage{
     @FindBy(xpath = "//input[@type='file']")
     private WebElement image;
 
+    @FindBy(xpath = "//p[contains(@class,'text-red-600')]")
+    private WebElement confirmPasswordMessage;
+
     public ProfilePage(){
         super();
     }
@@ -83,6 +86,11 @@ public class ProfilePage extends BasePage{
     public String getErrorMessage(){
         waitForElementToBeVisible(errorMessage);
         return getTextOfElement(errorMessage);
+    }
+
+    public String getConfirmPasswordMessage(){
+        waitForElementToBeVisible(confirmPasswordMessage);
+        return getTextOfElement(confirmPasswordMessage);
     }
 
     public void uploadImage(String imagePath) {

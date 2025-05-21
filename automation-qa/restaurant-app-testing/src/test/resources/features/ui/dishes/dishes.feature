@@ -15,7 +15,7 @@ Feature: Verify whether the dishes are displayed to the user
   @regression
   Scenario: Verify the authorized users should able to browse menu
     Given the user enters into the sign in page
-    And the user enters the "sushmag@example.com" and "Password123!"
+    And the user enters the "abcdef@example.com" and "Abcdef123!"
     And the user clicks on "sign in" button
     When the user clicks on "View Menu" button
     Then the user should be able to see the available "dynamic" dishes
@@ -23,14 +23,14 @@ Feature: Verify whether the dishes are displayed to the user
   @regression
   Scenario Outline: Verify the filtering of dishes
     Given the user enters into the sign in page
-    And the user enters the "sushmag@example.com" and "Password123!"
+    And the user enters the "abcdef@example.com" and "Abcdef123!"
     And the user clicks on "sign in" button
     When the user clicks on "View Menu" button
     And the user selects the "<order type>" from dropdown
     Then verify whether the price is sorted "<order type>" order
 
     Examples:
-    |order type  |
-    | Price Low to High           |
-    |   Price High to Low         |
+      | order type        |
+      | Price Low to High |
+      | Price High to Low |
 

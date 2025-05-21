@@ -20,7 +20,7 @@ Feature: Handle user profile updating
   @regression
   Scenario Outline: Update profile with valid data and image
     When the user enter "<firstName>" and "<lastName>"
-    And the user uploads the image "C:\Users\gantagari_sushma\Downloads\Shin Chan With Backpack Image Crayon Shin Chan And - Shin Chan, HD Png Download , Transparent Png Image - PNGitem.jpg"
+    And the user uploads the image "C:\Users\gottiparthy_rishitha\Desktop\b31257b43245c117758f79dc8758eda3.jpg"
     And the user clicks on "Save Changes" button
     Then the page will display the successfully updated message
 
@@ -62,4 +62,13 @@ Feature: Handle user profile updating
       | Password123! | Password123  | Password123     | At least one special character required    |
       | Password123! | Pass12!      | Pass12!         | Password must be 8-16 characters long      |
       | Password123! | Password123! | Password123!    | New password should not match old password |
-      | Password123! | Password123! | Password123     | Confirm password must match new password   |
+
+  @regression
+  Scenario Outline: New password and confirm password mismatch
+    When the user clicks on "Change Password" button
+    And the user enters "<oldPassword>", "<newPassword>" and "<confirmPassword>"
+    Then the page will display "<message>"
+
+    Examples:
+      | oldPassword  | newPassword | confirmPassword | message                                  |
+      | Password123! | Abcdef123!  | Abcdef123       | Confirm password must match new password |

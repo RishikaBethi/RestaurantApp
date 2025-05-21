@@ -2,7 +2,7 @@ Feature: Handle Customer reservations
   Background:
     Given the user enters into the application
     Given the user enters into the sign in page
-    When the user enters the "sushmag@example.com" and "Password123!"
+    When the user enters the "abcdef@example.com" and "Abcdef123!"
     And the user clicks on "sign in" button
     And the user clicks on "Book a Table" button
 

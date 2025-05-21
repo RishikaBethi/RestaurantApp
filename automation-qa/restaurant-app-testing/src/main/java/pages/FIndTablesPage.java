@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 public class FIndTablesPage extends BasePage{
 
-    @FindBy(partialLinkText = "Book a Table")
+    @FindBy(xpath = "//a[.='Book a Table']")
     private WebElement bookATable;
 
     @FindBy(xpath = "//button[.='Find a Table']")

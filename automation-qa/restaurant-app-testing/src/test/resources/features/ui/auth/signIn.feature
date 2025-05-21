@@ -12,7 +12,7 @@ Feature: Verify the sign in of the user
 
     Examples:
       | email               | password     | main                                                                   |
-      | sushmag@example.com | Password123! | http://team-7-frontend-bucket.s3-website-ap-southeast-2.amazonaws.com/ |
+      | sushmaa@example.com | Password123! | http://team-7-frontend-bucket.s3-website-ap-southeast-2.amazonaws.com/ |
 
 
   @regression
@@ -44,8 +44,8 @@ Feature: Verify the sign in of the user
     Then the page will display the error "<error>" message
 
     Examples:
-      | email                      | password  | error                                                                                             |
-      | sindhujareddyg@example.com | susha@W21 | Incorrect email or password. Try again or create an account.                                      |
-      | sindhujareddyg@example.com | susha@W21 | Incorrect email or password. Try again or create an account.                                      |
-      | sindhujareddyg@example.com | susha@W21 | Incorrect email or password. Try again or create an account.                                      |
-      | sindhujareddyg@example.com | susha@W21 | Your account is temporarily locked due to multiple failed login attempts. Please try again later. |
+      | email                 | password  | error                                                                                             |
+      | sushma123@example.com | susha@W21 | Incorrect email or password. Try again or create an account.                                      |
+      | sushma123@example.com | susha@W21 | Incorrect email or password. Try again or create an account.                                      |
+      | sushma123@example.com | susha@W21 | Incorrect email or password. Try again or create an account.                                      |
+      | sushma123@example.com | susha@W21 | Your account is temporarily locked due to multiple failed login attempts. Please try again later. |

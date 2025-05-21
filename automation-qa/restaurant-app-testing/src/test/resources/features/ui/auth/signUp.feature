@@ -27,18 +27,18 @@ Feature: Verify the registration of the user
 
     Examples:
 
-      | firstName | lastName | email           | password     | confirmPassword | error                                                                                                                   |
-      | JohnSon~  | Doe      | john@gmail.com  | Password123! | Password123!    | First name must start with a letter and be up to 50 characters.Only letters,special characters and numbers are allowed. |
-      | 1Johnson  | Doe      | john@gmail.com  | Password123! | Password123!    | First name must start with a letter and be up to 50 characters.Only letters,special characters and numbers are allowed. |
-      | @Johnson  | Doe      | john@gmail.com  | Password123! | Password123!    | First name must start with a letter and be up to 50 characters.Only letters,special characters and numbers are allowed. |
-      | ~Johnson  | Doe      | john@gmail.com  | Password123! | Password123!    | First name must start with a letter and be up to 50 characters.Only letters,special characters and numbers are allowed. |
-      | ~Johnson~ | Doe      | john@gmail.com  | Password123! | Password123!    | First name must start with a letter and be up to 50 characters.Only letters,special characters and numbers are allowed. |
-      | Johnson   | Doe~     | john@gmail.com  | Password123! | Password123!    | Last name can include letters, numbers, and special characters, up to 50 characters.                                    |
-      | Johnson   | ~Doe     | john@gmail.com  | Password123! | Password123!    | Last name can include letters, numbers, and special characters, up to 50 characters.                                    |
-      | Johnson   | ~Doe     | john@gmail.com  | Password123! | Password123!    | Last name can include letters, numbers, and special characters, up to 50 characters.                                    |
-      | Johnson   | ~Doe~    | john@gmail.com  | Password123! | Password123!    | Last name can include letters, numbers, and special characters, up to 50 characters.                                    |
-      | Johnson   | Doe      | john@@gmail.com | Password123! | Password123!    | Invalid email address. Ensure the username is alphanumeric, may contain '-' or '_', and the domain is valid.            |
-      | Johnson   | Doe      | john@gmail.com  | Password123! | password123!    | Confirm password must match new password                                                                                |
+      | firstName | lastName | email           | password     | confirmPassword | error                                                                                                                                  |
+      | JohnSon~  | Doe      | john@gmail.com  | Password123! | Password123!    | First name must start with a letter and be up to 50 characters.Only letters,special characters and numbers are allowed.                |
+      | 1Johnson  | Doe      | john@gmail.com  | Password123! | Password123!    | First name must start with a letter and be up to 50 characters.Only letters,special characters and numbers are allowed.                |
+      | @Johnson  | Doe      | john@gmail.com  | Password123! | Password123!    | First name must start with a letter and be up to 50 characters.Only letters,special characters and numbers are allowed.                |
+      | ~Johnson  | Doe      | john@gmail.com  | Password123! | Password123!    | First name must start with a letter and be up to 50 characters.Only letters,special characters and numbers are allowed.                |
+      | ~Johnson~ | Doe      | john@gmail.com  | Password123! | Password123!    | First name must start with a letter and be up to 50 characters.Only letters,special characters and numbers are allowed.                |
+      | Johnson   | Doe~     | john@gmail.com  | Password123! | Password123!    | Last name can include letters, numbers, and special characters, up to 50 characters.                                                   |
+      | Johnson   | ~Doe     | john@gmail.com  | Password123! | Password123!    | Last name can include letters, numbers, and special characters, up to 50 characters.                                                   |
+      | Johnson   | ~Doe     | john@gmail.com  | Password123! | Password123!    | Last name can include letters, numbers, and special characters, up to 50 characters.                                                   |
+      | Johnson   | ~Doe~    | john@gmail.com  | Password123! | Password123!    | Last name can include letters, numbers, and special characters, up to 50 characters.                                                   |
+      | Johnson   | Doe      | john@@gmail.com | Password123! | Password123!    | Invalid email address. Ensure the username may contain dots (.), but not consecutive or at invalid positions, and the domain is valid. |
+      | Johnson   | Doe      | john@gmail.com  | Password123! | password123!    | Confirm password must match new password                                                                                               |
 
   @regression
   Scenario Outline: Verify the registration by entering invalid passwords

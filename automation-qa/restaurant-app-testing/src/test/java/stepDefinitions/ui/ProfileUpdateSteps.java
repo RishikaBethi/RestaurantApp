@@ -33,8 +33,7 @@ public class ProfileUpdateSteps {
     }
 
     @And("the user uploads the image {string}")
-    public void uploadImage(String path)
-    {
+    public void uploadImage(String path) {
         profilePage.uploadImage(path);
     }
 
@@ -56,5 +55,10 @@ public class ProfileUpdateSteps {
     @Then("the page will display error {string}")
     public void testErrorMessage(String errorMessage){
         Assert.assertEquals(profilePage.getErrorMessage(), errorMessage);
+    }
+
+    @Then("the page will display {string}")
+    public void testConfirmPasswordMessage(String message){
+        Assert.assertEquals(profilePage.getConfirmPasswordMessage(), message);
     }
 }
