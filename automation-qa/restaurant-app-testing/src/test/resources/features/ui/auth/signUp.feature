@@ -14,8 +14,8 @@ Feature: Verify the registration of the user
     Then the user will be redirected to the "<signIn>" page
 
     Examples:
-      | firstName | lastName | email               | password     | confirmPassword | signIn                                                                      |
-      | Sushma    | G12      | sushmaaag@gmail.com | Password123! | Password123!    | http://team-7-frontend-bucket.s3-website-ap-southeast-2.amazonaws.com/login |
+      | firstName | lastName | email         | password     | confirmPassword | signIn                                                                      |
+      | Sushma    | G12      | ghi@gmail.com | Password123! | Password123!    | http://team-7-frontend-bucket.s3-website-ap-southeast-2.amazonaws.com/login |
 
   @regression
   Scenario Outline: Verify the registration by entering invalid details

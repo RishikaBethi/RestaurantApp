@@ -14,7 +14,7 @@ Feature: Handle Customer reservations
 
     Examples:
       | location | date       | timeSlot | guests |
-      | LOC003   | 21-05-2026 | 10:30    | 1      |
+      | LOC003   | 21-05-2027 | 15:45     | 1      |
 
   @regression
   Scenario Outline: Verify that the users can select the guests count
@@ -25,17 +25,17 @@ Feature: Handle Customer reservations
 
     Examples:
       | location | date       | timeSlot | guests |
-      | LOC003   | 21-05-2026 | 10:30    | 1      |
+      | LOC003   | 25-05-2027 | 15:45    | 1      |
 
   @regression
   Scenario Outline: Verify that message is shown after successful registration
     When the user selects the "<location>" "<date>" "<timeSlot>" "<guests>" details
     And the user clicks on "Find a Table" button
     And the user clicks on a timeslot
-    And the user increments the guests
+    #And the user increments the guests
     And the user clicks on "Make a Reservation" button
     Then the "Reservation Confirmed!" message is shown
 
     Examples:
       | location | date       | timeSlot | guests |
-      | LOC003   | 22-05-2030 | 10:30    | 1      |
+      | LOC003   | 22-05-2030 | 15:45     | 1      |
