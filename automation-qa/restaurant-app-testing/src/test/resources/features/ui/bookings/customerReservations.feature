@@ -32,7 +32,7 @@ Feature: Handle Customer reservations
     When the user selects the "<location>" "<date>" "<timeSlot>" "<guests>" details
     And the user clicks on "Find a Table" button
     And the user clicks on a timeslot
-    #And the user increments the guests
+    And the user increments the guests
     And the user clicks on "Make a Reservation" button
     Then the "Reservation Confirmed!" message is shown
 

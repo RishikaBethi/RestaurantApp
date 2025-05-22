@@ -45,8 +45,8 @@ Feature: Verify the sign in of the user
 
     Examples:
       | email                 | password  | error                                                                                             |
-      #| sushma123@example.com | susha@W21 | Incorrect email or password. Try again or create an account.                                      |
-      #| sushma123@example.com | susha@W21 | Incorrect email or password. Try again or create an account.                                      |
-      #| sushma123@example.com | susha@W21 | Incorrect email or password. Try again or create an account. |
+      | sushma123@example.com | susha@W21 | Incorrect email or password. Try again or create an account.                                      |
+      | sushma123@example.com | susha@W21 | Incorrect email or password. Try again or create an account.                                      |
+      | sushma123@example.com | susha@W21 | Incorrect email or password. Try again or create an account.                                      |
       | sushma123@example.com | susha@W21 | Your account is temporarily locked due to multiple failed login attempts. Please try again later. |
       | sushma123@example.com | susha@W21 | Your account is temporarily locked due to multiple failed login attempts. Please try again later. |

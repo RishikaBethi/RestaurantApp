@@ -15,28 +15,28 @@ Feature: Verify the reservations by the waiter
     Then the waiter should able to see reservations
 
 
-#  @regression
-#  Scenario: Valid Reservation by waiter for visitor
-#    When the user clicks on "WaiterReservations" button
-#    And the user clicks on "CreateNewReservation" button
-#    And the waiter selects the "21-05-2026" for "date"
-#    And the user clicks on "Visitor" button
-#    And the waiter selects the guests
-#    And the waiter selects the "10:30" for "time"
-#    And the waiter selects the "Table 3" for "table"
-#    And the user clicks on "Make a waiter Reservation" button
-#    Then the page will display the confirmation "Reservation made successfully!" message
-#
-#
-#  @regression
-#  Scenario: Valid Reservation by waiter for existing customer
-#    When the user clicks on "WaiterReservations" button
-#    And the user clicks on "CreateNewReservation" button
-#    And the waiter selects the "06-05-2025" for "date"
-#    And the user clicks on "Customer" button
-#    And the waiter sends the "sushmag@example.com" customer email
-#    And the waiter selects the guests
-#    And the waiter selects the "10:30" for "time"
-#    And the waiter selects the "Table 3" for "table"
-#    And the user clicks on "Make a waiter Reservation" button
-#    Then the page will display the confirmation "Reservation made successfully!" message
+  @regression
+  Scenario: Valid Reservation by waiter for visitor
+    When the user clicks on "WaiterReservations" button
+    And the user clicks on "CreateNewReservation" button
+    And the waiter selects the "21-05-2026" for "date"
+    And the user clicks on "Visitor" button
+    And the waiter selects the guests
+    And the waiter selects the "10:30" for "time"
+    And the waiter selects the "Table 3" for "table"
+    And the user clicks on "Make a waiter Reservation" button
+    Then the page will display the confirmation "Reservation made successfully!" message
+
+
+  @regression
+  Scenario: Valid Reservation by waiter for existing customer
+    When the user clicks on "WaiterReservations" button
+    And the user clicks on "CreateNewReservation" button
+    And the waiter selects the "06-05-2025" for "date"
+    And the user clicks on "Customer" button
+    And the waiter sends the "sushmag@example.com" customer email
+    And the waiter selects the guests
+    And the waiter selects the "10:30" for "time"
+    And the waiter selects the "Table 3" for "table"
+    And the user clicks on "Make a waiter Reservation" button
+    Then the page will display the confirmation "Reservation made successfully!" message
