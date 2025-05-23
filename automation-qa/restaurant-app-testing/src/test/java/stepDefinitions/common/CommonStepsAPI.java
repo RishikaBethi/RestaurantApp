@@ -9,10 +9,7 @@ import io.cucumber.java.en.When;
 import io.restassured.response.Response;
 import models.SignIn;
 import utils.ConfigReader;
-import utils.api.Constants;
 
-
-import java.lang.reflect.Field;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
