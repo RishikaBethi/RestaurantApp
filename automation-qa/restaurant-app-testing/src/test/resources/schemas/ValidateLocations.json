@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": { "type": "string" },
+      "address": { "type": "string" },
+      "description": { "type": "string" },
+      "totalCapacity": { "type": "string" },
+      "averageOccupancy": { "type": "string" },
+      "imageUrl": { "type": "string" },
+      "rating": { "type": "string" }
+    },
+    "required": [
+      "id",
+      "address",
+      "description",
+      "totalCapacity",
+      "averageOccupancy",
+      "imageUrl",
+      "rating"
+    ],
+    "additionalProperties": false
+  }
+}

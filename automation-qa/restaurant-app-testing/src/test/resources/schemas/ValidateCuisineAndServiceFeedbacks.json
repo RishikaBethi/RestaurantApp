@@ -1,0 +1,44 @@
+{
+  "number": "integer",
+  "size": "integer",
+  "last": "boolean",
+  "numberOfElements": "integer",
+  "totalPages": "integer",
+  "pageable": {
+    "paged": "boolean",
+    "pageNumber": "integer",
+    "offset": "integer",
+    "pageSize": "integer",
+    "unpaged": "boolean",
+    "sort": [
+      {
+        "nullHandling": "string",
+        "ignoreCase": "boolean",
+        "property": "string",
+        "ascending": "boolean",
+        "direction": "string"
+      }
+    ]
+  },
+  "sort": [
+    {
+      "nullHandling": "string",
+      "ignoreCase": "boolean",
+      "property": "string",
+      "ascending": "boolean",
+      "direction": "string"
+    }
+  ],
+  "content": [
+    {
+      "id": "string",
+      "rate": "string",
+      "comment": "string",
+      "date": "string",
+      "type": "string",
+      "userAvatarUrl": "string",
+      "userName": "string",
+      "locationId": "string"
+    }
+  ]
+}
