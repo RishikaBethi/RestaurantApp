@@ -1,0 +1,101 @@
+package com.restaurant.utils;
+
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Map;
+import java.util.Base64;
+import java.nio.charset.StandardCharsets;
+import java.util.logging.Logger;
+import java.time.LocalTime;
+
+
+public class Helper {
+
+    private static final Logger logger = Logger.getLogger(Helper.class.getName());
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+
+    public static boolean isOverlapping(String start1, String end1, String start2, String end2) {
+        LocalTime s1 = LocalTime.parse(start1);
+        LocalTime e1 = LocalTime.parse(end1);
+        LocalTime s2 = LocalTime.parse(start2);
+        LocalTime e2 = LocalTime.parse(end2);
+
+        return !e1.isBefore(s2) && !e2.isBefore(s1); // Overlap if ranges intersect
+    }
+
+
+    /**
+     * Creates a successful API response.
+     */
+    public static APIGatewayProxyResponseEvent createApiResponse(int statusCode, Object body) {
+        try {
+            return new APIGatewayProxyResponseEvent()
+                    .withStatusCode(statusCode)
+                    .withBody(objectMapper.writeValueAsString(body))
+                    .withHeaders(Map.of(
+                            "Content-Type", "application/json",
+                            "Access-Control-Allow-Origin", "*"
+                    ));
+        } catch (Exception e) {
+            logger.severe("Error serializing API response: " + e.getMessage());
+            return createErrorResponse(500, "Error serializing response");
+        }
+    }
+
+    /**
+     * Creates an error response with a message.
+     */
+    public static APIGatewayProxyResponseEvent createErrorResponse(int statusCode, String message) {
+        return createApiResponse(statusCode, Map.of("error", message));
+    }
+
+    /**
+     * Extracts user claims from the JWT token in the request headers.
+     */
+    public static Map<String, Object> extractClaims(com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent request) {
+        try {
+            String authorizationHeader = request.getHeaders().get("Authorization");
+
+            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+                logger.warning("Authorization header is missing or invalid");
+                return Map.of();
+            }
+
+            String token = authorizationHeader.substring(7);
+            String[] tokenParts = token.split("\\.");
+
+            if (tokenParts.length != 3) {
+                logger.warning("Invalid JWT token format");
+                return Map.of();
+            }
+
+            String payload = decodeBase64(tokenParts[1]);
+
+            if (payload == null || payload.isEmpty()) {
+                logger.warning("JWT payload is empty or invalid");
+                return Map.of();
+            }
+
+            Map<String, Object> claims = objectMapper.readValue(payload, Map.class);
+            logger.info("Extracted Claims: " + claims);
+            return claims;
+
+        } catch (Exception e) {
+            logger.severe("Error extracting claims: " + e.getMessage());
+            return Map.of();
+        }
+    }
+
+    /**
+     * Decodes a Base64-encoded JWT payload safely.
+     */
+    private static String decodeBase64(String encoded) {
+        try {
+            return new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException e) {
+            logger.severe("Error decoding Base64 JWT payload: " + e.getMessage());
+            return null;
+        }
+    }
+}
