@@ -1,0 +1,73 @@
+{
+  "type": "object",
+  "properties": {
+    "number": { "type": "integer" },
+    "size": { "type": "integer" },
+    "last": { "type": "boolean" },
+    "numberOfElements": { "type": "integer" },
+    "totalPages": { "type": "integer" },
+    "totalElements": { "type": "integer" },
+    "first": { "type": "boolean" },
+    "empty": { "type": "boolean" },
+    "pageable": {
+      "type": "object",
+      "properties": {
+        "paged": { "type": "boolean" },
+        "pageNumber": { "type": "integer" },
+        "offset": { "type": "integer" },
+        "pageSize": { "type": "integer" },
+        "unpaged": { "type": "boolean" },
+        "sort": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "nullHandling": { "type": "string" },
+              "ignoreCase": { "type": "boolean" },
+              "property": { "type": "string" },
+              "ascending": { "type": "boolean" },
+              "direction": { "type": "string" }
+            },
+            "required": ["property", "direction"]
+          }
+        }
+      }
+    },
+    "sort": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "nullHandling": { "type": "string" },
+          "ignoreCase": { "type": "boolean" },
+          "property": { "type": "string" },
+          "ascending": { "type": "boolean" },
+          "direction": { "type": "string" }
+        },
+        "required": ["property", "direction"]
+      }
+    },
+    "content": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "rate": { "type": "string", "pattern": "^[0-5](\\.0)?$" },
+          "comment": { "type": "string" },
+          "date": { "type": "string", "format": "date" },
+          "type": { "type": "string" },
+          "userAvatarUrl": { "type": "string" },
+          "userName": { "type": "string" },
+          "locationId": { "type": "string" }
+        },
+        "required": ["id", "rate", "comment", "date", "type", "userName", "locationId"]
+      }
+    }
+  },
+  "required": [
+    "number", "size", "last", "numberOfElements",
+    "totalPages", "totalElements", "first", "empty",
+    "pageable", "sort", "content"
+  ]
+}

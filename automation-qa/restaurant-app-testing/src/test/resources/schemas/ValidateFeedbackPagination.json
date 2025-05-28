@@ -1,0 +1,226 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "number": {
+      "type": "integer"    },    "size": {
+      "type": "integer"    },    "last": {
+      "type": "boolean"    },    "numberOfElements": {
+      "type": "integer"    },    "totalPages": {
+      "type": "integer"    },    "pageable": {
+      "type": "object",
+      "properties": {
+        "paged": {
+          "type": "boolean"        },        "pageNumber": {
+          "type": "integer"        },        "offset": {
+          "type": "integer"        },        "pageSize": {
+          "type": "integer"        },        "unpaged": {
+          "type": "boolean"        },        "sort": {
+          "type": "array",
+          "items": [
+            {              "type": "object",
+              "properties": {
+                "nullHandling": {
+                  "type": "string"                },                "ignoreCase": {
+                  "type": "boolean"                },                "property": {
+                  "type": "string"                },                "ascending": {
+                  "type": "boolean"                },                "direction": {
+                  "type": "string"                }              },              "required": [
+              "nullHandling",
+              "ignoreCase",
+              "property",
+              "ascending",
+              "direction"              ]            }          ]        }      },      "required": [
+        "paged",
+        "pageNumber",
+        "offset",
+        "pageSize",
+        "unpaged",
+        "sort"      ]    },    "sort": {
+      "type": "array",
+      "items": [
+        {          "type": "object",
+          "properties": {
+            "nullHandling": {
+              "type": "string"            },            "ignoreCase": {
+              "type": "boolean"            },            "property": {
+              "type": "string"            },            "ascending": {
+              "type": "boolean"            },            "direction": {
+              "type": "string"            }          },          "required": [
+          "nullHandling",
+          "ignoreCase",
+          "property",
+          "ascending",
+          "direction"          ]        }      ]    },    "content": {
+      "type": "array",
+      "items": [
+        {          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"            },            "rate": {
+              "type": "string"            },            "comment": {
+              "type": "string"            },            "date": {
+              "type": "string"            },            "type": {
+              "type": "string"            },            "userAvatarUrl": {
+              "type": "string"            },            "userName": {
+              "type": "string"            },            "locationId": {
+              "type": "string"            }          },          "required": [
+          "id",
+          "rate",
+          "comment",
+          "date",
+          "type",
+          "userAvatarUrl",
+          "userName",
+          "locationId"          ]        },        {          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"            },            "rate": {
+              "type": "string"            },            "comment": {
+              "type": "string"            },            "date": {
+              "type": "string"            },            "type": {
+              "type": "string"            },            "userAvatarUrl": {
+              "type": "string"            },            "userName": {
+              "type": "string"            },            "locationId": {
+              "type": "string"            }          },          "required": [
+            "id",
+            "rate",
+            "comment",
+            "date",
+            "type",
+            "userAvatarUrl",
+            "userName",
+            "locationId"          ]        },        {          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"            },            "rate": {
+              "type": "string"            },            "comment": {
+              "type": "string"            },            "date": {
+              "type": "string"            },            "type": {
+              "type": "string"
+            },
+            "userAvatarUrl": {
+              "type": "string"
+            },
+            "userName": {
+              "type": "string"
+            },
+            "locationId": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "rate",
+            "comment",
+            "date",
+            "type",
+            "userAvatarUrl",
+            "userName",
+            "locationId"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "rate": {
+              "type": "string"
+            },
+            "comment": {
+              "type": "string"
+            },
+            "date": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            },
+            "userAvatarUrl": {
+              "type": "string"
+            },
+            "userName": {
+              "type": "string"
+            },
+            "locationId": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "rate",
+            "comment",
+            "date",
+            "type",
+            "userAvatarUrl",
+            "userName",
+            "locationId"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "rate": {
+              "type": "string"
+            },
+            "comment": {
+              "type": "string"
+            },
+            "date": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            },
+            "userAvatarUrl": {
+              "type": "string"
+            },
+            "userName": {
+              "type": "string"
+            },
+            "locationId": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "rate",
+            "comment",
+            "date",
+            "type",
+            "userAvatarUrl",
+            "userName",
+            "locationId"
+          ]
+        }
+      ]
+    },
+    "first": {
+      "type": "boolean"
+    },
+    "totalElements": {
+      "type": "integer"
+    },
+    "empty": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "number",
+    "size",
+    "last",
+    "numberOfElements",
+    "totalPages",
+    "pageable",
+    "sort",
+    "content",
+    "first",
+    "totalElements",
+    "empty"
+  ]
+}
